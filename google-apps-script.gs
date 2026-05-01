@@ -16,13 +16,14 @@
  *  7. Redeploy on Vercel.
  */
 
+const SHEET_ID = '1YReg6fb4aTJG5NogXdZ5Pt8NEOJ1cQooY2WgjuAq1QI';
 const HEADERS_LEAD = ['Date', 'Nom', 'Téléphone', 'Ville', 'Quantité', 'Message', 'IP', 'User-Agent', 'Statut'];
 const HEADERS_BULK = ['Date', 'Nom', 'Téléphone', 'Email', 'Type activité', 'Ville', 'Quantité', 'Message', 'IP', 'User-Agent', 'Statut'];
 
 function doPost(e) {
     try {
         const data = JSON.parse(e.postData.contents);
-        const ss = SpreadsheetApp.getActiveSpreadsheet();
+        const ss = SpreadsheetApp.openById(SHEET_ID);
         const isBulk = data.kind === 'bulk';
         const sheetName = isBulk ? 'Bulk' : 'Commandes';
         const headers = isBulk ? HEADERS_BULK : HEADERS_LEAD;

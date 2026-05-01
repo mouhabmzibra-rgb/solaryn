@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
     const validQty = ['1', '2', '3'].includes(quantite) ? quantite : '1';
 
-    await forwardToSheets({
+    const sheetsResult = await forwardToSheets({
         kind: 'lead',
         date: new Date().toISOString(),
         nom,
@@ -41,8 +41,11 @@ export default async function handler(req, res) {
         ua: clean(req.headers['user-agent'] || '', 200),
     });
 
+    const debug = req.query?.debug === '1' || (typeof req.url === 'string' && req.url.includes('debug=1'));
+
     return res.status(200).json({
         ok: true,
         message: `شكرا ${nom} ! توصلنا بطلبيتك. غادي نعيطو ليك في أقرب وقت لتأكيد الطلبية.`,
+        ...(debug ? { sheets: sheetsResult } : {}),
     });
 }

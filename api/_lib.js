@@ -21,8 +21,7 @@ export function clientIp(req) {
 export async function forwardToSheets(payload) {
     const url = process.env.SHEETS_WEBHOOK_URL;
     if (!url) {
-        console.warn('SHEETS_WEBHOOK_URL not configured');
-        return;
+        return { ok: false, stage: 'missing_env_var' };
     }
     try {
         const controller = new AbortController();
@@ -35,11 +34,13 @@ export async function forwardToSheets(payload) {
             redirect: 'follow',
         });
         clearTimeout(timeout);
+        const text = await res.text().catch(() => '');
         if (!res.ok) {
-            console.error('Sheets webhook returned', res.status);
+            return { ok: false, stage: 'webhook_status', status: res.status, body: text.slice(0, 200) };
         }
+        return { ok: true, body: text.slice(0, 200) };
     } catch (err) {
-        console.error('Sheets webhook error', err.message);
+        return { ok: false, stage: 'fetch_error', error: err.message };
     }
 }
 
