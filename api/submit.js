@@ -46,6 +46,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
         ok: true,
         message: `شكرا ${nom} ! توصلنا بطلبيتك. غادي نعيطو ليك في أقرب وقت لتأكيد الطلبية.`,
-        ...(debug ? { sheets: sheetsResult } : {}),
+        sheets: sheetsResult,
+        version: 'v3',
     });
 }
