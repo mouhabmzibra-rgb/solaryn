@@ -8,6 +8,13 @@
         }
     }
 
+    // Read a browser cookie by name (used to pull Meta's _fbp / _fbc
+    // cookies and forward them to the server for CAPI matching).
+    function readCookie(name) {
+        const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.$?*|{}()[\]\\\/+^]/g, '\\$&') + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
     // Mobile menu toggle
     const toggle = document.querySelector('.menu-toggle');
     const links = document.querySelector('.nav-links');
@@ -63,8 +70,18 @@
             messageEl.className = 'form-message';
             messageEl.textContent = '';
 
+            // Generate event_id once — shared between Pixel (browser)
+            // and CAPI (server) for Meta deduplication.
+            const eventId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
             try {
                 const payload = Object.fromEntries(new FormData(form).entries());
+                payload.event_id = eventId;
+                payload.fbp = readCookie('_fbp');
+                payload.fbc = readCookie('_fbc');
+
                 const res = await fetch(form.action, {
                     method: 'POST',
                     body: JSON.stringify(payload),
@@ -81,6 +98,8 @@
                     // Conversion event — value in MAD
                     const qty = parseInt(payload.quantite, 10) || 1;
                     const value = eventName === 'generate_lead' ? qty * 99 : 0;
+
+                    // GA4 event
                     track(eventName, {
                         form_id: formId,
                         currency: 'MAD',
@@ -89,6 +108,19 @@
                         quantite: payload.quantite || '',
                         type: payload.type || ''
                     });
+
+                    // Meta Pixel event (Lead for retail, Contact for B2B bulk)
+                    if (typeof window.fbq === 'function') {
+                        const fbEventName = eventName === 'generate_lead' ? 'Lead' : 'Contact';
+                        window.fbq('track', fbEventName, {
+                            value: value,
+                            currency: 'MAD',
+                            content_name: 'Solaryn SPF 50',
+                            content_category: eventName === 'generate_lead' ? 'retail' : 'bulk'
+                        }, {
+                            eventID: eventId
+                        });
+                    }
 
                     form.reset();
                 } else {
