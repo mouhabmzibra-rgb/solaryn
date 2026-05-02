@@ -6,6 +6,15 @@
     <meta name="description" content="سولارين SPF 50 - واقي الشمس المغربي، حماية قوية من أشعة الشمس، مناسب لكل أنواع البشرة">
     <meta name="keywords" content="سولارين, Solaryn, واقي الشمس, SPF 50, crème solaire, المغرب, ecran solaire">
     <title>سولارين - Solaryn | واقي الشمس SPF 50</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQSQQBT50G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TQSQQBT50G');
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -68,6 +77,60 @@
         <div class="trust-item"><strong>%100</strong><span>طبيعي وآمن</span></div>
         <div class="trust-item"><strong>SPF 50</strong><span>حماية قصوى</span></div>
         <div class="trust-item"><strong>مدارس طبية</strong><span>اختبر ومصادق عليه</span></div>
+    </div>
+</section>
+
+<!-- Lead form -->
+<section id="contact" class="section section-cta">
+    <div class="container">
+        <div class="form-wrapper">
+            <div class="form-info">
+                <span class="section-tag light">طلب المنتج</span>
+                <h2>اطلب سولارين دابا</h2>
+                <p>عمر الفورمولير وغادي نعيطو ليك في أقرب وقت باش نأكدو الطلبية والعنوان.</p>
+                <div class="price-box">
+                    <div class="price-line"><span>ثمن المنتج</span><strong>99 درهم</strong></div>
+                    <div class="price-line"><span>توصيل</span><strong>20 درهم</strong></div>
+                    <div class="price-line total"><span>المجموع</span><strong>119 درهم</strong></div>
+                </div>
+                <ul class="check-list-light">
+                    <li>الدفع عند الاستلام 💵</li>
+                    <li>توصيل لكل المغرب 🚚</li>
+                    <li>المنتج مضمون 100% ✓</li>
+                </ul>
+            </div>
+            <form class="lead-form" action="/api/submit" method="POST" id="leadForm">
+                <div class="form-group">
+                    <label for="nom">الاسم الكامل *</label>
+                    <input type="text" id="nom" name="nom" required maxlength="100" placeholder="كتب سميتك">
+                </div>
+                <div class="form-group">
+                    <label for="tel">رقم الهاتف *</label>
+                    <input type="tel" id="tel" name="tel" required pattern="(0|\+212)[5-7][0-9]{8}" placeholder="06XXXXXXXX" maxlength="13">
+                    <small>مثال: 0612345678 ولا +212612345678</small>
+                </div>
+                <div class="form-group">
+                    <label for="ville">المدينة *</label>
+                    <input type="text" id="ville" name="ville" required maxlength="80" placeholder="الدار البيضاء، الرباط، فاس...">
+                </div>
+                <div class="form-group">
+                    <label for="quantite">الكمية</label>
+                    <select id="quantite" name="quantite">
+                        <option value="1">1 علبة - 99 درهم + 20 درهم توصيل</option>
+                        <option value="2">2 علب - 178 درهم + توصيل مجاني (وفر 40 درهم)</option>
+                        <option value="3">3 علب - 257 درهم + توصيل مجاني (وفر 60 درهم)</option>
+                    </select>
+                    <small>التوصيل مجاني ابتداءً من علبتين 🎉</small>
+                </div>
+                <div class="form-group">
+                    <label for="message">ملاحظة (اختياري)</label>
+                    <textarea id="message" name="message" rows="3" maxlength="500" placeholder="أي معلومة إضافية على الطلبية أو العنوان"></textarea>
+                </div>
+                <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
+                <button type="submit" class="btn btn-primary btn-block">أرسل الطلبية</button>
+                <div class="form-message" id="formMessage"></div>
+            </form>
+        </div>
     </div>
 </section>
 
@@ -180,60 +243,6 @@
             <div class="gallery-item"><img src="assets/images/lifestyle-3.png" alt="Solaryn - Le soin solaire" loading="lazy"></div>
             <div class="gallery-item"><img src="assets/images/lifestyle-4.png" alt="Solaryn - Léger, efficace" loading="lazy"></div>
             <div class="gallery-item"><img src="assets/images/gallery-2.png" alt="Solaryn product detail" loading="lazy"></div>
-        </div>
-    </div>
-</section>
-
-<!-- Lead form -->
-<section id="contact" class="section section-cta">
-    <div class="container">
-        <div class="form-wrapper">
-            <div class="form-info">
-                <span class="section-tag light">طلب المنتج</span>
-                <h2>اطلب سولارين دابا</h2>
-                <p>عمر الفورمولير وغادي نعيطو ليك في أقرب وقت باش نأكدو الطلبية والعنوان.</p>
-                <div class="price-box">
-                    <div class="price-line"><span>ثمن المنتج</span><strong>99 درهم</strong></div>
-                    <div class="price-line"><span>توصيل</span><strong>20 درهم</strong></div>
-                    <div class="price-line total"><span>المجموع</span><strong>119 درهم</strong></div>
-                </div>
-                <ul class="check-list-light">
-                    <li>الدفع عند الاستلام 💵</li>
-                    <li>توصيل لكل المغرب 🚚</li>
-                    <li>المنتج مضمون 100% ✓</li>
-                </ul>
-            </div>
-            <form class="lead-form" action="/api/submit" method="POST" id="leadForm">
-                <div class="form-group">
-                    <label for="nom">الاسم الكامل *</label>
-                    <input type="text" id="nom" name="nom" required maxlength="100" placeholder="كتب سميتك">
-                </div>
-                <div class="form-group">
-                    <label for="tel">رقم الهاتف *</label>
-                    <input type="tel" id="tel" name="tel" required pattern="(0|\+212)[5-7][0-9]{8}" placeholder="06XXXXXXXX" maxlength="13">
-                    <small>مثال: 0612345678 ولا +212612345678</small>
-                </div>
-                <div class="form-group">
-                    <label for="ville">المدينة *</label>
-                    <input type="text" id="ville" name="ville" required maxlength="80" placeholder="الدار البيضاء، الرباط، فاس...">
-                </div>
-                <div class="form-group">
-                    <label for="quantite">الكمية</label>
-                    <select id="quantite" name="quantite">
-                        <option value="1">1 علبة - 99 درهم + 20 درهم توصيل</option>
-                        <option value="2">2 علب - 178 درهم + توصيل مجاني (وفر 40 درهم)</option>
-                        <option value="3">3 علب - 257 درهم + توصيل مجاني (وفر 60 درهم)</option>
-                    </select>
-                    <small>التوصيل مجاني ابتداءً من علبتين 🎉</small>
-                </div>
-                <div class="form-group">
-                    <label for="message">ملاحظة (اختياري)</label>
-                    <textarea id="message" name="message" rows="3" maxlength="500" placeholder="أي معلومة إضافية على الطلبية أو العنوان"></textarea>
-                </div>
-                <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
-                <button type="submit" class="btn btn-primary btn-block">أرسل الطلبية</button>
-                <div class="form-message" id="formMessage"></div>
-            </form>
         </div>
     </div>
 </section>

@@ -1,6 +1,13 @@
 (function () {
     'use strict';
 
+    // Analytics helper — safe no-op if gtag not loaded (adblock, etc.)
+    function track(eventName, params) {
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', eventName, params || {});
+        }
+    }
+
     // Mobile menu toggle
     const toggle = document.querySelector('.menu-toggle');
     const links = document.querySelector('.nav-links');
@@ -18,10 +25,20 @@
     }
 
     // Form submission via fetch (no page reload)
-    function bindForm(formId, messageId) {
+    function bindForm(formId, messageId, eventName) {
         const form = document.getElementById(formId);
         const messageEl = document.getElementById(messageId);
         if (!form) return;
+
+        // Fire form_start once when user first interacts with this form
+        let started = false;
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('focus', () => {
+                if (started) return;
+                started = true;
+                track('form_start', { form_id: formId });
+            }, { once: false });
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -35,6 +52,7 @@
                 if (!/^(0|\+212)[5-7][0-9]{8}$/.test(cleaned)) {
                     showMessage(messageEl, 'رقم الهاتف ماشي صحيح. مثال: 0612345678', 'error');
                     tel.focus();
+                    track('form_error', { form_id: formId, error: 'invalid_phone' });
                     return;
                 }
                 tel.value = cleaned;
@@ -59,12 +77,27 @@
 
                 if (res.ok && data.ok) {
                     showMessage(messageEl, data.message || 'شكرا ! توصلنا بطلبيتك. غادي نعيطو ليك قريب.', 'success');
+
+                    // Conversion event — value in MAD
+                    const qty = parseInt(payload.quantite, 10) || 1;
+                    const value = eventName === 'generate_lead' ? qty * 99 : 0;
+                    track(eventName, {
+                        form_id: formId,
+                        currency: 'MAD',
+                        value: value,
+                        ville: payload.ville || '',
+                        quantite: payload.quantite || '',
+                        type: payload.type || ''
+                    });
+
                     form.reset();
                 } else {
                     showMessage(messageEl, data.message || 'كاين مشكل. عاود حاول من بعد.', 'error');
+                    track('form_error', { form_id: formId, error: 'server_error' });
                 }
             } catch (err) {
                 showMessage(messageEl, 'مشكل فالاتصال. تأكد من الإنترنت وعاود حاول.', 'error');
+                track('form_error', { form_id: formId, error: 'network_error' });
             } finally {
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -80,8 +113,32 @@
         }
     }
 
-    bindForm('leadForm', 'formMessage');
-    bindForm('bulkForm', 'bulkMessage');
+    bindForm('leadForm', 'formMessage', 'generate_lead');
+    bindForm('bulkForm', 'bulkMessage', 'bulk_lead');
+
+    // Smooth-scroll for in-page anchors (iOS Safari fallback)
+    // and CTA click tracking for #contact / #bulk
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            const href = a.getAttribute('href');
+            if (!href || href === '#' || href.length < 2) return;
+            const target = document.querySelector(href);
+            if (!target) return;
+
+            e.preventDefault();
+            const navbarH = 80;
+            const top = target.getBoundingClientRect().top + window.pageYOffset - navbarH;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+            history.pushState(null, '', href);
+
+            if (href === '#contact' || href === '#bulk') {
+                track('cta_click', {
+                    target: href,
+                    label: (a.textContent || '').trim().slice(0, 60)
+                });
+            }
+        });
+    });
 
     // Navbar shadow on scroll
     const navbar = document.querySelector('.navbar');
