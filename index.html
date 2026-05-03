@@ -7,6 +7,7 @@
 <meta name="description" content="سولارين SPF 50 — واقي الشمس المغربي. حماية قوية، خفيف، بلا آثار بيضاء. الدفع عند الاستلام في كل المغرب.">
 <title>سولارين – Solaryn | واقي الشمس SPF 50</title>
 
+<link rel="preload" as="image" href="assets/images/opt/hero.webp" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -29,12 +30,16 @@ fbq('init','26886012404419870');fbq('track','PageView');
 
 <body>
 
-<!-- HERO + FORM (above the fold) -->
+<!-- HERO -->
 <header class="hero">
     <img src="assets/images/opt/logo.webp" alt="Solaryn" class="logo" width="56" height="56" fetchpriority="high">
 
     <h1>سولارين <span class="brand-en">Solaryn</span></h1>
     <p class="tagline">واقي الشمس المغربي · <strong>SPF 50</strong></p>
+
+    <figure class="hero-img">
+        <img src="assets/images/opt/hero.webp" alt="Solaryn SPF 50" width="800" height="800" fetchpriority="high">
+    </figure>
 
     <div class="price-row">
         <span class="old">199 درهم</span>
@@ -49,8 +54,15 @@ fbq('init','26886012404419870');fbq('track','PageView');
         <li>✓ بلا آثار بيضاء</li>
     </ul>
 
+    <a href="#leadForm" class="btn btn-cta">اطلب دابا ←</a>
+</header>
+
+<!-- FORM -->
+<section class="form-section">
     <form id="leadForm" class="lead-form" action="/api/submit" method="POST" novalidate>
-        <h2 class="form-title">اطلب دابا — كنوصلوك فدارك</h2>
+        <h2 class="form-title">اطلب سولارين دابا</h2>
+        <p class="form-sub">عمر الفورم وغادي نعيطو ليك باش نأكدو الطلبية</p>
+
         <label for="nom">الاسم الكامل</label>
         <input id="nom" name="nom" type="text" required maxlength="100" placeholder="كتب سميتك" autocomplete="name">
 
@@ -66,16 +78,20 @@ fbq('init','26886012404419870');fbq('track','PageView');
         <div id="formMessage" class="form-message" role="status" aria-live="polite"></div>
     </form>
 
-    <p class="reassure">🚚 توصيل لكل المغرب · ✓ منتج مضمون 100%</p>
-</header>
+    <p class="reassure">🚚 توصيل لكل المغرب · 💵 الدفع عند الاستلام · ✓ منتج مضمون 100%</p>
+</section>
 
-<!-- HERO PRODUCT IMAGE -->
-<section class="product">
-    <figure class="product-shot">
-        <img src="assets/images/opt/hero.webp" alt="Solaryn SPF 50 — تيوب واقي الشمس" width="800" height="800" loading="lazy">
-    </figure>
-    <h2>شنو هو سولارين ؟</h2>
-    <p class="lead">سولارين هو واقي الشمس مغربي بصيغة خفيفة ومتطورة، كيحمي بشرتك من الأشعة فوق البنفسجية <strong>UVA + UVB</strong> فالشمس القاسحة ديال المغرب. مناسب لكل أنواع البشرة حتى الحساسة، وما كيخليش آثار بيضاء.</p>
+<!-- PRODUCT GALLERY -->
+<section class="gallery">
+    <h2>سولارين عن قرب</h2>
+    <div class="grid">
+        <img src="assets/images/opt/product-1.webp" alt="Solaryn SPF 50" width="600" height="900" loading="lazy">
+        <img src="assets/images/opt/product-2.webp" alt="Solaryn SPF 50" width="600" height="900" loading="lazy">
+        <img src="assets/images/opt/gallery-1.webp" alt="Solaryn — تيوب" width="600" height="600" loading="lazy">
+        <img src="assets/images/opt/gallery-3.webp" alt="Solaryn — تفاصيل" width="600" height="600" loading="lazy">
+        <img src="assets/images/opt/product-detail.webp" alt="Solaryn — قريب" width="600" height="600" loading="lazy">
+        <img src="assets/images/opt/lifestyle.webp" alt="Solaryn — الاستعمال" width="600" height="722" loading="lazy">
+    </div>
 </section>
 
 <!-- BENEFITS -->
@@ -102,17 +118,6 @@ fbq('init','26886012404419870');fbq('track','PageView');
             <h3>مكونات طبيعية</h3>
             <p>مزين بزيت الأركان، فيتامين E، ومرطبات.</p>
         </div>
-    </div>
-</section>
-
-<!-- LIFESTYLE GALLERY -->
-<section class="gallery">
-    <h2>سولارين فحياتك اليومية</h2>
-    <div class="grid">
-        <img src="assets/images/opt/lifestyle.webp" alt="حماية قوية" width="600" height="722" loading="lazy">
-        <img src="assets/images/opt/lifestyle-1.webp" alt="مناسب لكل أنواع البشرة" width="500" height="602" loading="lazy">
-        <img src="assets/images/opt/lifestyle-2.webp" alt="ضد الماء والعرق" width="500" height="602" loading="lazy">
-        <img src="assets/images/opt/lifestyle-3.webp" alt="خفيف وما كيلزقش" width="500" height="602" loading="lazy">
     </div>
 </section>
 

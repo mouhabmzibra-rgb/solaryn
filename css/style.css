@@ -15,12 +15,12 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 h1, h2, h3 { letter-spacing: -.02em; }
 
 section, header, footer {
-    padding: 32px 20px;
+    padding: 28px 20px;
     max-width: 480px;
     margin: 0 auto;
 }
 
-/* ===== HERO + FORM (above the fold) ===== */
+/* ===== HERO ===== */
 .hero {
     padding: 18px 20px 28px;
     text-align: center;
@@ -31,7 +31,7 @@ section, header, footer {
     border-radius: 12px;
 }
 .hero h1 {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 900;
     margin: 0 0 4px;
 }
@@ -39,16 +39,29 @@ section, header, footer {
     font-weight: 700;
     color: #A0A8B8;
     font-size: .68em;
-    letter-spacing: .02em;
 }
 .tagline {
-    font-size: 15px;
+    font-size: 16px;
     color: #4A5878;
-    margin: 0 0 16px;
+    margin: 0 0 18px;
 }
 .tagline strong {
     color: #F4B942;
     font-weight: 900;
+}
+
+.hero-img {
+    margin: 0 auto 20px;
+    max-width: 300px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #FAFAF7;
+    aspect-ratio: 1;
+}
+.hero-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .price-row {
@@ -66,13 +79,13 @@ section, header, footer {
     font-weight: 600;
 }
 .price-row .now {
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 900;
     color: #1B2D4D;
     line-height: 1;
 }
 .price-row .now small {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: #4A5878;
     margin-inline-start: 4px;
@@ -86,52 +99,64 @@ section, header, footer {
     border-radius: 8px;
 }
 .price-meta {
-    font-size: 12px;
+    font-size: 13px;
     color: #4A5878;
-    margin: 0 0 14px;
+    margin: 0 0 16px;
 }
 
 .benefits {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 14px;
+    gap: 6px 16px;
     justify-content: center;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: #4A5878;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
 }
 
-/* FORM */
+/* ===== FORM SECTION ===== */
+.form-section {
+    background: #FAFAF7;
+    border-block: 1px solid #F0F0F0;
+    max-width: none;
+    padding: 32px 20px 28px;
+}
 .lead-form {
     max-width: 380px;
     margin: 0 auto;
     text-align: start;
-    background: #FAFAF7;
+    background: #FFFFFF;
     border: 1px solid #F0F0F0;
     border-radius: 16px;
-    padding: 18px 16px 20px;
+    padding: 22px 18px;
 }
 .form-title {
-    font-size: 17px;
+    font-size: 22px;
     font-weight: 900;
-    margin: 0 0 14px;
+    margin: 0 0 4px;
     text-align: center;
     color: #1B2D4D;
+}
+.form-sub {
+    font-size: 13px;
+    color: #4A5878;
+    text-align: center;
+    margin: 0 0 18px;
 }
 .lead-form label {
     display: block;
     font-size: 13px;
     font-weight: 800;
-    margin: 12px 0 6px;
+    margin: 14px 0 6px;
     color: #1B2D4D;
 }
-.lead-form label:first-of-type { margin-top: 0; }
+.lead-form label:nth-of-type(1) { margin-top: 0; }
 .lead-form input {
     width: 100%;
-    padding: 13px 14px;
+    padding: 14px;
     border: 1.5px solid #E5E8EE;
-    border-radius: 10px;
+    border-radius: 11px;
     font-size: 16px;
     font-family: inherit;
     background: #FFFFFF;
@@ -151,7 +176,7 @@ section, header, footer {
     opacity: 0 !important;
 }
 .lead-form .btn {
-    margin-top: 16px;
+    margin-top: 18px;
     width: 100%;
     max-width: none;
 }
@@ -191,35 +216,31 @@ section, header, footer {
 .form-message.error { display: block; background: #FCE8E8; color: #B83A3A; }
 
 .reassure {
-    margin: 14px 0 0;
-    font-size: 12px;
+    margin: 16px 0 0;
+    font-size: 13px;
     color: #4A5878;
     text-align: center;
 }
 
-/* ===== PRODUCT SECTION ===== */
-.product { text-align: center; }
-.product-shot {
-    margin: 0 auto 22px;
-    max-width: 320px;
-    border-radius: 20px;
-    overflow: hidden;
-    background: #FAFAF7;
-}
-.product h2 {
+/* ===== GALLERY (PRODUCT PHOTOS) ===== */
+.gallery h2 {
     font-size: 24px;
     font-weight: 900;
-    margin: 0 0 12px;
+    margin: 0 0 18px;
+    text-align: center;
 }
-.product .lead {
-    font-size: 15px;
-    color: #4A5878;
-    line-height: 1.75;
-    margin: 0;
+.gallery .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
-.product .lead strong {
-    color: #1B2D4D;
-    font-weight: 800;
+.gallery img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #FAFAF7;
 }
 
 /* ===== BENEFITS CARDS ===== */
@@ -267,27 +288,6 @@ section, header, footer {
     line-height: 1.55;
 }
 
-/* ===== GALLERY ===== */
-.gallery h2 {
-    font-size: 24px;
-    font-weight: 900;
-    margin: 0 0 18px;
-    text-align: center;
-}
-.gallery .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-.gallery img {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 5 / 6;
-    object-fit: cover;
-    border-radius: 12px;
-    background: #FAFAF7;
-}
-
 /* ===== HOW TO USE ===== */
 .howto h2 {
     font-size: 24px;
@@ -296,10 +296,10 @@ section, header, footer {
     text-align: center;
 }
 .steps {
-    counter-reset: step;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    counter-reset: step;
 }
 .steps li {
     counter-increment: step;
@@ -415,16 +415,16 @@ section, header, footer {
 /* ===== TABLET / DESKTOP ===== */
 @media (min-width: 720px) {
     section, header, footer { max-width: 560px; }
-    .benefits-section, .trust { max-width: none; }
+    .form-section, .benefits-section, .trust { max-width: none; }
     .hero { padding: 32px 20px 40px; }
     .hero h1 { font-size: 36px; }
     .tagline { font-size: 17px; }
-    .price-row .now { font-size: 46px; }
-    .product h2, .benefits-section h2, .gallery h2, .howto h2, .final-cta h2 { font-size: 28px; }
-    .product .lead { font-size: 16px; }
-    .product-shot { max-width: 380px; }
+    .hero-img { max-width: 340px; }
+    .price-row .now { font-size: 50px; }
+    .gallery h2, .benefits-section h2, .howto h2, .final-cta h2 { font-size: 28px; }
+    .form-title { font-size: 26px; }
     .cards { grid-template-columns: repeat(4, 1fr); }
-    .gallery .grid { grid-template-columns: repeat(4, 1fr); }
+    .gallery .grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
