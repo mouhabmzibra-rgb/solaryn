@@ -14,19 +14,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 
-<!-- GA4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TQSQQBT50G"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TQSQQBT50G');</script>
-
-<!-- Meta Pixel -->
+<!-- Meta Pixel (eager — needs PageView ASAP for ad attribution) -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','26886012404419870');fbq('track','PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=26886012404419870&ev=PageView&noscript=1"/></noscript>
 
-<!-- Microsoft Clarity -->
-<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wl9rm0r89f");</script>
+<!-- GA4 — lazy-loaded on first user interaction (or 3.5s fallback) to free ~474KB from critical path -->
+<script>
+(function(){
+  var loaded=false;
+  function loadGA4(){
+    if(loaded)return;loaded=true;
+    var s=document.createElement('script');s.async=true;
+    s.src='https://www.googletagmanager.com/gtag/js?id=G-TQSQQBT50G';
+    s.onload=function(){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}window.gtag=gtag;gtag('js',new Date());gtag('config','G-TQSQQBT50G');};
+    document.head.appendChild(s);
+    ['scroll','click','keydown','touchstart','mousemove'].forEach(function(e){window.removeEventListener(e,loadGA4)});
+  }
+  ['scroll','click','keydown','touchstart','mousemove'].forEach(function(e){window.addEventListener(e,loadGA4,{once:true,passive:true})});
+  setTimeout(loadGA4,3500);
+})();
+</script>
 </head>
 
 <body>
