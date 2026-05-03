@@ -298,6 +298,17 @@ h3 { font-size: 1.3rem; margin-bottom: 0.6rem; }
     border-inline-start: 4px solid var(--gold);
 }
 
+.price-old {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-decoration: line-through;
+    text-decoration-color: #d33;
+    text-decoration-thickness: 2px;
+    margin-bottom: 4px;
+}
+
 .price-current {
     font-family: 'Cairo', sans-serif;
     font-size: 2.6rem;

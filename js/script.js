@@ -97,7 +97,7 @@
 
                     // Conversion event — value in MAD
                     const qty = parseInt(payload.quantite, 10) || 1;
-                    const value = eventName === 'generate_lead' ? qty * 99 : 0;
+                    const value = eventName === 'generate_lead' ? qty * 149 : 0;
 
                     // GA4 event
                     track(eventName, {
@@ -183,7 +183,7 @@
             track('whatsapp_click', {
                 source: 'floating_button',
                 currency: 'MAD',
-                value: 99
+                value: 149
             });
 
             if (typeof window.fbq === 'function') {
@@ -191,7 +191,7 @@
                     content_name: 'WhatsApp click',
                     content_category: 'whatsapp',
                     currency: 'MAD',
-                    value: 99
+                    value: 149
                 }, {
                     eventID: eventId
                 });
