@@ -907,3 +907,49 @@ h3 { font-size: 1.3rem; margin-bottom: 0.6rem; }
     .floating-badge { padding: 10px 14px; font-size: 0.85rem; }
     .spf-badge strong { font-size: 1.4rem; }
 }
+
+/* ===== Floating WhatsApp button ===== */
+.whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    background: #25D366;
+    color: #fff !important;
+    padding: 12px 20px;
+    border-radius: 50px;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: wa-pulse 2.4s ease-in-out infinite;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.05);
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65);
+}
+
+.whatsapp-float svg {
+    flex-shrink: 0;
+}
+
+@keyframes wa-pulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45); }
+    50%      { box-shadow: 0 6px 28px rgba(37, 211, 102, 0.85), 0 0 0 8px rgba(37, 211, 102, 0.15); }
+}
+
+@media (max-width: 540px) {
+    .whatsapp-float {
+        bottom: 16px;
+        right: 16px;
+        padding: 11px 16px;
+        font-size: 0.9rem;
+    }
+}

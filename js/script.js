@@ -172,6 +172,33 @@
         });
     });
 
+    // WhatsApp click tracking — fires Contact event in Meta + GA4
+    const waBtn = document.getElementById('whatsappBtn');
+    if (waBtn) {
+        waBtn.addEventListener('click', () => {
+            const eventId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+            track('whatsapp_click', {
+                source: 'floating_button',
+                currency: 'MAD',
+                value: 99
+            });
+
+            if (typeof window.fbq === 'function') {
+                window.fbq('track', 'Contact', {
+                    content_name: 'WhatsApp click',
+                    content_category: 'whatsapp',
+                    currency: 'MAD',
+                    value: 99
+                }, {
+                    eventID: eventId
+                });
+            }
+        });
+    }
+
     // Navbar shadow on scroll
     const navbar = document.querySelector('.navbar');
     if (navbar) {
