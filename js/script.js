@@ -163,7 +163,7 @@
             window.scrollTo({ top: top, behavior: 'smooth' });
             history.pushState(null, '', href);
 
-            if (href === '#contact' || href === '#bulk') {
+            if (href === '#leadForm' || href === '#bulk' || href === '#contact') {
                 track('cta_click', {
                     target: href,
                     label: (a.textContent || '').trim().slice(0, 60)
