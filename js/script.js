@@ -120,6 +120,21 @@
                         }, {
                             eventID: eventId
                         });
+
+                        // Purchase event — retail orders only, post backend-confirm
+                        if (eventName === 'generate_lead') {
+                            window.fbq('track', 'Purchase', {
+                                value: value,
+                                currency: 'MAD',
+                                content_name: 'Solaryn SPF 50',
+                                content_type: 'product',
+                                content_ids: ['solaryn-spf50'],
+                                contents: [{ id: 'solaryn-spf50', quantity: qty, item_price: 149 }],
+                                num_items: qty
+                            }, {
+                                eventID: eventId + '_purchase'
+                            });
+                        }
                     }
 
                     form.reset();
@@ -194,6 +209,16 @@
                     value: 149
                 }, {
                     eventID: eventId
+                });
+
+                window.fbq('trackCustom', 'WhatsAppClick', {
+                    content_name: 'Solaryn SPF 50',
+                    content_category: 'whatsapp',
+                    source: 'floating_button',
+                    currency: 'MAD',
+                    value: 149
+                }, {
+                    eventID: eventId + '_wa'
                 });
             }
         });
