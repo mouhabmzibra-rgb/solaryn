@@ -1,8 +1,10 @@
-// Twilio WhatsApp incoming-message webhook (TEXT BOT MODE).
+// Twilio WhatsApp incoming-message webhook (TEXT BOT MODE with QUICK-REPLY BUTTONS).
 // State machine in Darija: greets, collects name → city → address → confirms → creates Shopify order.
 // State stored on the Shopify customer record (tags + first_name/last_name/default_address).
 
 const SHOPIFY_VARIANT_ID = '53266501075257';
+const TPL_ORDER_CONFIRM = 'HX1a3cf48b74a84d7b4feb9fab3bb02dfe';
+const TPL_FINAL_CONFIRM = 'HXa6852b2ef5bdc165bcf9d76d2ce29af2';
 
 function parseTwilioBody(body) {
     if (typeof body === 'object' && body !== null && !Array.isArray(body)) return body;
@@ -173,6 +175,43 @@ async function createOrder(customer, token) {
     return result.order;
 }
 
+// Send a templated message (with quick-reply buttons) via Twilio Content API.
+// Used for steps that need clickable buttons (yes/no confirmations).
+async function sendTemplate(toPhone, contentSid, variables = {}) {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+15559405455';
+    if (!sid || !token) return false;
+    const to = toPhone.startsWith('whatsapp:') ? toPhone : `whatsapp:${toPhone}`;
+    const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+    const params = new URLSearchParams({
+        From: from,
+        To: to,
+        ContentSid: contentSid,
+    });
+    if (Object.keys(variables).length > 0) {
+        params.append('ContentVariables', JSON.stringify(variables));
+    }
+    try {
+        const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params,
+        });
+        if (!r.ok) {
+            const text = await r.text();
+            console.error('sendTemplate_failed', r.status, text.slice(0, 200));
+        }
+        return r.ok;
+    } catch (e) {
+        console.error('sendTemplate_error', e.message);
+        return false;
+    }
+}
+
 async function notifyOwner(text) {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
@@ -200,15 +239,21 @@ async function notifyOwner(text) {
 // Conversation state machine
 // ────────────────────────────────────────────────────────────────────
 
-function isYes(text) {
-    // Whole-word matching to avoid "ah" inside "Ahmed" matching
+function isYes(text, buttonId = '') {
+    if (buttonId === 'yes_order' || buttonId === 'confirm_ok') return true;
     const lower = String(text).toLowerCase().trim();
-    return /^(oui|yes|y|iyeh|iyyeh|naam|na3am|nam|eyh|ayyeh|wakha|wkha|ok|tmam|d['' ]?accord|dac|✅|👍|نعم|أيوا|ايوا|واخا|اوكي)$|^(naam|yes|ok|wakha)\b/i.test(lower);
+    return /^(oui|yes|y|iyeh|iyyeh|naam|na3am|nam|eyh|ayyeh|wakha|wkha|ok|tmam|d['' ]?accord|dac|✅|👍|نعم|أيوا|ايوا|واخا|اوكي|نعم،\s*بغيت|نعم،\s*أكدي)$|^(naam|yes|ok|wakha)\b/i.test(lower);
 }
 
-function isNo(text) {
+function isNo(text, buttonId = '') {
+    if (buttonId === 'no_order') return true;
     const lower = String(text).toLowerCase().trim();
-    return /^(la|non|no|nope|n)$|maba?ghi|لا/i.test(lower);
+    return /^(la|non|no|nope|n)$|maba?ghi|لا|لا،\s*شكرا/i.test(lower);
+}
+
+function isEdit(text, buttonId = '') {
+    if (buttonId === 'edit_order') return true;
+    return /تعديل|modif|edit|change/i.test(text);
 }
 
 function isOrderIntent(text) {
@@ -220,37 +265,33 @@ function looksLikeYesNoOnly(text) {
     return isYes(text) || isNo(text);
 }
 
-async function processMessage(state, messageBody, customer, token) {
+async function processMessage(state, messageBody, customer, token, buttonId = '') {
     const msg = messageBody.trim();
 
     switch (state) {
         case 'NEW':
-            if (isOrderIntent(msg) || isYes(msg)) {
-                return {
-                    reply: `السلام! 🌞 شكرا بزاف باش تواصلتي معانا.\n\n*Solaryn SPF 50* - واقي شمس مغربي:\n💰 99 درهم\n🚚 توصيل مجاني فالمغرب كامل\n💵 الدفع عند الاستلام\n📦 توصيل ف 2-5 يام\n\nواش بغيتي تطلبي وحدة؟ (جاوب ب *نعم* لإكمال الطلبية)`,
-                    newState: 'AWAITING_CONFIRMATION',
-                };
-            }
+            // Send templated welcome with نعم/لا buttons
             return {
-                reply: `السلام! 🌞 أنا غزلان من Solaryn.\nواش باغية تطلبي *Solaryn SPF 50* (واقي شمس) ب 99 درهم؟ جاوب *نعم* للاستمرار.`,
+                template: TPL_ORDER_CONFIRM,
                 newState: 'AWAITING_CONFIRMATION',
             };
 
         case 'AWAITING_CONFIRMATION':
-            if (isYes(msg)) {
+            if (isYes(msg, buttonId) || isOrderIntent(msg)) {
                 return {
                     reply: `ممتاز! ✨\n\nباش نسيفطو الطلبية، عافاك بعتي لينا:\n\n1️⃣ *السمية الكاملة*\n\n(مثال: Ahmed Benali)`,
                     newState: 'AWAITING_NAME',
                 };
             }
-            if (isNo(msg)) {
+            if (isNo(msg, buttonId)) {
                 return {
                     reply: `بلا مشكل، شكرا. ⚘ سلامات!`,
                     newState: 'NEW',
                 };
             }
+            // Re-send template with buttons
             return {
-                reply: `عافاك جاوب ب *نعم* أو *لا*. 🌸\nواش بغيتي *Solaryn SPF 50* ب 99 درهم؟`,
+                template: TPL_ORDER_CONFIRM,
                 newState: 'AWAITING_CONFIRMATION',
             };
 
@@ -291,24 +332,28 @@ async function processMessage(state, messageBody, customer, token) {
                     newState: 'AWAITING_ADDRESS',
                 };
             }
-            // Save address
-            // We need the city — it was saved on previous step via customer record (we didn't actually save; let's save now)
-            // For simplicity, store address and city together in customer's default_address
+            // Send templated confirmation with OK/تعديل buttons
+            const fullName = `${customer.first_name || '-'} ${customer.last_name || ''}`.trim();
             return {
-                reply: `📋 *تأكيد الطلبية*:\n\n👤 ${customer.first_name || '-'} ${customer.last_name || ''}\n📞 ${customer.phone}\n📍 ${msg}\n🛒 1× Solaryn SPF 50\n💰 99 درهم\n🚚 توصيل مجاني\n💵 الدفع عند الاستلام\n\nأكدي ب *OK* للإرسال، أو *تعديل* للتغيير.`,
+                template: TPL_FINAL_CONFIRM,
+                templateVars: {
+                    "1": fullName,
+                    "2": customer.phone || '-',
+                    "3": msg,
+                },
                 newState: 'AWAITING_FINAL_CONFIRMATION',
                 pendingAddress: msg,
             };
         }
 
         case 'AWAITING_FINAL_CONFIRMATION':
-            if (isYes(msg)) {
+            if (isYes(msg, buttonId)) {
                 return {
                     action: 'create_order',
                     newState: 'ORDERED',
                 };
             }
-            if (msg.toLowerCase().includes('تعديل') || msg.toLowerCase().includes('modif')) {
+            if (isEdit(msg, buttonId)) {
                 return {
                     reply: `بلا مشكل. عاود السمية الكاملة عافاك:`,
                     newState: 'AWAITING_NAME',
@@ -348,6 +393,8 @@ export default async function handler(req, res) {
     const params = parseTwilioBody(req.body);
     const fromPhone = normalizePhone(params.From);
     const messageBody = (params.Body || '').trim();
+    // Twilio sends button payload as ButtonPayload or ButtonText
+    const buttonId = (params.ButtonPayload || params.ButtonText || '').trim();
 
     if (!fromPhone || !fromPhone.startsWith('+')) {
         res.status(400).send('Invalid phone');
@@ -365,7 +412,7 @@ export default async function handler(req, res) {
         const state = getStateTag(customer);
 
         // Process message
-        const result = await processMessage(state, messageBody, customer, token);
+        const result = await processMessage(state, messageBody, customer, token, buttonId);
 
         // Update customer state + extra fields
         if (result.update) {
@@ -418,17 +465,22 @@ export default async function handler(req, res) {
             }
         }
 
-        // Standard reply
+        // Send templated message (with quick-reply buttons) and return empty TwiML
+        if (result.template) {
+            await sendTemplate(fromPhone, result.template, result.templateVars || {});
+            res.setHeader('Content-Type', 'text/xml');
+            res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+            return;
+        }
+
+        // Standard text reply
         res.setHeader('Content-Type', 'text/xml');
         res.status(200).send(twiml(result.reply));
     } catch (err) {
         console.error('whatsapp_bot_error', err.message, err.stack);
-        // In debug mode, surface the error so we can fix it; otherwise show friendly message
-        const debug = process.env.BOT_DEBUG === '1';
-        const fallback = debug
-            ? `[DEBUG] ${err.message.slice(0, 300)}`
-            : 'السلام! وقع مشكل صغير، عاود الرسالة عافاك. 🌷';
+        // Send detailed error to owner via WhatsApp + return generic to customer
+        await notifyOwner(`⚠️ Bot error for ${fromPhone}\nMsg: "${(messageBody || '').slice(0, 60)}"\nErr: ${err.message.slice(0, 300)}`);
         res.setHeader('Content-Type', 'text/xml');
-        res.status(200).send(twiml(fallback));
+        res.status(200).send(twiml('السلام! وقع مشكل صغير، عاود الرسالة عافاك. 🌷'));
     }
 }
