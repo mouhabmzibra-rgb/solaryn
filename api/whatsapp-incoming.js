@@ -265,14 +265,17 @@ function looksLikeYesNoOnly(text) {
     return isYes(text) || isNo(text);
 }
 
+// Templates remain commented out until Meta approves them.
+// Once approved, replace `reply: ...` with `template: TPL_ORDER_CONFIRM` etc.
+const USE_TEMPLATES = false;
+
 async function processMessage(state, messageBody, customer, token, buttonId = '') {
     const msg = messageBody.trim();
 
     switch (state) {
         case 'NEW':
-            // Send templated welcome with نعم/لا buttons
             return {
-                template: TPL_ORDER_CONFIRM,
+                reply: `السلام! 🌞 أنا غزلان من Solaryn.\n\n*Solaryn SPF 50* - واقي شمس مغربي ب *99 درهم* 💰\n\n🚚 شحن مجاني فالمغرب\n💵 الدفع عند الاستلام\n📦 توصيل ف 2 إلى 5 يام\n\n*واش بغيتي تطلبي؟*\nجاوب *نعم* للاستمرار، *لا* للإلغاء.`,
                 newState: 'AWAITING_CONFIRMATION',
             };
 
@@ -289,9 +292,8 @@ async function processMessage(state, messageBody, customer, token, buttonId = ''
                     newState: 'NEW',
                 };
             }
-            // Re-send template with buttons
             return {
-                template: TPL_ORDER_CONFIRM,
+                reply: `عافاك جاوب ب *نعم* أو *لا*. 🌸\nواش بغيتي *Solaryn SPF 50* ب 99 درهم؟`,
                 newState: 'AWAITING_CONFIRMATION',
             };
 
@@ -332,15 +334,8 @@ async function processMessage(state, messageBody, customer, token, buttonId = ''
                     newState: 'AWAITING_ADDRESS',
                 };
             }
-            // Send templated confirmation with OK/تعديل buttons
-            const fullName = `${customer.first_name || '-'} ${customer.last_name || ''}`.trim();
             return {
-                template: TPL_FINAL_CONFIRM,
-                templateVars: {
-                    "1": fullName,
-                    "2": customer.phone || '-',
-                    "3": msg,
-                },
+                reply: `📋 *تأكيد الطلبية*:\n\n👤 ${customer.first_name || '-'} ${customer.last_name || ''}\n📞 ${customer.phone}\n📍 ${msg}\n🛒 1× Solaryn SPF 50\n💰 *99 درهم*\n🚚 شحن مجاني\n💵 الدفع عند الاستلام\n\nأكدي ب *OK* للإرسال،\nأو *تعديل* للتغيير.`,
                 newState: 'AWAITING_FINAL_CONFIRMATION',
                 pendingAddress: msg,
             };
