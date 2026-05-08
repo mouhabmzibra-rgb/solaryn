@@ -179,7 +179,13 @@ export default async function handler(req, res) {
     }
 
     const callId = message?.call?.id || body?.call?.id || 'unknown';
+    const customerPhone = message?.call?.customer?.number || body?.call?.customer?.number;
     const orderData = findCaptureOrderArgs(message);
+
+    // Fallback: if AI didn't capture phone, use call recipient's number.
+    if (orderData && !orderData.phone && customerPhone) {
+        orderData.phone = customerPhone;
+    }
 
     if (!orderData || orderData.wantsToOrder === false) {
         await notifyOwner(`☎️ Vapi call ${callId} ended — pas de commande (cust. didn't confirm).`);
