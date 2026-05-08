@@ -62,9 +62,15 @@ async function shopifyApi(path, options = {}, token) {
 }
 
 async function getCustomerByPhone(phone, token) {
-    const escaped = phone.replace(/[+\s]/g, '');
-    const data = await shopifyApi(
-        `/customers/search.json?query=${encodeURIComponent('phone:' + phone + ' OR phone:*' + escaped)}`,
+    // Try with + prefix first, then without
+    let data = await shopifyApi(
+        `/customers/search.json?query=${encodeURIComponent('phone:' + phone)}`,
+        {}, token
+    );
+    if (data.customers && data.customers.length > 0) return data.customers[0];
+    const stripped = phone.replace(/^\+/, '');
+    data = await shopifyApi(
+        `/customers/search.json?query=${encodeURIComponent('phone:' + stripped)}`,
         {}, token
     );
     return (data.customers || [])[0] || null;
@@ -405,8 +411,13 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'text/xml');
         res.status(200).send(twiml(result.reply));
     } catch (err) {
-        console.error('whatsapp_bot_error', err.message);
+        console.error('whatsapp_bot_error', err.message, err.stack);
+        // In debug mode, surface the error so we can fix it; otherwise show friendly message
+        const debug = process.env.BOT_DEBUG === '1';
+        const fallback = debug
+            ? `[DEBUG] ${err.message.slice(0, 300)}`
+            : 'السلام! وقع مشكل صغير، عاود الرسالة عافاك. 🌷';
         res.setHeader('Content-Type', 'text/xml');
-        res.status(200).send(twiml('السلام! وقع مشكل صغير، عاود الرسالة عافاك. 🌷'));
+        res.status(200).send(twiml(fallback));
     }
 }
