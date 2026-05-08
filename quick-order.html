@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quick Order — Solaryn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Cairo',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:linear-gradient(180deg,#FFFAF0 0%,#F5EFE2 100%);min-height:100vh;color:#1B2D4D;padding:24px}
+  .card{background:#fff;border-radius:18px;padding:32px 24px;max-width:480px;margin:24px auto;box-shadow:0 12px 32px rgba(27,45,77,.1)}
+  h1{font-family:'Playfair Display',serif;margin:0 0 4px;font-size:26px;color:#1B2D4D}
+  .sub{color:#4A5878;margin:0 0 24px;font-size:14px}
+  .badge{display:inline-block;background:#FCE8B6;color:#6B4F12;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+  label{display:block;font-size:13px;font-weight:700;color:#1B2D4D;margin:14px 0 6px}
+  input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid #e6dfd2;border-radius:10px;font-size:15px;font-family:inherit;background:#FFFAF0;transition:border-color .15s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#C89860}
+  textarea{resize:vertical;min-height:80px}
+  .qty-row{display:flex;align-items:center;gap:12px}
+  .qty-row input{width:70px;text-align:center}
+  .qty-row .total{font-size:18px;font-weight:700;color:#1B2D4D}
+  .qty-row .total small{color:#4A5878;font-weight:500;font-size:12px}
+  button{width:100%;padding:16px;background:#C89860;color:#fff;border:none;border-radius:999px;font-size:16px;font-weight:700;letter-spacing:.04em;cursor:pointer;margin-top:24px;transition:transform .15s,background .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(200,152,96,.3)}
+  button:hover{background:#b58450;transform:translateY(-2px);box-shadow:0 12px 28px rgba(200,152,96,.45)}
+  button:disabled{background:#A0A8B8;cursor:not-allowed;transform:none}
+  .msg{margin-top:16px;padding:12px;border-radius:10px;font-size:14px;display:none}
+  .msg.success{background:#E8F5E9;color:#1B5E20;display:block}
+  .msg.error{background:#FFEBEE;color:#B71C1C;display:block}
+  .helper{font-size:12px;color:#A0A8B8;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="badge">QUICK ADD</span>
+  <h1>Nouvelle commande</h1>
+  <p class="sub">Solaryn SPF 50 — Cash on Delivery</p>
+
+  <form id="quickForm">
+    <label for="phone">📞 Téléphone client</label>
+    <input id="phone" name="phone" type="tel" required placeholder="+212XXXXXXXXX" autocomplete="tel">
+
+    <label for="fullName">👤 Nom complet</label>
+    <input id="fullName" name="fullName" type="text" required placeholder="Ahmed Benali" autocomplete="name">
+
+    <label for="city">🏙 Ville</label>
+    <input id="city" name="city" type="text" required placeholder="Casablanca" list="cities" autocomplete="address-level2">
+    <datalist id="cities">
+      <option value="Casablanca"><option value="Rabat"><option value="Marrakech"><option value="Fès"><option value="Tanger"><option value="Agadir"><option value="Kénitra"><option value="Meknès"><option value="Oujda"><option value="Tétouan"><option value="Salé"><option value="Mohammedia"><option value="Témara"><option value="El Jadida"><option value="Beni Mellal"><option value="Nador"><option value="Khouribga"><option value="Laâyoune">
+    </datalist>
+
+    <label for="address">📍 Adresse complète</label>
+    <textarea id="address" name="address" required placeholder="Hay almohamady, rue 12, n°45, Casablanca" autocomplete="street-address"></textarea>
+
+    <label for="quantity">📦 Quantité</label>
+    <div class="qty-row">
+      <input id="quantity" name="quantity" type="number" value="1" min="1" max="20">
+      <span class="total" id="totalPrice">99 <small>MAD</small></span>
+    </div>
+
+    <label for="notes">📝 Notes (optionnel)</label>
+    <textarea id="notes" name="notes" placeholder="Préférences, instructions livraison..."></textarea>
+
+    <button type="submit" id="submitBtn">✓ Créer order Shopify</button>
+    <div class="msg" id="msg"></div>
+  </form>
+</div>
+
+<script>
+  // Pre-fill from URL params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('phone')) document.getElementById('phone').value = params.get('phone');
+  if (params.get('name')) document.getElementById('fullName').value = params.get('name');
+
+  // Update total price
+  const qty = document.getElementById('quantity');
+  const total = document.getElementById('totalPrice');
+  function updateTotal() {
+    const n = Math.max(1, parseInt(qty.value, 10) || 1);
+    total.innerHTML = (n * 99) + ' <small>MAD</small>';
+  }
+  qty.addEventListener('input', updateTotal);
+
+  // Submit handler
+  const form = document.getElementById('quickForm');
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = '⏳ Creating...';
+    msg.className = 'msg';
+
+    const data = Object.fromEntries(new FormData(form));
+    data.quantity = Math.max(1, parseInt(data.quantity, 10) || 1);
+
+    try {
+      const res = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+
+      if (res.ok && result.ok) {
+        msg.classList.add('success');
+        msg.textContent = `🎉 Order ${result.order?.name || 'créée'} ! Total: ${result.order?.total_price || ''} MAD`;
+        btn.textContent = '✓ Créée';
+        setTimeout(() => { form.reset(); updateTotal(); btn.textContent = '✓ Créer order Shopify'; btn.disabled = false; msg.className = 'msg'; }, 4000);
+      } else {
+        msg.classList.add('error');
+        msg.textContent = '❌ ' + (result.error || 'Erreur création order');
+        btn.textContent = '✓ Créer order Shopify';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      msg.classList.add('error');
+      msg.textContent = '❌ Erreur réseau: ' + err.message;
+      btn.textContent = '✓ Créer order Shopify';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
