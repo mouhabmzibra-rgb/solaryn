@@ -112,17 +112,23 @@ async function setCustomerState(customerId, newState, token, extraFields = {}) {
 }
 
 async function setCustomerAddress(customerId, address1, city, token) {
+    // If a default address already exists with placeholder values, update it.
+    // Otherwise create a new address.
+    const cust = (await shopifyApi(`/customers/${customerId}.json`, {}, token)).customer;
+    const existing = cust.default_address;
+    const addressBody = {
+        address: { address1, city, country: 'Morocco', country_code: 'MA' },
+    };
+    if (existing && existing.id && (existing.address1 === '-' || existing.address1 === null)) {
+        const data = await shopifyApi(`/customers/${customerId}/addresses/${existing.id}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(addressBody),
+        }, token);
+        return data.customer_address;
+    }
     const data = await shopifyApi(`/customers/${customerId}/addresses.json`, {
         method: 'POST',
-        body: JSON.stringify({
-            address: {
-                address1,
-                city,
-                country: 'Morocco',
-                country_code: 'MA',
-                default: true,
-            },
-        }),
+        body: JSON.stringify(addressBody),
     }, token);
     return data.customer_address;
 }
