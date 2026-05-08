@@ -195,19 +195,23 @@ async function notifyOwner(text) {
 // ────────────────────────────────────────────────────────────────────
 
 function isYes(text) {
-    const lower = text.toLowerCase();
-    const yesWords = ['oui', 'yes', 'iyeh', 'iyyeh', 'iyy', 'naam', 'na3am', 'eyh', 'ayyeh', 'ah', 'wakha', 'wkha', '7sn', 'ok', 'd accord', 'dac', 'tmam', 'tmam', 'sahbi', 'sahbtek'];
-    return yesWords.some(w => lower.includes(w));
+    // Whole-word matching to avoid "ah" inside "Ahmed" matching
+    const lower = String(text).toLowerCase().trim();
+    return /^(oui|yes|y|iyeh|iyyeh|naam|na3am|nam|eyh|ayyeh|wakha|wkha|ok|tmam|d['' ]?accord|dac|✅|👍|نعم|أيوا|ايوا|واخا|اوكي)$|^(naam|yes|ok|wakha)\b/i.test(lower);
 }
 
 function isNo(text) {
-    const lower = text.toLowerCase();
-    return /\bla\b|\bnon\b|\bno\b|\bnope\b|maba?ghi/i.test(lower);
+    const lower = String(text).toLowerCase().trim();
+    return /^(la|non|no|nope|n)$|maba?ghi|لا/i.test(lower);
 }
 
 function isOrderIntent(text) {
-    const lower = text.toLowerCase();
-    return /bghi|bri|nbghi|nb?ri|tle?b|kommand|commande|order|solar?yn|spf|crem|dial|achat/.test(lower);
+    const lower = String(text).toLowerCase();
+    return /bghi|bri|nbghi|nb?ri|tle?b|kommand|commande|order|solar?yn|spf|crem|achat|بغيت|أبغي|طلب/.test(lower);
+}
+
+function looksLikeYesNoOnly(text) {
+    return isYes(text) || isNo(text);
 }
 
 async function processMessage(state, messageBody, customer, token) {
@@ -227,7 +231,7 @@ async function processMessage(state, messageBody, customer, token) {
             };
 
         case 'AWAITING_CONFIRMATION':
-            if (isYes(msg) || isOrderIntent(msg)) {
+            if (isYes(msg)) {
                 return {
                     reply: `ممتاز! ✨\n\nباش نسيفطو الطلبية، عافاك بعتي لينا:\n\n1️⃣ *السمية الكاملة*\n\n(مثال: Ahmed Benali)`,
                     newState: 'AWAITING_NAME',
@@ -245,9 +249,10 @@ async function processMessage(state, messageBody, customer, token) {
             };
 
         case 'AWAITING_NAME':
-            if (msg.length < 2 || msg.length > 80) {
+            // Reject confirmation words as a name — they're trying to confirm but we already moved past
+            if (looksLikeYesNoOnly(msg) || msg.length < 3 || msg.length > 80) {
                 return {
-                    reply: `عافاك بعتي السمية الكاملة.\n(مثال: Ahmed Benali)`,
+                    reply: `عافاك بعتي *السمية الكاملة* ديالك.\n(مثال: Ahmed Benali)`,
                     newState: 'AWAITING_NAME',
                 };
             }
@@ -261,9 +266,9 @@ async function processMessage(state, messageBody, customer, token) {
             };
 
         case 'AWAITING_CITY':
-            if (msg.length < 2 || msg.length > 80) {
+            if (looksLikeYesNoOnly(msg) || msg.length < 3 || msg.length > 80) {
                 return {
-                    reply: `عافاك بعتي اسم المدينة.\n(مثال: Casablanca)`,
+                    reply: `عافاك بعتي *اسم المدينة*.\n(مثال: Casablanca, Rabat, Marrakech...)`,
                     newState: 'AWAITING_CITY',
                 };
             }
@@ -274,9 +279,9 @@ async function processMessage(state, messageBody, customer, token) {
             };
 
         case 'AWAITING_ADDRESS': {
-            if (msg.length < 5 || msg.length > 200) {
+            if (looksLikeYesNoOnly(msg) || msg.length < 5 || msg.length > 200) {
                 return {
-                    reply: `عافاك بعتي العنوان الكامل (5 حروف على الأقل).`,
+                    reply: `عافاك بعتي *العنوان الكامل* (الزنقة، الرقم، الحي).\nمثال: Hay Almohamady, rue 12, n°45`,
                     newState: 'AWAITING_ADDRESS',
                 };
             }
