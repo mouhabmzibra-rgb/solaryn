@@ -465,11 +465,20 @@ export default async function handler(req, res) {
             }
         }
 
-        // Send templated message (with quick-reply buttons) and return empty TwiML
+        // Send templated message (with quick-reply buttons) — fallback to text if template fails
         if (result.template) {
-            await sendTemplate(fromPhone, result.template, result.templateVars || {});
+            const sent = await sendTemplate(fromPhone, result.template, result.templateVars || {});
+            if (sent) {
+                res.setHeader('Content-Type', 'text/xml');
+                res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+                return;
+            }
+            // Template send failed (likely not yet approved) — return text fallback
+            const fallback = result.template === TPL_ORDER_CONFIRM
+                ? `السلام! أنا غزلان من Solaryn 🌞\n\nواقي شمس Solaryn SPF 50 ب 99 درهم.\n🚚 شحن مجاني فالمغرب\n💵 الدفع عند الاستلام\n📦 توصيل ف 2 إلى 5 يام\n\nواش بغيتي تطلبي؟ جاوب *نعم* أو *لا*.`
+                : `📋 *تأكيد الطلبية*:\n\n👤 ${(result.templateVars||{})["1"] || customer.first_name}\n📞 ${(result.templateVars||{})["2"] || customer.phone}\n📍 ${(result.templateVars||{})["3"] || ''}\n🛒 1× Solaryn SPF 50 - 99 درهم\n\nجاوب *OK* للتأكيد أو *تعديل* للتغيير.`;
             res.setHeader('Content-Type', 'text/xml');
-            res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+            res.status(200).send(twiml(fallback));
             return;
         }
 
