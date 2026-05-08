@@ -3,8 +3,8 @@
 // State stored on the Shopify customer record (tags + first_name/last_name/default_address).
 
 const SHOPIFY_VARIANT_ID = '53266501075257';
-const TPL_ORDER_CONFIRM = 'HX1a3cf48b74a84d7b4feb9fab3bb02dfe';
-const TPL_FINAL_CONFIRM = 'HXa6852b2ef5bdc165bcf9d76d2ce29af2';
+const TPL_ORDER_CONFIRM = 'HX5381a5eb25b6c9b9f45d46de08a94313';
+const TPL_FINAL_CONFIRM = 'HX62aa42f3d00cb87d4720e1dab55d7577';
 
 function parseTwilioBody(body) {
     if (typeof body === 'object' && body !== null && !Array.isArray(body)) return body;
