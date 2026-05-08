@@ -76,7 +76,7 @@ export default async function handler(req, res) {
         '👇 *Actions:*',
         `🤖 Lance Vapi call: ${baseUrl}/api/trigger-call?phone=${phoneEnc}&name=${nameEnc}`,
         `💬 Reply WhatsApp: https://wa.me/${fromPhone.replace('+', '')}`,
-        `⚡ Quick add order: ${baseUrl}/quick-order.html?phone=${phoneEnc}&name=${nameEnc}`,
+        `⚡ Quick add order: ${baseUrl}/quick-order?phone=${phoneEnc}&name=${nameEnc}`,
     ].join('\n');
 
     const sent = await sendOwnerNotification(ownerMsg);
