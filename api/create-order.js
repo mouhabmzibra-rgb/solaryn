@@ -21,6 +21,64 @@ async function getShopifyToken() {
     return data.access_token;
 }
 
+// Hash function for PII (SHA-256) — required by TikTok Events API
+async function sha256(str) {
+    const crypto = await import('node:crypto');
+    return crypto.createHash('sha256').update(String(str).toLowerCase().trim()).digest('hex');
+}
+
+// Send Sale event to TikTok server-side (more reliable than pixel)
+async function fireTikTokEvent(orderData) {
+    const token = process.env.TIKTOK_ACCESS_TOKEN || '18eee8dbb9e1b0edf67c08c9a6271493a71cde94';
+    const pixelId = process.env.TIKTOK_PIXEL_ID || 'D80ESLJC77U3PBBHM3J0';
+    if (!token || !pixelId) return;
+
+    try {
+        const phoneE164 = orderData.phone.startsWith('+212')
+            ? orderData.phone
+            : ('+212' + orderData.phone.replace(/^0/, ''));
+        const phoneHash = await sha256(phoneE164);
+        const eventId = `solaryn_order_${orderData.orderId}`;
+
+        const payload = {
+            event_source: 'web',
+            event_source_id: pixelId,
+            data: [{
+                event: 'CompletePayment',
+                event_time: Math.floor(Date.now() / 1000),
+                event_id: eventId,
+                user: {
+                    phone: phoneHash,
+                    external_id: await sha256(String(orderData.orderId)),
+                },
+                properties: {
+                    currency: 'MAD',
+                    value: parseFloat(orderData.value || 99),
+                    contents: [{
+                        content_id: '53266501075257',
+                        content_type: 'product',
+                        content_name: 'Solaryn SPF 50',
+                        quantity: orderData.quantity || 1,
+                        price: parseFloat(orderData.value || 99),
+                    }],
+                },
+                page: {
+                    url: 'https://solaryn.co/products/ecran-solaire-solaryn-spf-50',
+                },
+            }],
+        };
+
+        await fetch('https://business-api.tiktok.com/open_api/v1.3/event/track/', {
+            method: 'POST',
+            headers: {
+                'Access-Token': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+    } catch { /* ignore */ }
+}
+
 async function notifyOwner(text) {
     // Send to Telegram (primary, instant, free)
     const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8719409348:AAGob_39mSvd1NeYo6LhLZXZ-Tu7_ur6ccI';
@@ -201,7 +259,12 @@ export default async function handler(req, res) {
                 }
                 const retryResult = await retryResp.json();
                 const rOrderName = retryResult.order?.name || '?';
+                const rOrderId = retryResult.order?.id || Date.now();
                 const rTotal = retryResult.order?.total_price || '99.00';
+                fireTikTokEvent({
+                    orderId: rOrderId, phone: phone.startsWith('+212') ? phone : ('+212' + phone.slice(1)),
+                    value: rTotal, quantity,
+                }).catch(() => {});
                 const rIsLead = fullName === 'Client à confirmer';
                 const rCleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
                 const rIntlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
@@ -222,11 +285,17 @@ export default async function handler(req, res) {
         const result = await resp.json();
 
         const orderName = result.order?.name || '?';
+        const orderId = result.order?.id || Date.now();
         const totalPrice = result.order?.total_price || '99.00';
         const isLead = fullName === 'Client à confirmer';
         const cleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
         const intlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
         const waNum = intlPhone.replace('+','');
+
+        // Fire TikTok CompletePayment event server-side for optimization
+        fireTikTokEvent({
+            orderId, phone: intlPhone, value: totalPrice, quantity,
+        }).catch(() => {});
         await notifyOwner(
             (isLead ? `📞 <b>NOUVEAU LEAD ${orderName}</b>\n` : `🎉 <b>Commande ${orderName}</b>\n`) +
             `\n📱 <b>${cleanPhone}</b>\n` +
