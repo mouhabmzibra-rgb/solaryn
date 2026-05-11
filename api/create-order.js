@@ -83,10 +83,35 @@ export default async function handler(req, res) {
         const domain = process.env.SHOPIFY_STORE_DOMAIN;
         const apiVersion = process.env.SHOPIFY_API_VERSION || '2025-10';
 
-        const order = {
+        // Look up existing customer by phone to avoid duplicate phone error
+        let existingCustomerId = null;
+        try {
+            const phoneVariants = [phone];
+            if (phone.startsWith('0')) phoneVariants.push('+212' + phone.slice(1));
+            if (phone.startsWith('+212')) phoneVariants.push('0' + phone.slice(4));
+            for (const p of phoneVariants) {
+                const searchResp = await fetch(
+                    `https://${domain}/admin/api/${apiVersion}/customers/search.json?query=${encodeURIComponent('phone:' + p)}`,
+                    { headers: { 'X-Shopify-Access-Token': token } }
+                );
+                if (searchResp.ok) {
+                    const sd = await searchResp.json();
+                    if (sd.customers && sd.customers.length > 0) {
+                        existingCustomerId = sd.customers[0].id;
+                        break;
+                    }
+                }
+            }
+        } catch { /* fall through to no customer match */ }
+
+        // Build a unique fake email per phone+time to avoid email collision
+        const phoneDigits = phone.replace(/\D/g, '').slice(-10);
+        const fakeEmail = `${phoneDigits}.${Date.now()}@solaryn.co`;
+
+        const orderPayload = {
             order: {
                 line_items: [{ variant_id: parseInt(SHOPIFY_VARIANT_ID, 10), quantity }],
-                customer: { first_name: firstName, last_name: lastName, phone },
+                email: fakeEmail,
                 shipping_address: {
                     first_name: firstName, last_name: lastName,
                     address1: address, city, country: 'Morocco', country_code: 'MA', phone,
@@ -104,17 +129,49 @@ export default async function handler(req, res) {
             },
         };
 
+        // Link to existing customer if found (avoids phone collision)
+        if (existingCustomerId) {
+            orderPayload.order.customer = { id: existingCustomerId };
+        }
+
         const resp = await fetch(`https://${domain}/admin/api/${apiVersion}/orders.json`, {
             method: 'POST',
             headers: {
                 'X-Shopify-Access-Token': token,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(order),
+            body: JSON.stringify(orderPayload),
         });
 
         if (!resp.ok) {
             const text = await resp.text();
+            // Last-resort retry without any customer/email if phone-related error
+            if (text.includes('phone') || text.includes('email')) {
+                const fallback = {
+                    order: {
+                        ...orderPayload.order,
+                        email: `guest.${Date.now()}@solaryn.co`,
+                    },
+                };
+                delete fallback.order.customer;
+                const retryResp = await fetch(`https://${domain}/admin/api/${apiVersion}/orders.json`, {
+                    method: 'POST',
+                    headers: { 'X-Shopify-Access-Token': token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fallback),
+                });
+                if (!retryResp.ok) {
+                    const retryText = await retryResp.text();
+                    throw new Error(`Shopify ${retryResp.status}: ${retryText.slice(0, 300)}`);
+                }
+                const retryResult = await retryResp.json();
+                await notifyOwner(
+                    `🎉 *Order ${retryResult.order?.name} créée (fallback)!*\n` +
+                    `👤 ${fullName}\n📞 ${phone}\n📍 ${address}, ${city}\n` +
+                    `🛒 ${quantity}× Solaryn SPF 50\n💰 ${retryResult.order?.total_price} MAD COD`
+                );
+                res.status(200).json({ ok: true, order: retryResult.order });
+                return;
+            }
             throw new Error(`Shopify ${resp.status}: ${text.slice(0, 300)}`);
         }
         const result = await resp.json();
