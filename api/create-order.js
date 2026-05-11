@@ -22,11 +22,30 @@ async function getShopifyToken() {
 }
 
 async function notifyOwner(text) {
+    // Send to Telegram (primary, instant, free)
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8719409348:AAGob_39mSvd1NeYo6LhLZXZ-Tu7_ur6ccI';
+    const tgChat = process.env.TELEGRAM_CHAT_ID || '8113442719';
+    if (tgToken && tgChat) {
+        try {
+            await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: tgChat,
+                    text,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true,
+                }),
+            });
+        } catch { /* ignore */ }
+    }
+
+    // Backup: Twilio WhatsApp (if available)
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
     const owner = process.env.SOLARYN_OWNER_PHONE;
     const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
-    if (!owner) return;
+    if (!sid || !token || !owner) return;
     const to = owner.startsWith('whatsapp:') ? owner : `whatsapp:${owner}`;
     const auth = Buffer.from(`${sid}:${token}`).toString('base64');
     const body = new URLSearchParams({ From: from, To: to, Body: text });
@@ -164,10 +183,18 @@ export default async function handler(req, res) {
                     throw new Error(`Shopify ${retryResp.status}: ${retryText.slice(0, 300)}`);
                 }
                 const retryResult = await retryResp.json();
+                const rOrderName = retryResult.order?.name || '?';
+                const rTotal = retryResult.order?.total_price || '99.00';
+                const rIsLead = fullName === 'Client à confirmer';
+                const rCleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
+                const rIntlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
                 await notifyOwner(
-                    `🎉 *Order ${retryResult.order?.name} créée (fallback)!*\n` +
-                    `👤 ${fullName}\n📞 ${phone}\n📍 ${address}, ${city}\n` +
-                    `🛒 ${quantity}× Solaryn SPF 50\n💰 ${retryResult.order?.total_price} MAD COD`
+                    (rIsLead ? `📞 *NOUVEAU LEAD ${rOrderName}*\n` : `🎉 *Commande ${rOrderName}*\n`) +
+                    `\n📱 *${rCleanPhone}*\n📍 ${city}\n` +
+                    (rIsLead ? '' : `👤 ${fullName}\n📦 ${address}\n`) +
+                    `🛒 ${quantity}× Solaryn SPF 50 — *${rTotal} MAD*\n\n` +
+                    (rIsLead ? `⏰ Appeler dans 5 min\n` : '') +
+                    `[📞 Appeler](tel:${rIntlPhone}) · [💬 WhatsApp](https://wa.me/${rIntlPhone.replace('+','')})`
                 );
                 res.status(200).json({ ok: true, order: retryResult.order });
                 return;
@@ -176,10 +203,20 @@ export default async function handler(req, res) {
         }
         const result = await resp.json();
 
+        const orderName = result.order?.name || '?';
+        const totalPrice = result.order?.total_price || '99.00';
+        const isLead = fullName === 'Client à confirmer';
+        const cleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
+        const intlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
         await notifyOwner(
-            `🎉 *Order ${result.order?.name} créée!*\n` +
-            `👤 ${fullName}\n📞 ${phone}\n📍 ${address}, ${city}\n` +
-            `🛒 ${quantity}× Solaryn SPF 50\n💰 ${result.order?.total_price} MAD COD`
+            (isLead ? `📞 *NOUVEAU LEAD ${orderName}*\n` : `🎉 *Commande ${orderName}*\n`) +
+            `\n📱 *${cleanPhone}*\n` +
+            `📍 ${city}\n` +
+            (isLead ? '' : `👤 ${fullName}\n📦 ${address}\n`) +
+            `🛒 ${quantity}× Solaryn SPF 50 — *${totalPrice} MAD*\n` +
+            `\n` +
+            (isLead ? `⏰ Appeler dans 5 min\n` : '') +
+            `[📞 Appeler maintenant](tel:${intlPhone}) · [💬 WhatsApp](https://wa.me/${intlPhone.replace('+','')})`
         );
 
         res.status(200).json({ ok: true, order: result.order });
