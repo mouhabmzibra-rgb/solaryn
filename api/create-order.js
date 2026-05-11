@@ -26,18 +26,35 @@ async function notifyOwner(text) {
     const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8719409348:AAGob_39mSvd1NeYo6LhLZXZ-Tu7_ur6ccI';
     const tgChat = process.env.TELEGRAM_CHAT_ID || '8113442719';
     if (tgToken && tgChat) {
+        // Try with HTML parse_mode first (handles tel: links and special chars)
+        let sent = false;
         try {
-            await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+            const r = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: tgChat,
                     text,
-                    parse_mode: 'Markdown',
+                    parse_mode: 'HTML',
                     disable_web_page_preview: true,
                 }),
             });
-        } catch { /* ignore */ }
+            sent = r.ok;
+        } catch (e) { sent = false; }
+        // Fallback: plain text without parsing if HTML failed
+        if (!sent) {
+            try {
+                await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: tgChat,
+                        text: text.replace(/<[^>]+>/g, '').replace(/\*/g, ''),
+                        disable_web_page_preview: true,
+                    }),
+                });
+            } catch { /* ignore */ }
+        }
     }
 
     // Backup: Twilio WhatsApp (if available)
@@ -188,13 +205,14 @@ export default async function handler(req, res) {
                 const rIsLead = fullName === 'Client à confirmer';
                 const rCleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
                 const rIntlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
+                const rWaNum = rIntlPhone.replace('+','');
                 await notifyOwner(
-                    (rIsLead ? `📞 *NOUVEAU LEAD ${rOrderName}*\n` : `🎉 *Commande ${rOrderName}*\n`) +
-                    `\n📱 *${rCleanPhone}*\n📍 ${city}\n` +
+                    (rIsLead ? `📞 <b>NOUVEAU LEAD ${rOrderName}</b>\n` : `🎉 <b>Commande ${rOrderName}</b>\n`) +
+                    `\n📱 <b>${rCleanPhone}</b>\n📍 ${city}\n` +
                     (rIsLead ? '' : `👤 ${fullName}\n📦 ${address}\n`) +
-                    `🛒 ${quantity}× Solaryn SPF 50 — *${rTotal} MAD*\n\n` +
-                    (rIsLead ? `⏰ Appeler dans 5 min\n` : '') +
-                    `[📞 Appeler](tel:${rIntlPhone}) · [💬 WhatsApp](https://wa.me/${rIntlPhone.replace('+','')})`
+                    `🛒 ${quantity}× Solaryn SPF 50 — <b>${rTotal} MAD</b>\n\n` +
+                    (rIsLead ? `⏰ Appeler dans 5 min\n\n` : '') +
+                    `📞 <a href="tel:${rIntlPhone}">Appeler</a>\n💬 <a href="https://wa.me/${rWaNum}">WhatsApp</a>`
                 );
                 res.status(200).json({ ok: true, order: retryResult.order });
                 return;
@@ -208,15 +226,17 @@ export default async function handler(req, res) {
         const isLead = fullName === 'Client à confirmer';
         const cleanPhone = phone.replace(/\s+/g,'').replace(/^\+212/, '0');
         const intlPhone = phone.startsWith('+212') ? phone : ('+212' + phone.slice(1));
+        const waNum = intlPhone.replace('+','');
         await notifyOwner(
-            (isLead ? `📞 *NOUVEAU LEAD ${orderName}*\n` : `🎉 *Commande ${orderName}*\n`) +
-            `\n📱 *${cleanPhone}*\n` +
+            (isLead ? `📞 <b>NOUVEAU LEAD ${orderName}</b>\n` : `🎉 <b>Commande ${orderName}</b>\n`) +
+            `\n📱 <b>${cleanPhone}</b>\n` +
             `📍 ${city}\n` +
             (isLead ? '' : `👤 ${fullName}\n📦 ${address}\n`) +
-            `🛒 ${quantity}× Solaryn SPF 50 — *${totalPrice} MAD*\n` +
+            `🛒 ${quantity}× Solaryn SPF 50 — <b>${totalPrice} MAD</b>\n` +
             `\n` +
-            (isLead ? `⏰ Appeler dans 5 min\n` : '') +
-            `[📞 Appeler maintenant](tel:${intlPhone}) · [💬 WhatsApp](https://wa.me/${intlPhone.replace('+','')})`
+            (isLead ? `⏰ Appeler dans 5 min\n\n` : '\n') +
+            `📞 <a href="tel:${intlPhone}">Appeler maintenant</a>\n` +
+            `💬 <a href="https://wa.me/${waNum}">WhatsApp</a>`
         );
 
         res.status(200).json({ ok: true, order: result.order });
