@@ -71,21 +71,23 @@ async function appendLeadRow(lead) {
     // (USER_ENTERED treats leading '+' as formula → #ERROR!).
     // Google Sheets mobile app auto-detects phone numbers for tap-to-call.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
+    const message = (lead.message || '').slice(0, 300);
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:I1`,
+        range: `${SHEET_NAME}!A1:J1`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         values: [[
-            now,
-            lead.phone,
-            (lead.message || '').slice(0, 300),
-            false,           // D: Commandé?
-            lead.name || '',
-            lead.city || '',
-            lead.address || '',
-            lead.notes || '',
-            false            // I: Appelé?
+            now,                         // A: Date
+            lead.phone,                  // B: Téléphone
+            message,                     // C: Dernier WhatsApp
+            false,                       // D: Commandé?
+            lead.name || '',             // E: Prénom
+            lead.city || '',             // F: Ville
+            lead.address || '',          // G: Adresse expédition
+            lead.notes || '🟢 Solaryn lead', // H: Notes
+            false,                       // I: Appelé?
+            message                      // J: Message client
         ]],
     });
 }
