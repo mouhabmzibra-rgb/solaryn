@@ -67,14 +67,14 @@ async function findDuplicateRow(phone) {
 }
 
 async function appendLeadRow(lead) {
-    // Store phone as plain text. Google Sheets mobile app auto-detects
-    // phone numbers and offers "Call" on tap. HYPERLINK("tel:...") errors out
-    // on Composio API reads.
+    // Phone stored as plain text. Use RAW so '+212...' isn't parsed as a formula
+    // (USER_ENTERED treats leading '+' as formula → #ERROR!).
+    // Google Sheets mobile app auto-detects phone numbers for tap-to-call.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
         range: `${SHEET_NAME}!A1:H1`,
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         values: [[
             now,
