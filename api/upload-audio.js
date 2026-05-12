@@ -117,7 +117,12 @@ form.addEventListener('submit', async (e) => {
     if (!phone || !file) { showError('Phone + fichier obligatoires'); return; }
 
     const phoneDigits = phone.replace(/[^\\d+]/g, '');
-    const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 40);
+    // Preserve extension: split base + ext, truncate base only
+    const dotIdx = file.name.lastIndexOf('.');
+    const ext = dotIdx >= 0 ? file.name.slice(dotIdx + 1).toLowerCase().slice(0, 8) : 'bin';
+    const base = (dotIdx >= 0 ? file.name.slice(0, dotIdx) : file.name)
+        .replace(/[^a-zA-Z0-9-]/g, '_').slice(0, 25);
+    const safeName = base + '.' + ext;
     const blobPath = 'solaryn-calls/' + phoneDigits + '_' + Date.now() + '_' + safeName;
 
     try {
@@ -175,7 +180,8 @@ export default async function handler(req, res) {
                     allowedContentTypes: [
                         'audio/*', 'audio/mpeg', 'audio/mp3', 'audio/m4a',
                         'audio/x-m4a', 'audio/wav', 'audio/ogg', 'audio/amr',
-                        'audio/aac', 'audio/opus', 'audio/3gpp',
+                        'audio/aac', 'audio/opus', 'audio/3gpp', 'audio/mp4',
+                        'video/*', 'video/mp4', 'video/quicktime', 'video/webm', 'video/3gpp',
                         'application/octet-stream',
                     ],
                     maximumSizeInBytes: 100 * 1024 * 1024, // 100 MB
