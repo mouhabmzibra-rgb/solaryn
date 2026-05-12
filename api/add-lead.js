@@ -47,16 +47,23 @@ async function callComposio(toolSlug, args) {
 }
 
 async function findDuplicateRow(phone) {
+    // Read column B as FORMULA (since cells contain HYPERLINK formulas).
+    // Then extract the phone number from "=HYPERLINK("tel:+212...","+212...")".
     const resp = await callComposio('GOOGLESHEETS_BATCH_GET', {
         spreadsheet_id: SHEET_ID,
         ranges: [`${SHEET_NAME}!B2:B500`],
-        valueRenderOption: 'FORMATTED_VALUE',
+        valueRenderOption: 'FORMULA',
     });
     const rows = resp?.data?.valueRanges?.[0]?.values || [];
     const phoneDigits = phone.replace(/[^\d]/g, '');
     for (let i = 0; i < rows.length; i++) {
-        const cellDigits = String(rows[i]?.[0] || '').replace(/[^\d]/g, '');
-        if (cellDigits && (cellDigits === phoneDigits || cellDigits.endsWith(phoneDigits.slice(-9)))) {
+        const cell = String(rows[i]?.[0] || '');
+        if (!cell) continue;
+        // Match "tel:+212..." inside HYPERLINK formula, or plain phone digits
+        const m = cell.match(/tel:(\+?\d+)/) || cell.match(/\+?\d{9,}/);
+        const cellDigits = (m ? m[1] || m[0] : cell).replace(/[^\d]/g, '');
+        if (!cellDigits) continue;
+        if (cellDigits === phoneDigits || cellDigits.endsWith(phoneDigits.slice(-9))) {
             return i + 2;
         }
     }
@@ -92,9 +99,9 @@ export default async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(204).end();
 
-    if (req.method === 'GET') {
+    if (req.method === 'GET' || req.method === 'HEAD') {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        return res.status(200).send(htmlForm());
+        return res.status(200).send(req.method === 'HEAD' ? '' : htmlForm());
     }
 
     if (req.method !== 'POST') {
