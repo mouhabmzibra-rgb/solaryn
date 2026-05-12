@@ -202,7 +202,8 @@ export default async function handler(req, res) {
                         return;
                     }
                     const dateLabel = new Date().toLocaleDateString('fr-FR');
-                    const linkFormula = `=HYPERLINK("${blob.url}","🎙️ Écouter (${dateLabel})")`;
+                    // French locale Google Sheets uses ';' not ',' as argument separator
+                    const linkFormula = `=HYPERLINK("${blob.url}";"🎙️ Écouter (${dateLabel})")`;
                     await setColumnKValue(rowIndex, linkFormula);
                     if (notes && notes.trim()) {
                         await appendNoteToCell(rowIndex, notes.trim().slice(0, 200));

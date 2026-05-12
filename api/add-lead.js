@@ -72,7 +72,8 @@ async function appendLeadRow(lead) {
     // Google Sheets mobile app auto-detects phone numbers for tap-to-call.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
     const message = (lead.message || '').slice(0, 300);
-    const uploadLink = `=HYPERLINK("https://solaryn-five.vercel.app/api/upload-audio?phone=${encodeURIComponent(lead.phone)}","📤 Uploader")`;
+    // French locale Google Sheets uses ';' not ',' as argument separator
+    const uploadLink = `=HYPERLINK("https://solaryn-five.vercel.app/api/upload-audio?phone=${encodeURIComponent(lead.phone)}";"📤 Uploader")`;
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
         range: `${SHEET_NAME}!A1:L1`,
