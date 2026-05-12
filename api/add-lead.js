@@ -73,18 +73,19 @@ async function appendLeadRow(lead) {
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:H1`,
+        range: `${SHEET_NAME}!A1:I1`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         values: [[
             now,
             lead.phone,
             (lead.message || '').slice(0, 300),
-            false,
+            false,           // D: Commandé?
             lead.name || '',
             lead.city || '',
             lead.address || '',
-            lead.notes || ''
+            lead.notes || '',
+            false            // I: Appelé?
         ]],
     });
 }
