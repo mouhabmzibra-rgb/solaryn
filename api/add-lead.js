@@ -74,7 +74,7 @@ async function appendLeadRow(lead) {
     const message = (lead.message || '').slice(0, 300);
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:J1`,
+        range: `${SHEET_NAME}!A1:K1`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         values: [[
@@ -87,7 +87,8 @@ async function appendLeadRow(lead) {
             lead.address || '',          // G: Adresse expédition
             lead.notes || '🟢 Solaryn lead', // H: Notes
             false,                       // I: Appelé?
-            message                      // J: Message client
+            message,                     // J: Message client
+            ''                           // K: Audio appel (rempli par téléconseillère)
         ]],
     });
 }
