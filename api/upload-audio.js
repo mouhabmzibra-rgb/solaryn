@@ -27,12 +27,17 @@ function setCors(res) {
 }
 
 function normalizePhoneMA(raw) {
-    let p = String(raw || '').replace(/[\s()-]/g, '').trim();
+    if (raw === undefined || raw === null) return null;
+    // Strip ALL chars except digits and +. Handles bidi markers, NBSP, dashes, parens, etc.
+    let p = String(raw).replace(/[^\d+]/g, '');
     if (!p) return null;
+    // If there's a '+' anywhere but not at start, drop all '+' (data entry quirks)
+    if (p.indexOf('+') > 0) p = p.replace(/\+/g, '');
+    // Normalize various entry formats to E.164 +212XXXXXXXXX
     if (p.startsWith('00')) p = '+' + p.slice(2);
-    if (/^0\d{9}$/.test(p)) p = '+212' + p.slice(1);
-    if (/^212\d{9}$/.test(p)) p = '+' + p;
-    if (!p.startsWith('+')) p = '+212' + p;
+    else if (/^0\d{9}$/.test(p)) p = '+212' + p.slice(1);
+    else if (/^212\d{9}$/.test(p)) p = '+' + p;
+    else if (!p.startsWith('+')) p = '+212' + p;
     if (!/^\+212\d{9}$/.test(p)) return null;
     return p;
 }
@@ -132,7 +137,10 @@ export default async function handler(req, res) {
         phone = normalizePhoneMA(rawPhone);
         if (!phone) {
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            return res.status(400).send(htmlForm('<div class="err">❌ Numéro marocain invalide</div>'));
+            const safe = String(rawPhone || '').replace(/[<>]/g, '').slice(0, 60);
+            return res.status(400).send(htmlForm(
+                `<div class="err">❌ Numéro marocain invalide.<br><br>Reçu: <code>${safe}</code><br>Format attendu: <code>06XXXXXXXX</code> ou <code>+212XXXXXXXXX</code></div>`
+            ));
         }
         const audioField = files.audio;
         fileEntry = Array.isArray(audioField) ? audioField[0] : audioField;
