@@ -72,14 +72,15 @@ async function appendLeadRow(lead) {
     // Google Sheets mobile app auto-detects phone numbers for tap-to-call.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
     const message = (lead.message || '').slice(0, 300);
+    const uploadLink = `=HYPERLINK("https://solaryn-five.vercel.app/api/upload-audio?phone=${encodeURIComponent(lead.phone)}","📤 Uploader")`;
     await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:K1`,
-        valueInputOption: 'RAW',
+        range: `${SHEET_NAME}!A1:L1`,
+        valueInputOption: 'USER_ENTERED', // USER_ENTERED to evaluate the HYPERLINK formula in L
         insertDataOption: 'INSERT_ROWS',
         values: [[
             now,                         // A: Date
-            lead.phone,                  // B: Téléphone
+            "'" + lead.phone,            // B: Téléphone (apostrophe forces text, prevents '+212' formula parse)
             message,                     // C: Dernier WhatsApp
             false,                       // D: Commandé?
             lead.name || '',             // E: Prénom
@@ -88,7 +89,8 @@ async function appendLeadRow(lead) {
             lead.notes || '🟢 Solaryn lead', // H: Notes
             false,                       // I: Appelé?
             message,                     // J: Message client
-            ''                           // K: Audio appel (rempli par téléconseillère)
+            '',                          // K: Audio appel
+            uploadLink                   // L: Upload audio (HYPERLINK pré-rempli)
         ]],
     });
 }
