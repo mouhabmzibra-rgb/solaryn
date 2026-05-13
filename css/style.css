@@ -408,9 +408,71 @@ section, header, footer {
     text-decoration: none;
     z-index: 100;
     transition: transform .15s ease;
+    animation: wa-pulse 2s ease-out infinite, wa-wiggle 5s ease-in-out infinite;
 }
-.wa-float:hover { transform: scale(1.06); }
+.wa-float::after {
+    content: 'اطلب الآن';
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1F2937;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 14px;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    pointer-events: none;
+    animation: wa-label-fade 5s ease-in-out infinite;
+}
+.wa-float::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(100% + 4px);
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-block: 5px solid transparent;
+    border-inline-end: 6px solid #1F2937;
+    transform: translateY(-50%);
+    pointer-events: none;
+    animation: wa-label-fade 5s ease-in-out infinite;
+}
+.wa-float:hover {
+    transform: scale(1.06);
+    animation: none;
+}
+.wa-float:hover::after,
+.wa-float:hover::before { animation: none; opacity: 1; }
 .wa-float:active { transform: scale(.95); }
+
+@keyframes wa-pulse {
+    0% { box-shadow: 0 8px 22px rgba(37, 211, 102, .42), 0 0 0 0 rgba(37, 211, 102, .55); }
+    70% { box-shadow: 0 8px 22px rgba(37, 211, 102, .42), 0 0 0 18px rgba(37, 211, 102, 0); }
+    100% { box-shadow: 0 8px 22px rgba(37, 211, 102, .42), 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+@keyframes wa-wiggle {
+    0%, 85%, 100% { transform: translateY(0); }
+    90% { transform: translateY(-10px); }
+    95% { transform: translateY(-3px); }
+}
+@keyframes wa-label-fade {
+    0%, 40%, 100% { opacity: 0; transform: translateY(-50%) translateX(0); }
+    10%, 30% { opacity: 1; }
+}
+.wa-float:hover::before { transform: translateY(-50%); }
+.wa-float:hover::after { transform: translateY(-50%) translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+    .wa-float,
+    .wa-float::before,
+    .wa-float::after { animation: none; }
+    .wa-float::after,
+    .wa-float::before { opacity: 1; }
+}
 
 /* ===== TABLET / DESKTOP ===== */
 @media (min-width: 720px) {
