@@ -1,4 +1,28 @@
-import { clean, validPhone, clientIp, forwardToSheets, readBody } from './_lib.js';
+import { clean, validPhone, clientIp, readBody } from './_lib.js';
+
+// Hardcoded — points to the redeployed Apps Script that knows kind=abandoned.
+// (Bypasses SHEETS_WEBHOOK_URL env var which still targets the old deployment.)
+const ABANDONED_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx0fKlThu1rj35H2ekIVP6HllnPrxxzlQXV2aNnZnIGzJDKVgdzat-mBfW1iDwEPZt_4Q/exec';
+
+async function forwardToAbandonedSheet(payload) {
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(ABANDONED_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+            redirect: 'follow',
+        });
+        clearTimeout(timeout);
+        const text = await res.text().catch(() => '');
+        if (!res.ok) return { ok: false, status: res.status, body: text.slice(0, 200) };
+        return { ok: true, body: text.slice(0, 200) };
+    } catch (err) {
+        return { ok: false, error: err.message };
+    }
+}
 
 async function notifyTelegram(text) {
     const tgToken = process.env.TELEGRAM_BOT_TOKEN || '8719409348:AAGob_39mSvd1NeYo6LhLZXZ-Tu7_ur6ccI';
@@ -45,7 +69,7 @@ export default async function handler(req, res) {
     const intlTel = tel.startsWith('+212') ? tel : ('+212' + tel.slice(1));
     const waNum = intlTel.replace('+', '');
 
-    const sheetsResult = await forwardToSheets({
+    const sheetsResult = await forwardToAbandonedSheet({
         kind: 'abandoned',
         date: new Date().toISOString(),
         tel: cleanTel,
