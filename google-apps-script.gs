@@ -19,14 +19,16 @@
 const SHEET_ID = '1YReg6fb4aTJG5NogXdZ5Pt8NEOJ1cQooY2WgjuAq1QI';
 const HEADERS_LEAD = ['Date', 'Nom', 'Téléphone', 'Ville', 'Quantité', 'Message', 'IP', 'User-Agent', 'Statut'];
 const HEADERS_BULK = ['Date', 'Nom', 'Téléphone', 'Email', 'Type activité', 'Ville', 'Quantité', 'Message', 'IP', 'User-Agent', 'Statut'];
+const HEADERS_ABANDONED = ['Date', 'Téléphone', 'Ville', 'Page', 'IP', 'User-Agent', 'Statut'];
 
 function doPost(e) {
     try {
         const data = JSON.parse(e.postData.contents);
         const ss = SpreadsheetApp.openById(SHEET_ID);
         const isBulk = data.kind === 'bulk';
-        const sheetName = isBulk ? 'Bulk' : 'Commandes';
-        const headers = isBulk ? HEADERS_BULK : HEADERS_LEAD;
+        const isAbandoned = data.kind === 'abandoned';
+        const sheetName = isAbandoned ? 'Abandons' : (isBulk ? 'Bulk' : 'Commandes');
+        const headers = isAbandoned ? HEADERS_ABANDONED : (isBulk ? HEADERS_BULK : HEADERS_LEAD);
 
         let sheet = ss.getSheetByName(sheetName);
         if (!sheet) {
@@ -45,7 +47,9 @@ function doPost(e) {
         const date = data.date ? new Date(data.date) : new Date();
         const dateStr = Utilities.formatDate(date, 'GMT+1', 'yyyy-MM-dd HH:mm:ss');
 
-        const row = isBulk
+        const row = isAbandoned
+            ? [dateStr, data.tel, data.ville, data.page || '', data.ip || '', data.ua || '', 'À rappeler']
+            : isBulk
             ? [dateStr, data.nom, data.tel, data.email || '', data.type_activite || '', data.ville, data.quantite, data.message || '', data.ip || '', data.ua || '', 'Nouveau']
             : [dateStr, data.nom, data.tel, data.ville, data.quantite, data.message || '', data.ip || '', data.ua || '', 'Nouveau'];
 
