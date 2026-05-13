@@ -15,6 +15,7 @@ const COMPOSIO_KEY = process.env.COMPOSIO_API_KEY || 'ak_R9c7r97htFBcxtnsCASU';
 const COMPOSIO_ACCOUNT_ID = process.env.COMPOSIO_ACCOUNT_ID || 'ca_x66oW70jpGO6';
 const COMPOSIO_USER_ID = process.env.COMPOSIO_USER_ID || 'solaryn-default';
 const SHEET_NAME = "'Feuille 1'";
+const SHEET_NAME_PLAIN = 'Feuille 1';
 
 function normalizePhoneMA(raw) {
     if (raw === undefined || raw === null) return null;
@@ -61,9 +62,10 @@ async function findRowForPhone(phone) {
 }
 
 async function setColumnKValue(rowIndex, value) {
-    return callComposio('GOOGLESHEETS_VALUES_UPDATE', {
+    return callComposio('GOOGLESHEETS_BATCH_UPDATE', {
         spreadsheet_id: SHEET_ID,
-        range: `${SHEET_NAME}!K${rowIndex}`,
+        sheet_name: SHEET_NAME_PLAIN,
+        first_cell_location: `K${rowIndex}`,
         value_input_option: 'USER_ENTERED',
         values: [[value]],
     });
@@ -77,9 +79,10 @@ async function appendNoteToCell(rowIndex, additionalNote) {
     });
     const current = resp?.data?.valueRanges?.[0]?.values?.[0]?.[0] || '';
     const newNote = current ? `${current} | ${additionalNote}` : additionalNote;
-    return callComposio('GOOGLESHEETS_VALUES_UPDATE', {
+    return callComposio('GOOGLESHEETS_BATCH_UPDATE', {
         spreadsheet_id: SHEET_ID,
-        range: `${SHEET_NAME}!H${rowIndex}`,
+        sheet_name: SHEET_NAME_PLAIN,
+        first_cell_location: `H${rowIndex}`,
         value_input_option: 'USER_ENTERED',
         values: [[newNote]],
     });
