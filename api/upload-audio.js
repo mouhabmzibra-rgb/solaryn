@@ -138,9 +138,27 @@ form.addEventListener('submit', async (e) => {
             },
         });
 
+        // Trigger sheet update immediately (more reliable than webhook)
+        btn.innerHTML = '<span class="spinner"></span>Liaison au sheet…';
+        let linkResult = null;
+        try {
+            const linkRes = await fetch('/api/upload-audio?action=link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, blobUrl: blob.url, notes }),
+            });
+            linkResult = await linkRes.json();
+        } catch (e) {
+            linkResult = { ok: false, error: e.message };
+        }
+
+        const sheetMsg = linkResult && linkResult.ok
+            ? '✅ Sheet mis à jour (ligne ' + linkResult.row + ')'
+            : '⚠️ Sheet pas mis à jour: ' + (linkResult && linkResult.error || 'unknown');
+
         document.getElementById('card').innerHTML =
             '<h1>✅ Upload terminé</h1>' +
-            '<p class="sub">Audio uploadé. Le sheet sera mis à jour dans 1-2 sec.</p>' +
+            '<p class="sub">' + sheetMsg + '</p>' +
             '<div class="ok">📞 Lead: ' + phone + '<br><br>' +
             '<a href="' + blob.url + '" target="_blank">▶️ Écouter l\\'audio</a></div>' +
             '<button onclick="location.reload()">↩️ Uploader un autre</button>' +
@@ -171,6 +189,29 @@ export default async function handler(req, res) {
 
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Branch: client-driven sheet linking after upload completes (more reliable than webhook)
+    const reqUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    if (reqUrl.searchParams.get('action') === 'link') {
+        try {
+            const body = req.body || {};
+            const phone = normalizePhoneMA(body.phone);
+            const blobUrl = String(body.blobUrl || '').trim();
+            if (!phone) return res.status(400).json({ ok: false, error: 'Numéro invalide' });
+            if (!blobUrl.startsWith('https://')) return res.status(400).json({ ok: false, error: 'blobUrl invalide' });
+            const rowIndex = await findRowForPhone(phone);
+            if (!rowIndex) return res.status(404).json({ ok: false, error: 'Lead introuvable dans le sheet' });
+            const dateLabel = new Date().toLocaleDateString('fr-FR');
+            const linkFormula = `=HYPERLINK("${blobUrl}";"🎙️ Écouter (${dateLabel})")`;
+            await setColumnKValue(rowIndex, linkFormula);
+            const notes = String(body.notes || '').trim();
+            if (notes) await appendNoteToCell(rowIndex, notes.slice(0, 200));
+            return res.status(200).json({ ok: true, row: rowIndex, phone });
+        } catch (e) {
+            console.error('action_link_error', e.message);
+            return res.status(500).json({ ok: false, error: e.message });
+        }
     }
 
     try {
