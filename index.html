@@ -19,7 +19,7 @@ fbq('init','26886012404419870');fbq('track','PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=26886012404419870&ev=PageView&noscript=1"/></noscript>
 
-<!-- GA4 lazy -->
+<!-- GA4 (dual tags) lazy -->
 <script>
 (function(){
   var loaded=false;
@@ -27,13 +27,24 @@ fbq('init','26886012404419870');fbq('track','PageView');
     if(loaded)return;loaded=true;
     var s=document.createElement('script');s.async=true;
     s.src='https://www.googletagmanager.com/gtag/js?id=G-TQSQQBT50G';
-    s.onload=function(){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}window.gtag=gtag;gtag('js',new Date());gtag('config','G-TQSQQBT50G');};
+    s.onload=function(){
+      window.dataLayer=window.dataLayer||[];
+      function gtag(){dataLayer.push(arguments)}
+      window.gtag=gtag;
+      gtag('js',new Date());
+      gtag('config','G-TQSQQBT50G');
+      gtag('config','G-C2C8ZJP45L');
+    };
     document.head.appendChild(s);
     ['scroll','click','keydown','touchstart'].forEach(function(e){window.removeEventListener(e,loadGA4)});
   }
   ['scroll','click','keydown','touchstart'].forEach(function(e){window.addEventListener(e,loadGA4,{once:true,passive:true})});
   setTimeout(loadGA4,3500);
 })();
+function trackEvent(name, params){
+  try{ if(window.gtag) gtag('event', name, params||{}); }catch(e){}
+  try{ if(window.fbq && params && params._fb) fbq('trackCustom', name, params); }catch(e){}
+}
 </script>
 
 <!-- Microsoft Clarity -->
@@ -264,30 +275,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <form id="leadForm" class="form-row" novalidate>
     <input type="text" name="nom" class="form-input" placeholder="الاسم الكامل" required>
     <input type="tel" name="tel" class="form-input" placeholder="رقم الهاتف (06xxxxxxxx)" required inputmode="tel">
-    <select name="ville" class="form-input" required>
-      <option value="">المدينة</option>
-      <option>الدار البيضاء</option>
-      <option>الرباط</option>
-      <option>مراكش</option>
-      <option>فاس</option>
-      <option>طنجة</option>
-      <option>أكادير</option>
-      <option>مكناس</option>
-      <option>وجدة</option>
-      <option>تطوان</option>
-      <option>القنيطرة</option>
-      <option>سلا</option>
-      <option>المحمدية</option>
-      <option>سطات</option>
-      <option>برشيد</option>
-      <option>الجديدة</option>
-      <option>آسفي</option>
-      <option>بني ملال</option>
-      <option>خريبكة</option>
-      <option>الناظور</option>
-      <option>العيون</option>
-      <option>أخرى</option>
-    </select>
+    <input type="text" name="ville" class="form-input" placeholder="المدينة (مثلا: الدار البيضاء)" required autocomplete="address-level2">
     <select name="quantite" class="form-input">
       <option value="1">قطعة وحدة - 149 درهم</option>
       <option value="2">2 قطع - 269 درهم (وفّر 29 درهم)</option>
@@ -404,12 +392,120 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   }, 18000);
 })();
 
+// ===== Engagement & scroll tracking =====
+(function(){
+  var fired={};
+  function once(name, params){
+    if(fired[name])return;fired[name]=true;
+    try{ if(window.gtag) gtag('event', name, params||{}); }catch(e){}
+  }
+  // 15s engaged session
+  setTimeout(function(){ once('engaged_15s', {event_category:'engagement'}); }, 15000);
+  // Scroll milestones
+  var maxScroll=0;
+  window.addEventListener('scroll', function(){
+    var h=document.documentElement;
+    var pct=Math.round((h.scrollTop+window.innerHeight)/h.scrollHeight*100);
+    if(pct>maxScroll)maxScroll=pct;
+    if(maxScroll>=25) once('scroll_25', {percent:25});
+    if(maxScroll>=50) once('scroll_50', {percent:50});
+    if(maxScroll>=75) once('scroll_75', {percent:75});
+    if(maxScroll>=90) once('scroll_90', {percent:90});
+  }, {passive:true});
+})();
+
+// ===== WhatsApp click tracking =====
 document.getElementById('waBtn').addEventListener('click', function(){
   try{
-    fbq('track','Contact');
-    if(window.gtag) gtag('event','whatsapp_click',{event_category:'engagement'});
+    fbq('track','Contact',{content_name:'whatsapp_main'});
+    if(window.gtag){
+      gtag('event','whatsapp_click',{location:'main_cta',event_category:'engagement'});
+      gtag('event','generate_lead',{method:'whatsapp',value:149,currency:'MAD'});
+    }
   }catch(e){}
 });
+document.querySelector('.btn-wa-mini').addEventListener('click', function(){
+  try{
+    fbq('track','Contact',{content_name:'whatsapp_sticky'});
+    if(window.gtag) gtag('event','whatsapp_click',{location:'sticky_bottom',event_category:'engagement'});
+  }catch(e){}
+});
+
+// ===== Abandon tracking =====
+(function(){
+  var formStarted=false, submitted=false, abandonSent=false;
+  var phoneEl = document.querySelector('input[name=tel]');
+  var villeEl = document.querySelector('[name=ville]');
+  var form = document.getElementById('leadForm');
+
+  function validPhone(t){return /^(\+212|0)[5-7][0-9]{8}$/.test((t||'').replace(/\s+/g,''));}
+
+  // form_start on first focus/input
+  form.addEventListener('focusin', function(){
+    if(formStarted)return;
+    formStarted=true;
+    try{
+      fbq('track','InitiateCheckout',{content_name:'lead_form',value:149,currency:'MAD'});
+      if(window.gtag) gtag('event','form_start',{event_category:'engagement',form_id:'leadForm'});
+    }catch(e){}
+  }, {once:false});
+
+  // field_filled events
+  ['nom','tel','ville','quantite'].forEach(function(name){
+    var el = form.querySelector('[name='+name+']');
+    if(!el)return;
+    el.addEventListener('change', function(){
+      if(el.value && el.value.length){
+        try{ if(window.gtag) gtag('event','field_filled',{field:name,event_category:'form'}); }catch(e){}
+      }
+    });
+  });
+
+  function sendAbandon(viaBeacon){
+    if(abandonSent || submitted)return;
+    var tel = (phoneEl.value||'').replace(/\s+/g,'');
+    if(!validPhone(tel))return;
+    abandonSent = true;
+    var payload = {
+      phone: tel,
+      city: (villeEl && villeEl.value) || '',
+      page: location.href
+    };
+    var body = JSON.stringify(payload);
+    try{
+      if(viaBeacon && navigator.sendBeacon){
+        var blob = new Blob([body], {type:'application/json'});
+        navigator.sendBeacon('/api/abandoned-lead', blob);
+      } else {
+        fetch('/api/abandoned-lead', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: body,
+          keepalive: true
+        }).catch(function(){});
+      }
+      try{
+        fbq('trackCustom','LeadAbandoned',{phone_provided:true});
+        if(window.gtag) gtag('event','lead_abandoned',{event_category:'form',value:149,currency:'MAD'});
+      }catch(e){}
+    }catch(e){}
+  }
+
+  // 1) Phone field blur with valid number (slow user → save)
+  phoneEl.addEventListener('blur', function(){
+    setTimeout(function(){ sendAbandon(false); }, 1500);
+  });
+
+  // 2) Page hide / visibility change (user closes tab)
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') sendAbandon(true);
+  });
+  window.addEventListener('pagehide', function(){ sendAbandon(true); });
+  window.addEventListener('beforeunload', function(){ sendAbandon(true); });
+
+  // mark submitted on success
+  window.__markSubmitted = function(){ submitted = true; };
+})();
 
 document.getElementById('leadForm').addEventListener('submit', async function(e){
   e.preventDefault();
@@ -444,6 +540,8 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
+  try{ if(window.gtag) gtag('event','form_submit_attempt',{event_category:'form'}); }catch(e){}
+
   try{
     var res = await fetch('/api/submit', {
       method:'POST',
@@ -452,21 +550,29 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
     });
     var json = await res.json();
     if(json.ok){
+      if(window.__markSubmitted) window.__markSubmitted();
       try{
-        fbq('track','Lead',{value:149,currency:'MAD'});
-        if(window.gtag) gtag('event','generate_lead',{value:149,currency:'MAD'});
+        fbq('track','Lead',{value:149,currency:'MAD',content_name:'Solaryn_SPF50'});
+        fbq('track','Purchase',{value:149,currency:'MAD',content_name:'Solaryn_SPF50_COD'});
+        if(window.gtag){
+          gtag('event','generate_lead',{value:149,currency:'MAD',method:'form'});
+          gtag('event','form_submit_success',{event_category:'conversion',value:149,currency:'MAD'});
+          gtag('event','conversion',{value:149,currency:'MAD'});
+        }
       }catch(e){}
       successMsg.textContent = json.message || '✅ شكرا! توصلنا بطلبيتك، غادي نعيطو ليك قريب.';
       successMsg.style.display = 'block';
       form.style.display = 'none';
       successMsg.scrollIntoView({behavior:'smooth',block:'center'});
     } else {
+      try{ if(window.gtag) gtag('event','form_submit_error',{error:json.message||'unknown'}); }catch(e){}
       errorMsg.textContent = '⚠️ ' + (json.message || 'وقع خطأ، عاود حاول');
       errorMsg.style.display = 'block';
       btn.disabled = false;
       btn.textContent = '🛒 تأكيد الطلبية - الدفع عند الاستلام';
     }
   } catch(err){
+    try{ if(window.gtag) gtag('event','form_submit_error',{error:'network'}); }catch(e){}
     errorMsg.textContent = '⚠️ مشكل ف الاتصال، المرجو المحاولة مرة أخرى';
     errorMsg.style.display = 'block';
     btn.disabled = false;
