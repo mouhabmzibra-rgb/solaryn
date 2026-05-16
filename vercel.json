@@ -2,18 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "https://solaryn.co/products/ecran-solaire-solaryn-spf-50",
-      "permanent": true
-    },
-    {
-      "source": "/:path((?!api/).*)",
-      "destination": "https://solaryn.co/products/ecran-solaire-solaryn-spf-50",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
