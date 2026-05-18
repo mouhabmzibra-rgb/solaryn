@@ -1,6 +1,7 @@
-// POST /api/add-lead — append a WhatsApp lead row to the Solaryn Google Sheet
-// via Composio API. Dedupes by phone (reads column B first). Also serves a
-// simple HTML form on GET (bookmark on phone home screen).
+// POST /api/add-lead — prepend a WhatsApp lead row at the top of the Solaryn
+// Google Sheet (row 2, just under header) via Composio API. Dedupes by phone
+// (reads column B first). Also serves a simple HTML form on GET (bookmark on
+// phone home screen).
 // Body: { phone, name?, message?, city?, address?, notes? }
 // JSON or x-www-form-urlencoded both accepted.
 
@@ -66,33 +67,50 @@ async function findDuplicateRow(phone) {
     return null;
 }
 
-async function appendLeadRow(lead) {
-    // Phone stored as plain text. Use RAW so '+212...' isn't parsed as a formula
-    // (USER_ENTERED treats leading '+' as formula → #ERROR!).
-    // Google Sheets mobile app auto-detects phone numbers for tap-to-call.
+async function prependLeadRow(lead) {
+    // New leads go to row 2 (just under header), so the most recent is always visible at top.
+    // 1) Insert a blank row at row index 1 (= sheet row 2), pushing existing rows down.
+    // 2) Write A2:N2 with the lead data + HYPERLINK formulas for upload/WhatsApp/Call.
+    // Phone is prefixed with "'" so '+212...' is stored as text (not parsed as a formula).
+    // French locale: use ';' as HYPERLINK arg separator, not ','.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
     const message = (lead.message || '').slice(0, 300);
-    // French locale Google Sheets uses ';' not ',' as argument separator
+    const phoneNoPlus = lead.phone.replace(/^\+/, '');
     const uploadLink = `=HYPERLINK("https://solaryn-five.vercel.app/api/upload-audio?phone=${encodeURIComponent(lead.phone)}";"📤 Uploader")`;
-    await callComposio('GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', {
-        spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:L1`,
-        valueInputOption: 'USER_ENTERED', // USER_ENTERED to evaluate the HYPERLINK formula in L
-        insertDataOption: 'INSERT_ROWS',
-        values: [[
-            now,                         // A: Date
-            "'" + lead.phone,            // B: Téléphone (apostrophe forces text, prevents '+212' formula parse)
-            message,                     // C: Dernier WhatsApp
-            false,                       // D: Commandé?
-            lead.name || '',             // E: Prénom
-            lead.city || '',             // F: Ville
-            lead.address || '',          // G: Adresse expédition
-            lead.notes || '🟢 Solaryn lead', // H: Notes
-            false,                       // I: Appelé?
-            message,                     // J: Message client
-            '',                          // K: Audio appel
-            uploadLink                   // L: Upload audio (HYPERLINK pré-rempli)
-        ]],
+    const waLink = `=HYPERLINK("https://wa.me/${phoneNoPlus}";"💬 WhatsApp")`;
+    const callLink = `=HYPERLINK("tel:${lead.phone}";"📞 Call")`;
+
+    await callComposio('GOOGLESHEETS_INSERT_DIMENSION', {
+        spreadsheet_id: SHEET_ID,
+        insert_dimension: {
+            range: { sheet_id: 0, dimension: 'ROWS', start_index: 1, end_index: 2 },
+            inherit_from_before: false,
+        },
+    });
+
+    await callComposio('GOOGLESHEETS_UPDATE_VALUES_BATCH', {
+        spreadsheet_id: SHEET_ID,
+        valueInputOption: 'USER_ENTERED',
+        data: [{
+            range: `${SHEET_NAME}!A2:N2`,
+            majorDimension: 'ROWS',
+            values: [[
+                now,                              // A: Date
+                "'" + lead.phone,                 // B: Téléphone (text)
+                message,                          // C: Dernier WhatsApp
+                false,                            // D: Commandé?
+                lead.name || '',                  // E: Prénom
+                lead.city || '',                  // F: Ville
+                lead.address || '',               // G: Adresse expédition
+                lead.notes || '🟢 Solaryn lead',  // H: Notes
+                false,                            // I: Appelé?
+                message,                          // J: Message client
+                '',                               // K: Audio appel
+                uploadLink,                       // L: Upload audio
+                waLink,                           // M: WhatsApp
+                callLink,                         // N: Call
+            ]],
+        }],
     });
 }
 
@@ -142,7 +160,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ ok: true, skipped: true, existingRow: dupRow });
         }
 
-        await appendLeadRow({
+        await prependLeadRow({
             phone,
             name: body.name || '',
             message: body.message || '',
