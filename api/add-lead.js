@@ -12,6 +12,11 @@ const COMPOSIO_ACCOUNT_ID = process.env.COMPOSIO_ACCOUNT_ID || 'ca_x66oW70jpGO6'
 const COMPOSIO_USER_ID = process.env.COMPOSIO_USER_ID || 'solaryn-default';
 const SHEET_NAME = "'Feuille 1'";
 
+// Baileys bot (Fly.io) — for auto-creating 3-way WhatsApp group [user, lead, assistant]
+const BOT_URL = process.env.BOT_URL || '';
+const BOT_TOKEN = process.env.BOT_TOKEN || '';
+const ASSISTANT_WHATSAPP = process.env.ASSISTANT_WHATSAPP || '+212626168410';
+
 function setCors(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -67,10 +72,41 @@ async function findDuplicateRow(phone) {
     return null;
 }
 
+async function createWhatsAppGroup(lead) {
+    // Best-effort 3-way group creation via Baileys bot on Fly.io.
+    // Returns invite link on success, null if bot is unreachable / fails — never throws.
+    // The bot's connected WhatsApp account = the user (Mouhab), who becomes group creator.
+    if (!BOT_URL || !BOT_TOKEN) return null;
+    try {
+        const res = await fetch(`${BOT_URL}/create-group`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${BOT_TOKEN}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                groupName: `Solaryn — ${lead.name || lead.phone}`,
+                members: [lead.phone, ASSISTANT_WHATSAPP],
+            }),
+            signal: AbortSignal.timeout(20000),
+        });
+        if (!res.ok) {
+            console.error('bot_create_group_error', res.status, (await res.text()).slice(0, 200));
+            return null;
+        }
+        const data = await res.json();
+        return data?.inviteLink || null;
+    } catch (err) {
+        console.error('bot_create_group_exception', err.message);
+        return null;
+    }
+}
+
 async function prependLeadRow(lead) {
     // New leads go to row 2 (just under header), so the most recent is always visible at top.
-    // 1) Insert a blank row at row index 1 (= sheet row 2), pushing existing rows down.
-    // 2) Write A2:N2 with the lead data + HYPERLINK formulas for upload/WhatsApp/Call.
+    // 1) Try to create 3-way WhatsApp group via Baileys bot (best effort).
+    // 2) Insert a blank row at row index 1 (= sheet row 2), pushing existing rows down.
+    // 3) Write A2:O2 with lead data + HYPERLINK formulas (upload/WhatsApp/Call/Group).
     // Phone is prefixed with "'" so '+212...' is stored as text (not parsed as a formula).
     // French locale: use ';' as HYPERLINK arg separator, not ','.
     const now = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' });
@@ -79,6 +115,9 @@ async function prependLeadRow(lead) {
     const uploadLink = `=HYPERLINK("https://solaryn-five.vercel.app/api/upload-audio?phone=${encodeURIComponent(lead.phone)}";"📤 Uploader")`;
     const waLink = `=HYPERLINK("https://wa.me/${phoneNoPlus}";"💬 WhatsApp")`;
     const callLink = `=HYPERLINK("tel:${lead.phone}";"📞 Call")`;
+
+    const inviteLink = await createWhatsAppGroup(lead);
+    const groupLink = inviteLink ? `=HYPERLINK("${inviteLink}";"👥 Groupe")` : '';
 
     await callComposio('GOOGLESHEETS_INSERT_DIMENSION', {
         spreadsheet_id: SHEET_ID,
@@ -108,6 +147,7 @@ async function prependLeadRow(lead) {
             uploadLink,                       // L: Upload audio
             waLink,                           // M: WhatsApp
             callLink,                         // N: Call
+            groupLink,                        // O: Groupe WhatsApp
         ]],
     });
 }
