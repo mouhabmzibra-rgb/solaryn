@@ -88,29 +88,27 @@ async function prependLeadRow(lead) {
         },
     });
 
-    await callComposio('GOOGLESHEETS_UPDATE_VALUES_BATCH', {
+    await callComposio('GOOGLESHEETS_BATCH_UPDATE', {
         spreadsheet_id: SHEET_ID,
-        valueInputOption: 'USER_ENTERED',
-        data: [{
-            range: `${SHEET_NAME}!A2:N2`,
-            majorDimension: 'ROWS',
-            values: [[
-                now,                              // A: Date
-                "'" + lead.phone,                 // B: Téléphone (text)
-                message,                          // C: Dernier WhatsApp
-                false,                            // D: Commandé?
-                lead.name || '',                  // E: Prénom
-                lead.city || '',                  // F: Ville
-                lead.address || '',               // G: Adresse expédition
-                lead.notes || '🟢 Solaryn lead',  // H: Notes
-                false,                            // I: Appelé?
-                message,                          // J: Message client
-                '',                               // K: Audio appel
-                uploadLink,                       // L: Upload audio
-                waLink,                           // M: WhatsApp
-                callLink,                         // N: Call
-            ]],
-        }],
+        sheet_name: 'Feuille 1',
+        first_cell_location: 'A2',
+        value_input_option: 'USER_ENTERED',
+        values: [[
+            now,                              // A: Date
+            "'" + lead.phone,                 // B: Téléphone (text)
+            message,                          // C: Dernier WhatsApp
+            false,                            // D: Commandé?
+            lead.name || '',                  // E: Prénom
+            lead.city || '',                  // F: Ville
+            lead.address || '',               // G: Adresse expédition
+            lead.notes || '🟢 Solaryn lead',  // H: Notes
+            false,                            // I: Appelé?
+            message,                          // J: Message client
+            '',                               // K: Audio appel
+            uploadLink,                       // L: Upload audio
+            waLink,                           // M: WhatsApp
+            callLink,                         // N: Call
+        ]],
     });
 }
 
