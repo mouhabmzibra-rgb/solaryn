@@ -36,9 +36,9 @@ export async function forwardToSheets(payload) {
         clearTimeout(timeout);
         const text = await res.text().catch(() => '');
         if (!res.ok) {
-            return { ok: false, stage: 'webhook_status', status: res.status, body: text.slice(0, 200) };
+            return { ok: false, stage: 'webhook_status', status: res.status, body: text.slice(0, 500) };
         }
-        return { ok: true, body: text.slice(0, 200) };
+        return { ok: true, body: text };
     } catch (err) {
         return { ok: false, stage: 'fetch_error', error: err.message };
     }
