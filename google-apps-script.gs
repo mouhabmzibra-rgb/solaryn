@@ -96,19 +96,39 @@ function affiliateLogin(data) {
     return jsonResp({ ok: false });
 }
 
+function lookupAffiliateName(phone) {
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(AFFILIATES_SHEET);
+    if (!sheet) return '';
+    var rows = sheet.getDataRange().getValues();
+    var p = normalizePhone(phone);
+    for (var i = 1; i < rows.length; i++) {
+        if (normalizePhone(rows[i][0]) === p) return String(rows[i][1] || '');
+    }
+    return '';
+}
+
 function affiliateSale(data) {
     var sheet = getOrCreateSheet(AFFILIATE_SALES_SHEET, [
         'Sale_ID','Date','Affiliate_Phone','Customer_Nom','Customer_Tel','Customer_Ville',
-        'Customer_Adresse','Quantite','Total_MAD','Commission_MAD','Status','Notes','WhatsApp','Call'
+        'Customer_Adresse','Quantite','Total_MAD','Commission_MAD','Status','Notes',
+        'Customer_WhatsApp','Customer_Call','Affiliate_Nom','Affiliate_WhatsApp'
     ]);
+    // Backfill new headers if sheet existed with old 14-col layout
+    if (sheet.getRange(1, 15).getValue() === '') {
+        sheet.getRange(1, 13, 1, 4).setValues([['Customer_WhatsApp','Customer_Call','Affiliate_Nom','Affiliate_WhatsApp']])
+            .setFontWeight('bold').setBackground('#1B2D4D').setFontColor('#FFFFFF');
+    }
     var saleId = 'SALE-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000);
     var dateStr = Utilities.formatDate(new Date(data.date || new Date()), 'GMT+1', 'yyyy-MM-dd HH:mm:ss');
     var phone = data.customer_tel || '';
+    var affPhone = data.affiliate_id || '';
+    var affNom = lookupAffiliateName(affPhone);
     sheet.insertRowBefore(2);
-    sheet.getRange(2, 1, 1, 14).setValues([[
-        saleId, dateStr, data.affiliate_id, data.customer_nom, phone, data.customer_ville,
+    sheet.getRange(2, 1, 1, 16).setValues([[
+        saleId, dateStr, affPhone, data.customer_nom, phone, data.customer_ville,
         data.customer_adresse, data.quantite, data.total, data.commission, 'pending', data.notes,
-        whatsappFormula(phone), callFormula(phone)
+        whatsappFormula(phone), callFormula(phone),
+        affNom, whatsappFormula(affPhone)
     ]]);
     return jsonResp({ ok: true, sale_id: saleId });
 }
@@ -273,6 +293,11 @@ function doPost(e) {
         if (kind === 'admin_data')         return adminData(data);
         if (kind === 'admin_update_sale')  return adminUpdateSale(data);
         if (kind === 'admin_toggle_affiliate') return adminToggleAffiliate(data);
+
+        // Guard: don't silently fall back to lead insertion for unknown affiliate_/admin_ kinds
+        if (String(kind).indexOf('affiliate_') === 0 || String(kind).indexOf('admin_') === 0) {
+            return jsonResp({ ok: false, error: 'unknown_kind', kind: kind });
+        }
 
         var ss = SpreadsheetApp.openById(SHEET_ID);
         var sheet = ss.getSheetByName(TARGET_SHEET);

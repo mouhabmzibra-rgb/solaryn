@@ -779,6 +779,7 @@ function showDashboard(){
   document.getElementById('dashboardSection').classList.remove('hidden');
   updateWelcome();
   loadDashboard();
+  startAutoRefresh();
 }
 
 function animateValue(el, target){
@@ -887,10 +888,26 @@ function confetti(){
   }
 }
 
+// ════════════════════ AUTO-REFRESH ════════════════════
+let refreshTimer = null;
+function startAutoRefresh(){
+  if (refreshTimer) return;
+  refreshTimer = setInterval(() => {
+    if (!document.getElementById('dashboardSection').classList.contains('hidden') && document.visibilityState === 'visible') {
+      loadDashboard();
+    }
+  }, 60000);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && getToken() && !document.getElementById('dashboardSection').classList.contains('hidden')) {
+    loadDashboard();
+  }
+});
+
 // ════════════════════ INIT ════════════════════
 applyLang();
 updateQtySelect();
-if (getToken()) showDashboard();
+if (getToken()) { showDashboard(); startAutoRefresh(); }
 else showAuth();
 </script>
 
