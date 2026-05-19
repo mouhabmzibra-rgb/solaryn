@@ -5,6 +5,8 @@ const AFFILIATES_TAB = 'Affiliates';
 const SALES_TAB = 'Affiliate_Sales';
 
 const SALES_COL_TRACKING = 'O';
+const AFFILIATES_COL_LAST_ACTIVE = 'I';
+const ONLINE_WINDOW_MS = 15 * 60 * 1000;
 
 let _sheetsClient = null;
 
@@ -84,7 +86,7 @@ export async function readAdminData() {
     const sheets = getSheetsClient();
     const res = await sheets.spreadsheets.values.batchGet({
         spreadsheetId: SHEET_ID,
-        ranges: [`${AFFILIATES_TAB}!A2:F`, `${SALES_TAB}!A2:O`],
+        ranges: [`${AFFILIATES_TAB}!A2:I`, `${SALES_TAB}!A2:O`],
         valueRenderOption: 'UNFORMATTED_VALUE',
         dateTimeRenderOption: 'FORMATTED_STRING',
     });
@@ -93,17 +95,25 @@ export async function readAdminData() {
     const affRows = (affRange && affRange.values) || [];
     const salesRows = (salesRange && salesRange.values) || [];
 
+    const now = Date.now();
     const affiliates = [];
     const affMap = {};
+    let onlineNow = 0;
     for (const r of affRows) {
         const phone = String(r[0] || '');
         if (!phone) continue;
+        const lastActiveIso = toIso(r[8]);
+        const lastActiveTs = lastActiveIso ? Date.parse(lastActiveIso) : 0;
+        const isOnline = lastActiveTs && (now - lastActiveTs) < ONLINE_WINDOW_MS;
+        if (isOnline) onlineNow++;
         const aff = {
             phone,
             nom: r[1] || '',
             ville: r[2] || '',
             registered_at: toIso(r[4]),
             status: String(r[5] || 'active'),
+            last_active: lastActiveIso,
+            online: !!isOnline,
             sales_count: 0,
             total_mad: 0,
             commission_mad: 0,
@@ -115,7 +125,7 @@ export async function readAdminData() {
     }
 
     const sales = [];
-    const stats = { affiliates: affiliates.length, ...emptyStats() };
+    const stats = { affiliates: affiliates.length, online_now: onlineNow, ...emptyStats() };
 
     for (const r of salesRows) {
         if (!r[0]) continue;
@@ -202,6 +212,21 @@ export async function updateSaleStatus(saleId, status) {
         range: `${SALES_TAB}!K${rowNum}`,
         valueInputOption: 'RAW',
         requestBody: { values: [[status]] },
+    });
+    return { ok: true };
+}
+
+export async function updateLastActive(phone) {
+    const target = normalizePhone(phone);
+    if (!target) return { ok: false, error: 'no_phone' };
+    const rowNum = await findRowIndex(AFFILIATES_TAB, 'A2:A', (r) => normalizePhone(r[0]) === target);
+    if (rowNum === -1) return { ok: false, error: 'not_found' };
+    const sheets = getSheetsClient();
+    await sheets.spreadsheets.values.update({
+        spreadsheetId: SHEET_ID,
+        range: `${AFFILIATES_TAB}!${AFFILIATES_COL_LAST_ACTIVE}${rowNum}`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [[new Date().toISOString()]] },
     });
     return { ok: true };
 }

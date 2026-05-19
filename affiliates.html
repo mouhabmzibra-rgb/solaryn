@@ -7,6 +7,13 @@
 <title>Solaryn ✨ — Espace Revendeuses</title>
 <meta name="description" content="Solaryn — vends, gagne, brille">
 <meta name="robots" content="noindex,nofollow">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TQSQQBT50G"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-TQSQQBT50G', { anonymize_ip: true });
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -865,6 +872,12 @@ async function loadDashboard(){
   lastStats = r.stats || { count: 0 };
   renderSales(lastSales);
   renderAchievements(lastStats.count || 0);
+  if (typeof gtag === 'function') {
+    gtag('event', 'affiliate_dashboard_view', {
+      lang: currentLang,
+      sales_count: lastStats.count || 0,
+    });
+  }
 }
 
 function statusLabel(s){

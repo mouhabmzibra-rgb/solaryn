@@ -1,5 +1,5 @@
 import { verifyToken, bearerToken } from './_auth.js';
-import { getAffiliateDashboard } from './_sheets.js';
+import { getAffiliateDashboard, updateLastActive } from './_sheets.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET' && req.method !== 'POST') {
@@ -17,6 +17,7 @@ export default async function handler(req, res) {
         if (!r.ok) {
             return res.status(404).json({ ok: false, message: 'الحساب ماشي موجود. / Compte introuvable.' });
         }
+        updateLastActive(session.affiliateId).catch(() => {});
         return res.status(200).json({
             ok: true,
             affiliate: r.affiliate,

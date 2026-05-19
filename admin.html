@@ -178,6 +178,8 @@ tbody tr:last-child td{border-bottom:none}
 .btn-track{background:var(--bg);color:var(--navy);border:1px dashed var(--border)}
 .btn-track:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
 .btn-track.has{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-style:solid;border-color:var(--gold)}
+.online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 0 3px rgba(40,160,90,.18);vertical-align:middle;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(40,160,90,.18)}50%{box-shadow:0 0 0 6px rgba(40,160,90,.05)}}
 
 /* ─── TRACKING MODAL ─── */
 .modal-backdrop{
@@ -202,6 +204,15 @@ tbody tr:last-child td{border-bottom:none}
 }
 .modal-close:hover{background:var(--bg);color:var(--navy)}
 .modal-body{padding:22px}
+.modal-section-title{font-size:12px;font-weight:800;color:#7a7e8a;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px}
+.sale-details{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:13px;line-height:1.6}
+.sale-details .row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px dashed var(--border)}
+.sale-details .row:last-child{border-bottom:none}
+.sale-details .k{color:#7a7e8a;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
+.sale-details .vv{color:var(--navy);font-weight:700;text-align:right;word-break:break-word;max-width:65%}
+.sale-details .vv.notes{font-style:italic;color:#555;font-weight:500}
+.sale-details .vv a{color:var(--blue);text-decoration:none}
+.sale-details .vv a:hover{text-decoration:underline}
 .tracking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
 .tracking-thumb{
   position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
@@ -313,6 +324,11 @@ tbody tr:last-child td{border-bottom:none}
         <div class="v" id="statAffiliates">0</div>
         <div class="l">Affiliées</div>
       </div>
+      <div class="stat-card green">
+        <div class="icon">🟢</div>
+        <div class="v" id="statOnline">0</div>
+        <div class="l">Connectées (15 min)</div>
+      </div>
       <div class="stat-card orange">
         <div class="icon">📦</div>
         <div class="v" id="statSales">0</div>
@@ -398,14 +414,16 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ════════ TRACKING MODAL ════════ -->
+<!-- ════════ TRACKING + DETAILS MODAL ════════ -->
 <div class="modal-backdrop" id="trackingModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>📦 Suivi Sendit</h3>
+      <h3>📋 Détails de la vente</h3>
       <button class="modal-close" onclick="closeTracking()">×</button>
     </div>
     <div class="modal-body">
+      <div class="sale-details" id="saleDetails"></div>
+      <div class="modal-section-title">📦 Suivi Sendit</div>
       <div class="tracking-grid" id="trackingGrid"></div>
       <label class="upload-zone" id="uploadZone">
         <span class="icon">📷</span>
@@ -521,6 +539,7 @@ async function loadData() {
 
   const s = r.stats || {};
   animVal('statAffiliates', s.affiliates || 0);
+  animVal('statOnline', s.online_now || 0);
   animVal('statSales', s.count || 0);
   animVal('statRevenue', s.total_mad || 0);
   animVal('statPending', s.commission_pending || 0);
@@ -611,9 +630,33 @@ let currentTrackingSaleId = null;
 function openTracking(saleId) {
   currentTrackingSaleId = saleId;
   const sale = allSales.find(s => s.sale_id === saleId);
+  renderSaleDetails(sale);
   const urls = (sale && sale.tracking_urls) || [];
   renderTrackingGrid(urls);
   document.getElementById('trackingModal').classList.add('show');
+}
+
+function renderSaleDetails(s) {
+  const el = document.getElementById('saleDetails');
+  if (!s) { el.innerHTML = ''; return; }
+  const tel = String(s.customer_tel || '').replace(/[^0-9]/g, '');
+  const affTel = String(s.affiliate_phone || '').replace(/[^0-9]/g, '');
+  const date = String(s.date || '').slice(0, 16).replace('T', ' ');
+  const rows = [
+    ['Vente', escapeHtml(s.sale_id || '')],
+    ['Date', escapeHtml(date)],
+    ['Affiliée', `${escapeHtml(s.affiliate_nom || '')} · <a href="tel:+${affTel}">${escapeHtml(s.affiliate_phone || '')}</a> · <a href="https://wa.me/${affTel}" target="_blank">💬</a>`],
+    ['Client', escapeHtml(s.customer_nom || '')],
+    ['Téléphone', `<a href="tel:+${tel}">${escapeHtml(s.customer_tel || '')}</a> · <a href="https://wa.me/${tel}" target="_blank">💬 WhatsApp</a>`],
+    ['Ville', escapeHtml(s.customer_ville || '')],
+    ['Adresse', escapeHtml(s.customer_adresse || '—')],
+    ['Quantité', `×${s.quantite || 1}`],
+    ['Total', `${(s.total || 0).toLocaleString()} MAD`],
+    ['Commission', `${(s.commission || 0).toLocaleString()} MAD`],
+    ['Status', escapeHtml(STATUS_LABEL[s.status] || s.status || '')],
+  ];
+  const notes = s.notes ? `<div class="row"><span class="k">Notes affiliée</span><span class="vv notes">${escapeHtml(s.notes)}</span></div>` : '';
+  el.innerHTML = rows.map(([k, v]) => `<div class="row"><span class="k">${k}</span><span class="vv">${v}</span></div>`).join('') + notes;
 }
 
 function closeTracking() {
@@ -726,9 +769,10 @@ function renderAffiliates(affs) {
   }
   body.innerHTML = affs.map(a => {
     const reg = String(a.registered_at || '').slice(0, 10);
+    const dot = a.online ? '<span class="online-dot" title="Connectée"></span>' : '';
     return `
       <tr>
-        <td data-label="Affiliée"><div class="aff-name">${escapeHtml(a.nom || '')}</div></td>
+        <td data-label="Affiliée"><div class="aff-name">${dot}${escapeHtml(a.nom || '')}</div></td>
         <td data-label="Ville">${escapeHtml(a.ville || '')}</td>
         <td data-label="Tel">
           <a href="tel:+${escapeHtml(a.phone || '')}" class="tel-link">${escapeHtml(a.phone || '')}</a>
