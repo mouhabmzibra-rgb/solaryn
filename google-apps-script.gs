@@ -13,6 +13,8 @@
 
 const SHEET_ID = '1uyItM4b7XLPbo2xgTbOrS99MWEz6Ls16MKtVBb1F6hA';
 const TARGET_SHEET = 'Feuille 1';
+const AFFILIATES_SHEET = 'Affiliates';
+const AFFILIATE_SALES_SHEET = 'Affiliate_Sales';
 
 // Target column layout (matches existing sheet):
 // A Date | B Téléphone | C Dernier WhatsApp | D Commandé? | E Prénom
@@ -45,9 +47,132 @@ function callFormula(rawPhone) {
     return '=HYPERLINK("tel:+' + intl + '","📞 Call")';
 }
 
+function jsonResp(obj) {
+    return ContentService
+        .createTextOutput(JSON.stringify(obj))
+        .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSheet(name, headers) {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName(name);
+    if (!sheet) {
+        sheet = ss.insertSheet(name);
+        sheet.appendRow(headers);
+        sheet.getRange(1, 1, 1, headers.length)
+            .setFontWeight('bold').setBackground('#1B2D4D').setFontColor('#FFFFFF');
+        sheet.setFrozenRows(1);
+    }
+    return sheet;
+}
+
+function affiliateRegister(data) {
+    var sheet = getOrCreateSheet(AFFILIATES_SHEET, ['Phone','Nom','Ville','PIN_Hash','Registered_At','Status','WhatsApp','Call']);
+    var phone = normalizePhone(data.tel);
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+        if (normalizePhone(rows[i][0]) === phone) {
+            return jsonResp({ ok: false, error: 'phone_exists' });
+        }
+    }
+    sheet.appendRow([
+        phone, data.nom, data.ville, data.pin_hash, data.date, 'active',
+        whatsappFormula(phone), callFormula(phone)
+    ]);
+    return jsonResp({ ok: true, affiliate_id: phone });
+}
+
+function affiliateLogin(data) {
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(AFFILIATES_SHEET);
+    if (!sheet) return jsonResp({ ok: false });
+    var phone = normalizePhone(data.tel);
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+        if (normalizePhone(rows[i][0]) === phone && String(rows[i][3]) === String(data.pin_hash)) {
+            if (String(rows[i][5]) !== 'active') return jsonResp({ ok: false });
+            return jsonResp({ ok: true, nom: rows[i][1], ville: rows[i][2], affiliate_id: phone });
+        }
+    }
+    return jsonResp({ ok: false });
+}
+
+function affiliateSale(data) {
+    var sheet = getOrCreateSheet(AFFILIATE_SALES_SHEET, [
+        'Sale_ID','Date','Affiliate_Phone','Customer_Nom','Customer_Tel','Customer_Ville',
+        'Customer_Adresse','Quantite','Total_MAD','Commission_MAD','Status','Notes','WhatsApp','Call'
+    ]);
+    var saleId = 'SALE-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000);
+    var dateStr = Utilities.formatDate(new Date(data.date || new Date()), 'GMT+1', 'yyyy-MM-dd HH:mm:ss');
+    var phone = data.customer_tel || '';
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 14).setValues([[
+        saleId, dateStr, data.affiliate_id, data.customer_nom, phone, data.customer_ville,
+        data.customer_adresse, data.quantite, data.total, data.commission, 'pending', data.notes,
+        whatsappFormula(phone), callFormula(phone)
+    ]]);
+    return jsonResp({ ok: true, sale_id: saleId });
+}
+
+function affiliateDashboard(data) {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var affSheet = ss.getSheetByName(AFFILIATES_SHEET);
+    var salesSheet = ss.getSheetByName(AFFILIATE_SALES_SHEET);
+
+    var affiliate = { id: data.affiliate_id, nom: '', ville: '' };
+    if (affSheet) {
+        var aRows = affSheet.getDataRange().getValues();
+        for (var j = 1; j < aRows.length; j++) {
+            if (String(aRows[j][0]) === String(data.affiliate_id)) {
+                affiliate.nom = aRows[j][1];
+                affiliate.ville = aRows[j][2];
+                break;
+            }
+        }
+    }
+
+    var sales = [];
+    var stats = { count: 0, total_mad: 0, commission_mad: 0, commission_pending: 0, commission_paid: 0 };
+
+    if (salesSheet) {
+        var rows = salesSheet.getDataRange().getValues();
+        for (var i = 1; i < rows.length; i++) {
+            if (String(rows[i][2]) === String(data.affiliate_id)) {
+                var status = String(rows[i][10] || 'pending');
+                var commission = Number(rows[i][9]) || 0;
+                var total = Number(rows[i][8]) || 0;
+                sales.push({
+                    sale_id: rows[i][0],
+                    date: String(rows[i][1]),
+                    customer_nom: rows[i][3],
+                    customer_tel: String(rows[i][4]),
+                    customer_ville: rows[i][5],
+                    quantite: rows[i][7],
+                    total: total,
+                    commission: commission,
+                    status: status,
+                });
+                stats.count++;
+                stats.total_mad += total;
+                stats.commission_mad += commission;
+                if (status === 'paid') stats.commission_paid += commission;
+                else if (status !== 'cancelled') stats.commission_pending += commission;
+            }
+        }
+    }
+
+    return jsonResp({ ok: true, affiliate: affiliate, sales: sales, stats: stats });
+}
+
 function doPost(e) {
     try {
         var data = JSON.parse(e.postData.contents);
+        var kind = data.kind || 'lead';
+
+        if (kind === 'affiliate_register') return affiliateRegister(data);
+        if (kind === 'affiliate_login')    return affiliateLogin(data);
+        if (kind === 'affiliate_sale')     return affiliateSale(data);
+        if (kind === 'affiliate_dashboard') return affiliateDashboard(data);
+
         var ss = SpreadsheetApp.openById(SHEET_ID);
         var sheet = ss.getSheetByName(TARGET_SHEET);
         if (!sheet) sheet = ss.insertSheet(TARGET_SHEET);
