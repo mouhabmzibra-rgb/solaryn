@@ -1,14 +1,71 @@
+import { put } from '@vercel/blob';
 import { clean, readBody } from './_lib.js';
 import { signToken, verifyToken, bearerToken } from './_auth.js';
-import { readAdminData, updateSaleStatus, toggleAffiliateStatus, removeTrackingUrl } from './_sheets.js';
+import { readAdminData, updateSaleStatus, toggleAffiliateStatus, appendTrackingUrl, removeTrackingUrl } from './_sheets.js';
+
+export const config = {
+    api: { bodyParser: { sizeLimit: '6mb' } },
+};
 
 const ADMIN_ID = 'admin';
 const VALID_STATUSES = ['pending', 'confirmed', 'delivered', 'paid', 'cancelled'];
 const VALID_AFF_STATUSES = ['active', 'disabled'];
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
 
 function isAdminSession(req) {
     const s = verifyToken(bearerToken(req));
     return s && s.affiliateId === ADMIN_ID;
+}
+
+function extFor(mime) {
+    if (mime === 'image/jpeg') return 'jpg';
+    if (mime === 'image/png') return 'png';
+    if (mime === 'image/webp') return 'webp';
+    if (mime === 'image/gif') return 'gif';
+    return 'bin';
+}
+
+async function handleUploadTracking(req, res, body) {
+    const saleId = clean(body.sale_id, 100);
+    const contentType = clean(body.content_type, 50);
+    const dataBase64 = typeof body.data_base64 === 'string' ? body.data_base64 : '';
+
+    if (!saleId) return res.status(400).json({ ok: false, message: 'sale_id requis' });
+    if (!ALLOWED_MIME.has(contentType)) {
+        return res.status(400).json({ ok: false, message: 'Format non supporté (JPG/PNG/WEBP/GIF)' });
+    }
+    if (!dataBase64) return res.status(400).json({ ok: false, message: 'fichier requis' });
+
+    let buffer;
+    try {
+        buffer = Buffer.from(dataBase64, 'base64');
+    } catch {
+        return res.status(400).json({ ok: false, message: 'base64 invalide' });
+    }
+    if (!buffer.length) return res.status(400).json({ ok: false, message: 'fichier vide' });
+    if (buffer.length > MAX_FILE_BYTES) {
+        return res.status(413).json({ ok: false, message: 'Fichier trop lourd (max 4 MB)' });
+    }
+
+    const ext = extFor(contentType);
+    const safeSaleId = saleId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const blobPath = `tracking/${safeSaleId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    let blob;
+    try {
+        blob = await put(blobPath, buffer, {
+            access: 'public',
+            contentType,
+            addRandomSuffix: false,
+        });
+    } catch (err) {
+        return res.status(500).json({ ok: false, message: 'Erreur stockage: ' + (err.message || 'inconnue') });
+    }
+
+    const appended = await appendTrackingUrl(saleId, blob.url);
+    if (!appended.ok) return res.status(404).json({ ok: false, message: 'Vente introuvable' });
+    return res.status(200).json({ ok: true, url: blob.url, urls: appended.urls });
 }
 
 export default async function handler(req, res) {
@@ -61,6 +118,10 @@ export default async function handler(req, res) {
             const r = await toggleAffiliateStatus(phone, status);
             if (!r.ok) return res.status(404).json({ ok: false, message: 'Affiliée introuvable' });
             return res.status(200).json({ ok: true });
+        }
+
+        if (action === 'upload_tracking') {
+            return await handleUploadTracking(req, res, body);
         }
 
         if (action === 'delete_tracking') {

@@ -635,32 +635,47 @@ function renderTrackingGrid(urls) {
   `).join('');
 }
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error('Lecture fichier impossible'));
+    reader.readAsDataURL(file);
+  });
+}
+
 document.getElementById('trackingFile').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file || !currentTrackingSaleId) return;
+  if (file.size > 4 * 1024 * 1024) {
+    toast('Fichier trop lourd (max 4 MB)', 'error');
+    e.target.value = '';
+    return;
+  }
   const zone = document.getElementById('uploadZone');
   zone.classList.add('uploading');
-  const fd = new FormData();
-  fd.append('sale_id', currentTrackingSaleId);
-  fd.append('file', file);
   try {
-    const res = await fetch('/api/admin-upload-tracking', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + getToken() },
-      body: fd,
-    });
-    const data = await res.json().catch(() => ({ ok: false, message: 'Parse error' }));
-    if (!data.ok) {
-      toast(data.message || 'Erreur upload', 'error');
+    const data_base64 = await fileToBase64(file);
+    const r = await api('upload_tracking', {
+      sale_id: currentTrackingSaleId,
+      content_type: file.type,
+      data_base64,
+    }, true);
+    if (!r.ok) {
+      toast(r.message || 'Erreur upload', 'error');
     } else {
       toast('Screenshot ajouté ✨', 'success');
       const sale = allSales.find(s => s.sale_id === currentTrackingSaleId);
-      if (sale) sale.tracking_urls = data.urls || [];
-      renderTrackingGrid(data.urls || []);
+      if (sale) sale.tracking_urls = r.urls || [];
+      renderTrackingGrid(r.urls || []);
       renderSales(allSales);
     }
   } catch (err) {
-    toast('Erreur réseau: ' + err.message, 'error');
+    toast('Erreur: ' + err.message, 'error');
   } finally {
     zone.classList.remove('uploading');
     e.target.value = '';
