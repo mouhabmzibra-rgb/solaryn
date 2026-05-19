@@ -3,224 +3,487 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#1B2D4D">
-<title>Solaryn — Espace Revendeuses / مساحة الشريكات</title>
-<meta name="description" content="Plateforme affiliés Solaryn — saisis tes ventes et suis tes commissions">
+<meta name="theme-color" content="#FF8C42">
+<title>Solaryn ✨ — Espace Revendeuses</title>
+<meta name="description" content="Solaryn — vends, gagne, brille">
 <meta name="robots" content="noindex,nofollow">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
+:root{
+  --navy:#1B2D4D;
+  --navy-deep:#0F1B30;
+  --gold:#C89860;
+  --gold-light:#F7C969;
+  --orange:#FF8C42;
+  --coral:#FF6B6B;
+  --cream:#FFFAF0;
+  --cream-warm:#FFF3E0;
+  --shadow-soft:0 4px 24px rgba(27,45,77,0.08);
+  --shadow-med:0 8px 32px rgba(27,45,77,0.12);
+  --shadow-hard:0 16px 48px rgba(27,45,77,0.18);
+  --gradient-sun:linear-gradient(135deg,#FF6B6B 0%,#FF8C42 35%,#F7C969 70%,#C89860 100%);
+  --gradient-night:linear-gradient(135deg,#1B2D4D 0%,#2d4670 50%,#1B2D4D 100%);
+  --gradient-gold:linear-gradient(135deg,#F7C969 0%,#C89860 100%);
+  --radius-sm:12px;
+  --radius-md:18px;
+  --radius-lg:24px;
+  --radius-xl:32px;
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{
-  font-family:'Cairo','Tahoma','Segoe UI',Arial,sans-serif;
-  background:#FFFAF0;color:#1B2D4D;line-height:1.5;font-size:16px;
+  font-family:'Cairo','Tahoma',Arial,sans-serif;
+  background:var(--cream);
+  color:var(--navy);
+  line-height:1.5;font-size:16px;
   min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
 }
-html[dir="ltr"] body{font-family:'Inter','Segoe UI',Arial,sans-serif}
+html[dir="ltr"] body{font-family:'Inter',Arial,sans-serif}
 
+/* Animated background blobs */
+body::before, body::after{
+  content:'';position:fixed;border-radius:50%;filter:blur(80px);
+  opacity:0.35;pointer-events:none;z-index:0;animation:float 20s ease-in-out infinite;
+}
+body::before{width:400px;height:400px;background:var(--gradient-sun);top:-100px;right:-100px;}
+body::after{width:300px;height:300px;background:var(--gradient-gold);bottom:-80px;left:-80px;animation-delay:-10s;}
+
+@keyframes float{
+  0%,100%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(30px,-30px) scale(1.1)}
+}
+
+/* ─── TOPBAR ─── */
 .topbar{
-  background:#1B2D4D;color:#fff;padding:14px 18px;
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,250,240,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(200,152,96,0.15);
+  padding:14px 18px;
   display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 2px 12px rgba(27,45,77,0.15);
 }
-.brand{font-size:18px;font-weight:800;letter-spacing:1px}
-.brand .gold{color:#C89860}
+.logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:900;color:var(--navy);letter-spacing:1px}
+.logo .sun{
+  display:inline-block;width:28px;height:28px;border-radius:50%;
+  background:var(--gradient-sun);
+  box-shadow:0 0 20px rgba(255,140,66,0.5);
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(255,140,66,0.5)}
+  50%{transform:scale(1.1);box-shadow:0 0 30px rgba(255,140,66,0.7)}
+}
+.logo .gold-txt{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+
 .lang-toggle{
-  background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);
-  color:#fff;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;
-  cursor:pointer;
+  background:rgba(27,45,77,0.05);border:1px solid rgba(27,45,77,0.1);
+  color:var(--navy);padding:8px 14px;border-radius:30px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;font-family:inherit;
 }
-.lang-toggle:hover{background:rgba(255,255,255,0.22)}
+.lang-toggle:hover{background:var(--navy);color:#fff;transform:translateY(-1px)}
 
-.container{max-width:560px;margin:0 auto;padding:18px 16px 100px}
+/* ─── CONTAINER ─── */
+.container{max-width:600px;margin:0 auto;padding:18px 16px 100px;position:relative;z-index:1}
 
-.card{
-  background:#fff;border-radius:16px;padding:22px 18px;margin-bottom:16px;
-  box-shadow:0 6px 24px rgba(27,45,77,0.08);border:1px solid #f0e6d2;
+/* ─── HERO CARD (auth) ─── */
+.hero-card{
+  background:#fff;border-radius:var(--radius-xl);padding:28px 22px;
+  box-shadow:var(--shadow-hard);position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.5);
 }
-.card h2{font-size:22px;color:#1B2D4D;margin-bottom:8px;font-weight:800}
-.card .sub{font-size:14px;color:#6b6557;margin-bottom:16px}
+.hero-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:var(--gradient-sun);
+}
+.hero-emoji{
+  display:inline-block;font-size:40px;
+  animation:wiggle 4s ease-in-out infinite;transform-origin:bottom center;
+}
+@keyframes wiggle{
+  0%,100%{transform:rotate(0deg)}
+  25%{transform:rotate(-8deg)}
+  75%{transform:rotate(8deg)}
+}
+.hero-title{
+  font-size:26px;font-weight:900;line-height:1.2;margin:8px 0 6px;color:var(--navy);
+}
+.hero-title .grad{
+  background:var(--gradient-sun);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-sub{font-size:14px;color:#7a7160;margin-bottom:20px}
 
-label{display:block;font-size:13px;font-weight:600;color:#1B2D4D;margin:12px 0 6px}
+/* ─── TABS ─── */
+.tabs{
+  display:flex;background:var(--cream-warm);border-radius:50px;padding:5px;margin-bottom:22px;
+  position:relative;
+}
+.tab{
+  flex:1;padding:11px;text-align:center;cursor:pointer;border-radius:50px;
+  font-weight:700;font-size:14px;color:#7a7160;transition:all .25s;
+  position:relative;z-index:1;
+}
+.tab.active{color:#fff}
+.tabs::after{
+  content:'';position:absolute;top:5px;height:calc(100% - 10px);width:calc(50% - 5px);
+  background:var(--gradient-sun);border-radius:50px;
+  transition:transform .3s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 12px rgba(255,140,66,0.4);
+}
+html[dir="rtl"] .tabs::after{right:5px;}
+html[dir="ltr"] .tabs::after{left:5px;}
+html[dir="rtl"] .tabs.t-register::after{transform:translateX(-100%)}
+html[dir="ltr"] .tabs.t-register::after{transform:translateX(100%)}
+
+/* ─── FORMS ─── */
+label{
+  display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--navy);
+  margin:14px 0 6px;
+}
 input[type=text],input[type=tel],input[type=password],input[type=number],select,textarea{
-  width:100%;padding:12px 14px;border:1.5px solid #e6dbc4;border-radius:10px;
-  font-size:15px;font-family:inherit;background:#FFFAF0;color:#1B2D4D;
-  transition:border-color .15s,box-shadow .15s;
+  width:100%;padding:13px 16px;border:2px solid #f0e6d2;border-radius:14px;
+  font-size:15px;font-family:inherit;background:var(--cream);color:var(--navy);
+  transition:all .2s;font-weight:500;
 }
 input:focus,select:focus,textarea:focus{
-  outline:none;border-color:#C89860;box-shadow:0 0 0 3px rgba(200,152,96,0.15);
+  outline:none;border-color:var(--orange);background:#fff;
+  box-shadow:0 0 0 4px rgba(255,140,66,0.12);
 }
 textarea{min-height:70px;resize:vertical}
+.help-text{font-size:11px;color:#a89c80;margin-top:4px;display:flex;align-items:center;gap:4px}
 
+/* ─── BUTTONS ─── */
 .btn{
-  display:block;width:100%;padding:14px;border:none;border-radius:12px;
-  font-size:16px;font-weight:700;cursor:pointer;margin-top:18px;
-  transition:transform .1s,box-shadow .15s;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:15px;border:none;border-radius:16px;
+  font-size:16px;font-weight:800;cursor:pointer;margin-top:20px;
+  transition:all .2s;font-family:inherit;position:relative;overflow:hidden;
 }
-.btn-primary{background:#C89860;color:#fff;box-shadow:0 4px 12px rgba(200,152,96,0.3)}
-.btn-primary:hover{background:#b8895a;box-shadow:0 6px 16px rgba(200,152,96,0.4)}
-.btn-primary:active{transform:scale(0.98)}
-.btn-secondary{background:#fff;color:#1B2D4D;border:1.5px solid #1B2D4D;margin-top:10px}
-.btn-secondary:hover{background:#f5f0e3}
-.btn-ghost{background:transparent;color:#6b6557;text-decoration:underline;font-weight:500;margin-top:8px;padding:8px}
-
-.tabs{display:flex;background:#f5f0e3;border-radius:10px;padding:4px;margin-bottom:18px}
-.tab{
-  flex:1;padding:10px;text-align:center;cursor:pointer;border-radius:8px;
-  font-weight:600;font-size:14px;color:#6b6557;transition:all .15s;
+.btn-primary{
+  background:var(--gradient-sun);color:#fff;
+  box-shadow:0 8px 20px rgba(255,140,66,0.35);
 }
-.tab.active{background:#fff;color:#1B2D4D;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
-
-.msg{
-  padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14px;font-weight:500;
-  display:none;
+.btn-primary::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,0.3) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .6s;
 }
-.msg.show{display:block}
-.msg.success{background:#e7f7ec;color:#1c6b3a;border:1px solid #b6e6c4}
-.msg.error{background:#fdecec;color:#8b1a1a;border:1px solid #f4c0c0}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(255,140,66,0.45)}
+.btn-primary:hover::before{transform:translateX(100%)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.btn-secondary{background:#fff;color:var(--navy);border:2px solid var(--navy);margin-top:10px}
+.btn-secondary:hover{background:var(--navy);color:#fff}
+.btn-ghost{background:transparent;color:#a89c80;text-decoration:underline;font-weight:600;margin-top:8px;padding:10px}
 
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+/* ─── MESSAGES ─── */
+.msg{padding:14px 16px;border-radius:14px;margin:12px 0;font-size:14px;font-weight:600;display:none;align-items:center;gap:8px}
+.msg.show{display:flex;animation:slideDown .3s ease}
+@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.msg.success{background:linear-gradient(135deg,#d4f1de,#e7f7ec);color:#1c6b3a;border:1px solid #b6e6c4}
+.msg.error{background:linear-gradient(135deg,#fde0e0,#fdecec);color:#8b1a1a;border:1px solid #f4c0c0}
+
+/* ─── DASHBOARD ─── */
+.welcome-card{
+  background:var(--gradient-night);color:#fff;border-radius:var(--radius-xl);
+  padding:26px 22px;position:relative;overflow:hidden;margin-bottom:16px;
+  box-shadow:var(--shadow-hard);
+}
+.welcome-card::before{
+  content:'';position:absolute;top:-50px;left:50%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(247,201,105,0.4) 0%,transparent 60%);
+  pointer-events:none;
+}
+.welcome-greeting{font-size:13px;opacity:0.7;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.welcome-name{font-size:28px;font-weight:900;margin:4px 0 16px;line-height:1.2}
+.welcome-name .wave{display:inline-block;animation:wave 2s ease infinite;transform-origin:70% 70%}
+@keyframes wave{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(14deg)}20%{transform:rotate(-8deg)}30%{transform:rotate(14deg)}40%{transform:rotate(-4deg)}50%{transform:rotate(10deg)}}
+.welcome-motiv{font-size:14px;opacity:0.85;font-weight:500;line-height:1.5}
+
+/* ─── STATS GRID ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
 .stat{
-  background:linear-gradient(135deg,#1B2D4D,#2d4670);color:#fff;
-  padding:14px;border-radius:12px;text-align:center;
+  background:#fff;border-radius:var(--radius-md);padding:16px 14px;position:relative;overflow:hidden;
+  box-shadow:var(--shadow-soft);border:1px solid #f7eedb;
+  transition:transform .2s,box-shadow .2s;
 }
-.stat .v{font-size:22px;font-weight:900}
-.stat .l{font-size:11px;opacity:0.85;letter-spacing:0.5px;text-transform:uppercase;margin-top:4px}
-.stat.gold{background:linear-gradient(135deg,#C89860,#a87938)}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-med)}
+.stat .icon{
+  width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:8px;background:var(--cream-warm);
+}
+.stat .value{font-size:24px;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}
+.stat .label{font-size:11px;color:#a89c80;letter-spacing:0.5px;text-transform:uppercase;font-weight:700;margin-top:2px}
+.stat.featured{background:var(--gradient-sun);color:#fff}
+.stat.featured .icon{background:rgba(255,255,255,0.25)}
+.stat.featured .value{color:#fff}
+.stat.featured .label{color:rgba(255,255,255,0.85)}
 
-.sale{
-  background:#fff;border:1px solid #f0e6d2;border-radius:12px;padding:12px 14px;margin-bottom:10px;
+/* ─── BIG CTA ─── */
+.big-cta{
+  background:var(--gradient-sun);color:#fff;border-radius:var(--radius-md);padding:20px 18px;
+  margin-bottom:16px;cursor:pointer;border:none;width:100%;
+  font-family:inherit;text-align:start;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 8px 24px rgba(255,140,66,0.35);transition:all .2s;
+  position:relative;overflow:hidden;
 }
-.sale-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.sale-name{font-weight:700;color:#1B2D4D;font-size:15px}
-.sale-date{font-size:11px;color:#888}
-.sale-info{display:flex;gap:12px;font-size:13px;color:#555;margin-bottom:8px;flex-wrap:wrap}
-.sale-info span{display:inline-flex;align-items:center;gap:4px}
-.sale-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e6dbc4;padding-top:8px;margin-top:6px}
-.sale-commission{color:#C89860;font-weight:800;font-size:15px}
+.big-cta::after{
+  content:'';position:absolute;top:-50%;right:-20%;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(255,255,255,0.2),transparent 70%);
+}
+.big-cta:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,140,66,0.45)}
+.big-cta-text{font-size:18px;font-weight:800;line-height:1.3}
+.big-cta-sub{font-size:12px;opacity:0.9;margin-top:2px;font-weight:500}
+.big-cta-arrow{
+  width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;
+  transition:transform .2s;
+}
+.big-cta:hover .big-cta-arrow{transform:translateX(4px)}
+html[dir="rtl"] .big-cta:hover .big-cta-arrow{transform:translateX(-4px)}
+html[dir="rtl"] .big-cta-arrow{transform:scaleX(-1)}
+
+/* ─── ACHIEVEMENTS ─── */
+.achievements{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none}
+.achievements::-webkit-scrollbar{display:none}
+.achievement{
+  flex-shrink:0;background:#fff;border-radius:14px;padding:10px 14px;
+  display:flex;align-items:center;gap:8px;border:1px solid #f7eedb;
+  box-shadow:var(--shadow-soft);font-size:12px;font-weight:700;color:var(--navy);
+  transition:all .2s;
+}
+.achievement.unlocked{
+  background:var(--gradient-gold);color:#fff;border-color:transparent;
+  animation:unlock 0.6s ease;
+}
+@keyframes unlock{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.achievement.locked{opacity:0.5}
+.achievement .emoji{font-size:18px}
+
+/* ─── CARDS ─── */
+.card{
+  background:#fff;border-radius:var(--radius-lg);padding:22px 18px;margin-bottom:14px;
+  box-shadow:var(--shadow-soft);border:1px solid #f7eedb;position:relative;
+}
+.card-title{
+  display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;color:var(--navy);
+  margin-bottom:14px;
+}
+.card-title .emoji{font-size:22px}
+
+/* ─── SALE FORM (slide-in) ─── */
+.sale-form-card{
+  background:#fff;border-radius:var(--radius-xl);padding:24px 20px;margin-bottom:14px;
+  box-shadow:var(--shadow-hard);border:2px solid var(--gold-light);
+  animation:slideIn .4s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── SALE ITEMS ─── */
+.sale-item{
+  background:linear-gradient(135deg,#fff,#FFFAF0);
+  border:1px solid #f0e6d2;border-radius:18px;padding:14px 16px;margin-bottom:10px;
+  position:relative;overflow:hidden;
+  transition:all .2s;
+}
+.sale-item:hover{transform:translateX(-2px);box-shadow:var(--shadow-soft);border-color:var(--gold-light)}
+html[dir="ltr"] .sale-item:hover{transform:translateX(2px)}
+.sale-item::before{
+  content:'';position:absolute;top:0;bottom:0;width:4px;
+  background:var(--gradient-sun);border-radius:0 4px 4px 0;
+}
+html[dir="rtl"] .sale-item::before{right:0;border-radius:4px 0 0 4px}
+html[dir="ltr"] .sale-item::before{left:0;border-radius:0 4px 4px 0}
+
+.sale-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.sale-name{font-weight:800;color:var(--navy);font-size:15px}
+.sale-date{font-size:11px;color:#a89c80;font-weight:600}
+.sale-info{display:flex;gap:14px;font-size:12px;color:#7a7160;margin:6px 0;flex-wrap:wrap;font-weight:600}
+.sale-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px dashed #e6dbc4;padding-top:10px;margin-top:8px;
+}
+.sale-commission{
+  background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent;
+  font-weight:900;font-size:17px;
+}
 .status-badge{
-  display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;
+  display:inline-block;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;
 }
-.status-pending{background:#fff4e0;color:#a86d1c}
-.status-confirmed{background:#e0f0ff;color:#1c5ba8}
-.status-delivered{background:#e7f7ec;color:#1c6b3a}
-.status-paid{background:#C89860;color:#fff}
-.status-cancelled{background:#f5e0e0;color:#8b1a1a}
+.status-pending{background:#fff4e0;color:#a86d1c;border:1px solid #f9d896}
+.status-confirmed{background:#e0f0ff;color:#1c5ba8;border:1px solid #b6d4f0}
+.status-delivered{background:#e7f7ec;color:#1c6b3a;border:1px solid #b6e6c4}
+.status-paid{background:var(--gradient-gold);color:#fff;border:1px solid transparent}
+.status-cancelled{background:#f5e0e0;color:#8b1a1a;border:1px solid #f0c0c0}
 
-.empty{
-  text-align:center;padding:30px 20px;color:#888;
+.empty-state{
+  text-align:center;padding:40px 20px;
 }
+.empty-state .emoji{font-size:54px;display:block;margin-bottom:12px;opacity:0.5;animation:wiggle 4s ease-in-out infinite}
+.empty-state-text{color:#a89c80;font-size:14px;font-weight:600}
+
 .hidden{display:none !important}
-
 .hp{position:absolute;left:-9999px;opacity:0;pointer-events:none}
 
-.help-text{font-size:12px;color:#888;margin-top:4px}
+/* ─── CONFETTI ─── */
+.confetti{
+  position:fixed;width:10px;height:10px;pointer-events:none;
+  z-index:9999;animation:confettiFall 3s ease-out forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(-100vh) rotate(0deg);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
 
-@media (max-width: 420px){
+/* ─── TOAST ─── */
+.toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;pointer-events:none}
+.toast{
+  background:var(--navy-deep);color:#fff;padding:14px 22px;border-radius:50px;
+  font-weight:700;font-size:14px;box-shadow:var(--shadow-hard);margin-top:8px;
+  display:flex;align-items:center;gap:8px;animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards;
+  pointer-events:auto;
+}
+.toast.success{background:linear-gradient(135deg,#1c6b3a,#28a05a)}
+.toast.error{background:linear-gradient(135deg,#8b1a1a,#c0392b)}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(20px) scale(0.9)}}
+
+@media (max-width: 480px){
+  .hero-title{font-size:22px}
+  .welcome-name{font-size:24px}
+  .stat .value{font-size:20px}
   .container{padding:14px 12px 80px}
-  .card{padding:18px 14px}
-  .card h2{font-size:19px}
-  .stat .v{font-size:18px}
 }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="brand"><span class="gold">SOLARYN</span> <span data-i18n="affiliates">شريكات</span></div>
+  <div class="logo">
+    <span class="sun"></span>
+    <span class="gold-txt">SOLARYN</span>
+  </div>
   <button class="lang-toggle" id="langToggle">🇫🇷 FR</button>
 </div>
 
 <div class="container">
 
-  <!-- ===== AUTH SECTION ===== -->
-  <div id="authSection" class="card">
-    <div class="tabs">
-      <div class="tab active" data-tab="login" data-i18n="tabLogin">دخول</div>
-      <div class="tab" data-tab="register" data-i18n="tabRegister">تسجيل جديد</div>
-    </div>
+  <!-- ════════ AUTH SECTION ════════ -->
+  <div id="authSection">
+    <div class="hero-card">
+      <span class="hero-emoji">🌞</span>
+      <h1 class="hero-title">
+        <span data-i18n="heroLine1">بيعي</span>
+        <span class="grad" data-i18n="heroLine2">سولارين</span>
+        <span data-i18n="heroLine3">وربحي معانا</span>
+      </h1>
+      <p class="hero-sub" data-i18n="heroSub">انضمي لمجتمع الشريكات وربحي 50 درهم على كل بيعة</p>
 
-    <!-- LOGIN -->
-    <div id="loginPanel">
-      <h2 data-i18n="loginTitle">بيعي وربحي مع Solaryn 🌞</h2>
-      <p class="sub" data-i18n="loginSub">دخلي بالرقم ديالك وPIN باش تكملي.</p>
-      <div class="msg" id="loginMsg"></div>
+      <div class="tabs" id="tabsContainer">
+        <div class="tab active" data-tab="login" data-i18n="tabLogin">دخول</div>
+        <div class="tab" data-tab="register" data-i18n="tabRegister">تسجيل جديد</div>
+      </div>
 
-      <form id="loginForm" autocomplete="off">
-        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
+      <!-- LOGIN -->
+      <div id="loginPanel">
+        <div class="msg" id="loginMsg"></div>
+        <form id="loginForm" autocomplete="off">
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
 
-        <label data-i18n="lblPhone">📱 رقم الهاتف</label>
-        <input type="tel" name="tel" required placeholder="0612345678" pattern="^(0|\+212)[5-7][0-9]{8}$">
+          <label data-i18n="lblPhone">📱 رقم الهاتف</label>
+          <input type="tel" name="tel" required placeholder="0612345678" pattern="^(0|\+212)[5-7][0-9]{8}$">
 
-        <label data-i18n="lblPin">🔑 PIN (4-6 أرقام)</label>
-        <input type="password" name="pin" required pattern="[0-9]{4,6}" inputmode="numeric" placeholder="••••">
+          <label data-i18n="lblPin">🔑 PIN</label>
+          <input type="password" name="pin" required pattern="[0-9]{4,6}" inputmode="numeric" placeholder="••••">
 
-        <button type="submit" class="btn btn-primary" data-i18n="btnLogin">دخول</button>
-      </form>
-    </div>
+          <button type="submit" class="btn btn-primary">
+            <span data-i18n="btnLogin">دخول</span>
+            <span>✨</span>
+          </button>
+        </form>
+      </div>
 
-    <!-- REGISTER -->
-    <div id="registerPanel" class="hidden">
-      <h2 data-i18n="regTitle">انضمي للشريكات Solaryn</h2>
-      <p class="sub" data-i18n="regSub">عمري المعلومات باش نخلقو حسابك.</p>
-      <div class="msg" id="regMsg"></div>
+      <!-- REGISTER -->
+      <div id="registerPanel" class="hidden">
+        <div class="msg" id="regMsg"></div>
+        <form id="regForm" autocomplete="off">
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
 
-      <form id="regForm" autocomplete="off">
-        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
+          <label data-i18n="lblName">👤 السمية الكاملة</label>
+          <input type="text" name="nom" required minlength="2" maxlength="100">
 
-        <label data-i18n="lblName">👤 السمية الكاملة</label>
-        <input type="text" name="nom" required minlength="2" maxlength="100">
+          <label data-i18n="lblPhone">📱 رقم الهاتف</label>
+          <input type="tel" name="tel" required placeholder="0612345678" pattern="^(0|\+212)[5-7][0-9]{8}$">
+          <div class="help-text" data-i18n="phoneHelp">📌 هاد الرقم هو اللي غادي تستعمليه باش تدخلي</div>
 
-        <label data-i18n="lblPhone">📱 رقم الهاتف</label>
-        <input type="tel" name="tel" required placeholder="0612345678" pattern="^(0|\+212)[5-7][0-9]{8}$">
-        <div class="help-text" data-i18n="phoneHelp">هاد الرقم هو اللي غادي تستعمليه باش تدخلي.</div>
+          <label data-i18n="lblCity">🏙️ المدينة</label>
+          <input type="text" name="ville" required minlength="2" maxlength="80">
 
-        <label data-i18n="lblCity">🏙️ المدينة</label>
-        <input type="text" name="ville" required minlength="2" maxlength="80">
+          <label data-i18n="lblPinCreate">🔑 خلقي PIN (4-6 أرقام)</label>
+          <input type="password" name="pin" required pattern="[0-9]{4,6}" inputmode="numeric" placeholder="••••">
+          <div class="help-text" data-i18n="pinHelp">🔒 حفظيه مزيان</div>
 
-        <label data-i18n="lblPinCreate">🔑 خلقي PIN (4-6 أرقام)</label>
-        <input type="password" name="pin" required pattern="[0-9]{4,6}" inputmode="numeric" placeholder="••••">
-        <div class="help-text" data-i18n="pinHelp">حفظيه مزيان، غادي تحتاجيه ف كل دخول.</div>
-
-        <button type="submit" class="btn btn-primary" data-i18n="btnRegister">إنشاء الحساب</button>
-      </form>
+          <button type="submit" class="btn btn-primary">
+            <span data-i18n="btnRegister">إنشاء الحساب</span>
+            <span>🚀</span>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
-  <!-- ===== DASHBOARD ===== -->
+  <!-- ════════ DASHBOARD ════════ -->
   <div id="dashboardSection" class="hidden">
 
-    <div class="card">
-      <h2 id="welcomeName">مرحبا 👋</h2>
-      <p class="sub" id="welcomeSub" data-i18n="welcomeSub">هاد هي لوحة التحكم ديالك.</p>
-
-      <div class="stats-grid">
-        <div class="stat">
-          <div class="v" id="statCount">0</div>
-          <div class="l" data-i18n="statSales">بيعات</div>
-        </div>
-        <div class="stat">
-          <div class="v" id="statTotal">0</div>
-          <div class="l" data-i18n="statTotal">المجموع MAD</div>
-        </div>
-        <div class="stat gold">
-          <div class="v" id="statPending">0</div>
-          <div class="l" data-i18n="statPending">كوميسيون معلقة</div>
-        </div>
-        <div class="stat gold">
-          <div class="v" id="statPaid">0</div>
-          <div class="l" data-i18n="statPaid">كوميسيون مخلصة</div>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" id="showSaleFormBtn" data-i18n="btnAddSale">➕ زيدي بيعة جديدة</button>
-      <button class="btn btn-ghost" id="logoutBtn" data-i18n="btnLogout">خروج</button>
+    <div class="welcome-card">
+      <div class="welcome-greeting" id="welcomeTime">صباح الخير</div>
+      <h1 class="welcome-name"><span id="welcomeName">مرحبا</span> <span class="wave">👋</span></h1>
+      <p class="welcome-motiv" id="welcomeMotiv">اليوم هو يوم مزيان باش تربحي ✨</p>
     </div>
 
-    <!-- NEW SALE FORM -->
-    <div id="saleFormCard" class="card hidden">
-      <h2 data-i18n="saleTitle">بيعة جديدة</h2>
-      <p class="sub" data-i18n="saleSub">عمري معلومات الزبون والطلبية.</p>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="icon">📦</div>
+        <div class="value" id="statCount">0</div>
+        <div class="label" data-i18n="statSales">بيعات</div>
+      </div>
+      <div class="stat">
+        <div class="icon">💵</div>
+        <div class="value" id="statTotal">0</div>
+        <div class="label" data-i18n="statTotal">المجموع MAD</div>
+      </div>
+      <div class="stat featured">
+        <div class="icon">⏳</div>
+        <div class="value" id="statPending">0</div>
+        <div class="label" data-i18n="statPending">معلقة MAD</div>
+      </div>
+      <div class="stat featured">
+        <div class="icon">💰</div>
+        <div class="value" id="statPaid">0</div>
+        <div class="label" data-i18n="statPaid">مخلصة MAD</div>
+      </div>
+    </div>
+
+    <div class="achievements" id="achievementsRow"></div>
+
+    <button class="big-cta" id="showSaleFormBtn">
+      <div>
+        <div class="big-cta-text" data-i18n="ctaSaleTitle">زيدي بيعة جديدة</div>
+        <div class="big-cta-sub" data-i18n="ctaSaleSub">+50 درهم على كل قطعة 💸</div>
+      </div>
+      <div class="big-cta-arrow">→</div>
+    </button>
+
+    <!-- SALE FORM -->
+    <div id="saleFormCard" class="sale-form-card hidden">
+      <div class="card-title">
+        <span class="emoji">🛒</span>
+        <span data-i18n="saleTitle">بيعة جديدة</span>
+      </div>
       <div class="msg" id="saleMsg"></div>
 
       <form id="saleForm" autocomplete="off">
@@ -239,127 +502,99 @@ textarea{min-height:70px;resize:vertical}
         <textarea name="customer_adresse" maxlength="200" placeholder="شارع، حي، رقم..."></textarea>
 
         <label data-i18n="lblQty">📦 الكمية</label>
-        <select name="quantite" required>
-          <option value="1">1 - 199 MAD (كوميسيون 35 MAD)</option>
-          <option value="2">2 - 398 MAD (كوميسيون 70 MAD)</option>
-          <option value="3">3 - 597 MAD (كوميسيون 105 MAD)</option>
-          <option value="5">5 - 995 MAD (كوميسيون 175 MAD)</option>
-          <option value="10">10 - 1990 MAD (كوميسيون 350 MAD)</option>
-        </select>
+        <select name="quantite" required id="qtySelect"></select>
 
-        <label data-i18n="lblNotes">📝 ملاحظات (اختياري)</label>
-        <textarea name="notes" maxlength="500"></textarea>
+        <label data-i18n="lblNotes">📝 ملاحظات</label>
+        <textarea name="notes" maxlength="500" placeholder="..."></textarea>
 
-        <button type="submit" class="btn btn-primary" data-i18n="btnSubmitSale">سجلي البيعة</button>
+        <button type="submit" class="btn btn-primary">
+          <span data-i18n="btnSubmitSale">سجلي البيعة</span>
+          <span>🎉</span>
+        </button>
         <button type="button" class="btn btn-secondary" id="cancelSaleBtn" data-i18n="btnCancel">إلغاء</button>
       </form>
     </div>
 
     <!-- SALES HISTORY -->
     <div class="card">
-      <h2 data-i18n="historyTitle">سجل البيعات</h2>
+      <div class="card-title">
+        <span class="emoji">📜</span>
+        <span data-i18n="historyTitle">سجل البيعات</span>
+      </div>
       <div id="salesList"></div>
     </div>
 
+    <button class="btn btn-ghost" id="logoutBtn" data-i18n="btnLogout">↩️ خروج</button>
   </div>
 </div>
 
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-// ============= I18N =============
+// ════════════════════ I18N ════════════════════
 const I18N = {
   ar: {
-    affiliates: 'شريكات',
-    tabLogin: 'دخول',
-    tabRegister: 'تسجيل جديد',
-    loginTitle: 'بيعي وربحي مع Solaryn 🌞',
-    loginSub: 'دخلي بالرقم ديالك وPIN باش تكملي.',
-    regTitle: 'انضمي للشريكات Solaryn',
-    regSub: 'عمري المعلومات باش نخلقو حسابك.',
-    lblName: '👤 السمية الكاملة',
-    lblPhone: '📱 رقم الهاتف',
-    phoneHelp: 'هاد الرقم هو اللي غادي تستعمليه باش تدخلي.',
-    lblCity: '🏙️ المدينة',
-    lblPin: '🔑 PIN (4-6 أرقام)',
-    lblPinCreate: '🔑 خلقي PIN (4-6 أرقام)',
-    pinHelp: 'حفظيه مزيان، غادي تحتاجيه ف كل دخول.',
-    btnLogin: 'دخول',
-    btnRegister: 'إنشاء الحساب',
-    welcomeSub: 'هاد هي لوحة التحكم ديالك.',
-    statSales: 'بيعات',
-    statTotal: 'المجموع MAD',
-    statPending: 'كوميسيون معلقة',
-    statPaid: 'كوميسيون مخلصة',
-    btnAddSale: '➕ زيدي بيعة جديدة',
-    btnLogout: 'خروج',
+    heroLine1: 'بيعي', heroLine2: 'سولارين', heroLine3: 'وربحي معانا',
+    heroSub: 'انضمي لمجتمع الشريكات وربحي 50 درهم على كل بيعة',
+    tabLogin: 'دخول', tabRegister: 'تسجيل جديد',
+    lblName: '👤 السمية الكاملة', lblPhone: '📱 رقم الهاتف', lblCity: '🏙️ المدينة',
+    lblPin: '🔑 PIN', lblPinCreate: '🔑 خلقي PIN (4-6 أرقام)',
+    phoneHelp: '📌 هاد الرقم هو اللي غادي تستعمليه باش تدخلي', pinHelp: '🔒 حفظيه مزيان',
+    btnLogin: 'دخول', btnRegister: 'إنشاء الحساب',
+    statSales: 'بيعات', statTotal: 'المجموع MAD',
+    statPending: 'معلقة MAD', statPaid: 'مخلصة MAD',
+    ctaSaleTitle: 'زيدي بيعة جديدة', ctaSaleSub: '+50 درهم على كل قطعة 💸',
     saleTitle: 'بيعة جديدة',
-    saleSub: 'عمري معلومات الزبون والطلبية.',
-    lblCustName: '👤 سمية الزبون',
-    lblCustPhone: '📱 رقم الزبون',
-    lblCustCity: '🏙️ المدينة',
-    lblCustAddress: '📍 العنوان',
-    lblQty: '📦 الكمية',
-    lblNotes: '📝 ملاحظات (اختياري)',
-    btnSubmitSale: 'سجلي البيعة',
-    btnCancel: 'إلغاء',
-    historyTitle: 'سجل البيعات',
-    emptyHistory: 'مازال ما عندك حتى بيعة. زيدي وحدة باش تبدا!',
+    lblCustName: '👤 سمية الزبون', lblCustPhone: '📱 رقم الزبون', lblCustCity: '🏙️ المدينة',
+    lblCustAddress: '📍 العنوان', lblQty: '📦 الكمية', lblNotes: '📝 ملاحظات',
+    btnSubmitSale: 'سجلي البيعة', btnCancel: 'إلغاء',
+    historyTitle: 'سجل البيعات', btnLogout: '↩️ خروج',
+    emptyHistory: 'مازال ما عندك حتى بيعة. زيدي وحدة باش تبدا الرحلة! ✨',
+    welcomeMorning: 'صباح الخير', welcomeAfternoon: 'مسا الخير', welcomeEvening: 'مسا الخير',
+    motivMorning: 'بداية يوم جديد، فرصة جديدة باش تربحي 🌞',
+    motivAfternoon: 'كملي القوة، شي بيعات أخرى كتستناك 💪',
+    motivEvening: 'مازال عندك وقت، خصصي شوية ديال الوقت ✨',
+    statusPending: 'معلقة', statusConfirmed: 'مؤكدة',
+    statusDelivered: 'موصلة', statusPaid: 'مخلصة', statusCancelled: 'ملغاة',
+    achFirst: '🌱 أول بيعة', achThree: '🔥 3 بيعات', achTen: '⭐ 10 بيعات',
+    achTwentyFive: '👑 25 بيعة', achFifty: '💎 50 بيعة', achHundred: '🚀 100 بيعة',
+    saleSuccess: 'تسجلات البيعة', confettiMsg: 'برافو! 🎉',
     welcomeName: 'مرحبا',
-    statusPending: 'معلقة',
-    statusConfirmed: 'مؤكدة',
-    statusDelivered: 'موصلة',
-    statusPaid: 'مخلصة',
-    statusCancelled: 'ملغاة',
   },
   fr: {
-    affiliates: 'Revendeuses',
-    tabLogin: 'Connexion',
-    tabRegister: 'Nouvelle inscription',
-    loginTitle: 'Vends Solaryn & gagne 🌞',
-    loginSub: 'Connecte-toi avec ton numéro et ton PIN.',
-    regTitle: 'Rejoins les revendeuses Solaryn',
-    regSub: 'Remplis tes infos pour créer ton compte.',
-    lblName: '👤 Nom complet',
-    lblPhone: '📱 Numéro de téléphone',
-    phoneHelp: 'Ce numéro te servira pour te connecter.',
-    lblCity: '🏙️ Ville',
-    lblPin: '🔑 PIN (4-6 chiffres)',
-    lblPinCreate: '🔑 Crée ton PIN (4-6 chiffres)',
-    pinHelp: 'Note-le bien, il te servira à chaque connexion.',
-    btnLogin: 'Se connecter',
-    btnRegister: 'Créer le compte',
-    welcomeSub: 'Voici ton tableau de bord.',
-    statSales: 'Ventes',
-    statTotal: 'Total MAD',
-    statPending: 'Commission en attente',
-    statPaid: 'Commission payée',
-    btnAddSale: '➕ Nouvelle vente',
-    btnLogout: 'Déconnexion',
+    heroLine1: 'Vends', heroLine2: 'Solaryn', heroLine3: 'avec nous',
+    heroSub: 'Rejoins notre communauté et gagne 50 DH sur chaque vente',
+    tabLogin: 'Connexion', tabRegister: 'Inscription',
+    lblName: '👤 Nom complet', lblPhone: '📱 Téléphone', lblCity: '🏙️ Ville',
+    lblPin: '🔑 PIN', lblPinCreate: '🔑 Crée ton PIN (4-6 chiffres)',
+    phoneHelp: '📌 Ce numéro servira pour te connecter', pinHelp: '🔒 Note-le bien',
+    btnLogin: 'Se connecter', btnRegister: 'Créer le compte',
+    statSales: 'Ventes', statTotal: 'Total MAD',
+    statPending: 'En attente MAD', statPaid: 'Payée MAD',
+    ctaSaleTitle: 'Nouvelle vente', ctaSaleSub: '+50 DH par produit 💸',
     saleTitle: 'Nouvelle vente',
-    saleSub: 'Saisis les infos du client et de la commande.',
-    lblCustName: '👤 Nom du client',
-    lblCustPhone: '📱 Téléphone du client',
-    lblCustCity: '🏙️ Ville',
-    lblCustAddress: '📍 Adresse',
-    lblQty: '📦 Quantité',
-    lblNotes: '📝 Notes (optionnel)',
-    btnSubmitSale: 'Enregistrer la vente',
-    btnCancel: 'Annuler',
-    historyTitle: 'Historique des ventes',
-    emptyHistory: 'Aucune vente pour le moment. Ajoute-en une pour commencer !',
+    lblCustName: '👤 Nom client', lblCustPhone: '📱 Tel client', lblCustCity: '🏙️ Ville',
+    lblCustAddress: '📍 Adresse', lblQty: '📦 Quantité', lblNotes: '📝 Notes',
+    btnSubmitSale: 'Enregistrer', btnCancel: 'Annuler',
+    historyTitle: 'Historique', btnLogout: '↩️ Déconnexion',
+    emptyHistory: 'Aucune vente pour le moment. Ajoute la première pour commencer ✨',
+    welcomeMorning: 'Bonjour', welcomeAfternoon: 'Bon après-midi', welcomeEvening: 'Bonsoir',
+    motivMorning: 'Nouveau jour, nouvelle opportunité de gagner 🌞',
+    motivAfternoon: 'Continue, d\'autres ventes t\'attendent 💪',
+    motivEvening: 'Il te reste du temps pour transformer ta soirée ✨',
+    statusPending: 'En attente', statusConfirmed: 'Confirmée',
+    statusDelivered: 'Livrée', statusPaid: 'Payée', statusCancelled: 'Annulée',
+    achFirst: '🌱 Première vente', achThree: '🔥 3 ventes', achTen: '⭐ 10 ventes',
+    achTwentyFive: '👑 25 ventes', achFifty: '💎 50 ventes', achHundred: '🚀 100 ventes',
+    saleSuccess: 'Vente enregistrée', confettiMsg: 'Bravo ! 🎉',
     welcomeName: 'Bienvenue',
-    statusPending: 'En attente',
-    statusConfirmed: 'Confirmée',
-    statusDelivered: 'Livrée',
-    statusPaid: 'Payée',
-    statusCancelled: 'Annulée',
   }
 };
 
 let currentLang = localStorage.getItem('solaryn_lang') || 'ar';
+const t = k => (I18N[currentLang] && I18N[currentLang][k]) || k;
 
-function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || key; }
-
-function applyLang() {
+function applyLang(){
   document.documentElement.lang = currentLang;
   document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.dataset.lang = currentLang;
@@ -369,23 +604,30 @@ function applyLang() {
     const text = t(key);
     if (text) el.textContent = text;
   });
-  // Update quantity options with translated commission
-  const qtySel = document.querySelector('select[name=quantite]');
-  if (qtySel) {
-    const commWord = currentLang === 'ar' ? 'كوميسيون' : 'commission';
-    qtySel.innerHTML = [1,2,3,5,10].map(q => {
-      const total = q * 199;
-      const comm = q * 35;
-      return `<option value="${q}">${q} - ${total} MAD (${commWord} ${comm} MAD)</option>`;
-    }).join('');
-  }
-  // Update welcome name if logged in
-  const aff = getAffiliate();
-  if (aff && aff.nom) {
-    document.getElementById('welcomeName').textContent = t('welcomeName') + ' ' + aff.nom + ' 👋';
-  }
-  // Refresh sales list to update status labels
+  updateQtySelect();
+  updateWelcome();
   renderSales(lastSales);
+  renderAchievements(lastStats.count || 0);
+}
+
+function updateQtySelect(){
+  const sel = document.getElementById('qtySelect');
+  if (!sel) return;
+  const commWord = currentLang === 'ar' ? 'كوميسيون' : 'comm.';
+  sel.innerHTML = [1,2,3,5,10].map(q => {
+    const total = q * 199;
+    const comm = q * 50;
+    return `<option value="${q}">${q} × 199 = ${total} MAD ✨ ${commWord} ${comm} MAD</option>`;
+  }).join('');
+}
+
+function updateWelcome(){
+  const aff = getAffiliate();
+  if (aff && aff.nom) document.getElementById('welcomeName').textContent = t('welcomeName') + ' ' + aff.nom;
+  const h = new Date().getHours();
+  let period = h < 12 ? 'Morning' : (h < 18 ? 'Afternoon' : 'Evening');
+  document.getElementById('welcomeTime').textContent = t('welcome' + period);
+  document.getElementById('welcomeMotiv').textContent = t('motiv' + period);
 }
 
 document.getElementById('langToggle').addEventListener('click', () => {
@@ -394,23 +636,30 @@ document.getElementById('langToggle').addEventListener('click', () => {
   applyLang();
 });
 
-// ============= AUTH HELPERS =============
-function getToken() { return localStorage.getItem('solaryn_aff_token'); }
-function setToken(t) { localStorage.setItem('solaryn_aff_token', t); }
-function clearToken() { localStorage.removeItem('solaryn_aff_token'); localStorage.removeItem('solaryn_aff_user'); }
-function setAffiliate(a) { localStorage.setItem('solaryn_aff_user', JSON.stringify(a)); }
-function getAffiliate() {
-  try { return JSON.parse(localStorage.getItem('solaryn_aff_user') || 'null'); } catch { return null; }
-}
+// ════════════════════ AUTH ════════════════════
+const getToken = () => localStorage.getItem('solaryn_aff_token');
+const setToken = (tk) => localStorage.setItem('solaryn_aff_token', tk);
+const clearToken = () => { localStorage.removeItem('solaryn_aff_token'); localStorage.removeItem('solaryn_aff_user'); };
+const setAffiliate = (a) => localStorage.setItem('solaryn_aff_user', JSON.stringify(a));
+const getAffiliate = () => { try { return JSON.parse(localStorage.getItem('solaryn_aff_user') || 'null'); } catch { return null; } };
 
-function showMsg(elId, text, isErr) {
+function showMsg(elId, text, isErr){
   const el = document.getElementById(elId);
-  el.textContent = text;
+  el.textContent = (isErr ? '⚠️ ' : '✅ ') + text;
   el.className = 'msg show ' + (isErr ? 'error' : 'success');
-  setTimeout(() => { el.className = 'msg'; }, 5000);
+  setTimeout(() => el.className = 'msg', 5000);
 }
 
-async function postJson(url, body, withAuth) {
+function toast(text, type){
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.innerHTML = (type === 'success' ? '✅' : type === 'error' ? '⚠️' : '✨') + ' <span>' + text + '</span>';
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+async function postJson(url, body, withAuth){
   const headers = { 'Content-Type': 'application/json' };
   if (withAuth) {
     const tk = getToken();
@@ -421,62 +670,64 @@ async function postJson(url, body, withAuth) {
   return { status: res.status, ...data };
 }
 
-// ============= TABS =============
+// ════════════════════ TABS ════════════════════
+const tabsContainer = document.getElementById('tabsContainer');
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     tab.classList.add('active');
     const which = tab.dataset.tab;
+    tabsContainer.classList.toggle('t-register', which === 'register');
     document.getElementById('loginPanel').classList.toggle('hidden', which !== 'login');
     document.getElementById('registerPanel').classList.toggle('hidden', which !== 'register');
   });
 });
 
-// ============= FORMS =============
+// ════════════════════ FORMS ════════════════════
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
-  const body = { tel: f.tel.value.trim(), pin: f.pin.value.trim() };
   const btn = f.querySelector('button[type=submit]');
   btn.disabled = true;
-  const r = await postJson('/api/affiliate-login', body);
+  const r = await postJson('/api/affiliate-login', { tel: f.tel.value.trim(), pin: f.pin.value.trim() });
   btn.disabled = false;
   if (r.ok) {
     setToken(r.token);
     setAffiliate(r.affiliate);
+    toast(currentLang === 'ar' ? 'مرحبا بيك! ✨' : 'Bienvenue ! ✨', 'success');
     showDashboard();
   } else {
-    showMsg('loginMsg', r.message || 'Erreur', true);
+    showMsg('loginMsg', r.message || 'Error', true);
   }
 });
 
 document.getElementById('regForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
-  const body = {
-    nom: f.nom.value.trim(),
-    tel: f.tel.value.trim(),
-    ville: f.ville.value.trim(),
-    pin: f.pin.value.trim(),
-    website: f.website.value,
-  };
   const btn = f.querySelector('button[type=submit]');
   btn.disabled = true;
-  const r = await postJson('/api/affiliate-register', body);
+  const r = await postJson('/api/affiliate-register', {
+    nom: f.nom.value.trim(), tel: f.tel.value.trim(), ville: f.ville.value.trim(),
+    pin: f.pin.value.trim(), website: f.website.value,
+  });
   btn.disabled = false;
   if (r.ok) {
     setToken(r.token);
     setAffiliate(r.affiliate);
+    confetti();
+    toast(currentLang === 'ar' ? 'تم! مرحبا بيك ف سولارين ✨' : 'C\'est parti ! ✨', 'success');
     showDashboard();
   } else {
-    showMsg('regMsg', r.message || 'Erreur', true);
+    showMsg('regMsg', r.message || 'Error', true);
   }
 });
 
 document.getElementById('saleForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
-  const body = {
+  const btn = f.querySelector('button[type=submit]');
+  btn.disabled = true;
+  const r = await postJson('/api/affiliate-sale', {
     customer_nom: f.customer_nom.value.trim(),
     customer_tel: f.customer_tel.value.trim(),
     customer_ville: f.customer_ville.value.trim(),
@@ -484,90 +735,95 @@ document.getElementById('saleForm').addEventListener('submit', async (e) => {
     quantite: f.quantite.value,
     notes: f.notes.value.trim(),
     website: f.website.value,
-  };
-  const btn = f.querySelector('button[type=submit]');
-  btn.disabled = true;
-  const r = await postJson('/api/affiliate-sale', body, true);
+  }, true);
   btn.disabled = false;
   if (r.ok) {
-    showMsg('saleMsg', r.message + ' (+' + r.commission + ' MAD)', false);
+    confetti();
+    toast((currentLang === 'ar' ? '🎉 ربحتي ' : '🎉 Gagné ') + r.commission + ' MAD!', 'success');
     f.reset();
     setTimeout(() => {
       document.getElementById('saleFormCard').classList.add('hidden');
       loadDashboard();
-    }, 1500);
+    }, 800);
   } else if (r.status === 401) {
-    clearToken();
-    showAuth();
+    clearToken(); showAuth();
   } else {
-    showMsg('saleMsg', r.message || 'Erreur', true);
+    showMsg('saleMsg', r.message || 'Error', true);
   }
 });
 
-// ============= DASHBOARD =============
+// ════════════════════ DASHBOARD ════════════════════
 let lastSales = [];
+let lastStats = { count: 0 };
 
 document.getElementById('showSaleFormBtn').addEventListener('click', () => {
-  document.getElementById('saleFormCard').classList.remove('hidden');
-  document.getElementById('saleFormCard').scrollIntoView({ behavior: 'smooth' });
+  const c = document.getElementById('saleFormCard');
+  c.classList.remove('hidden');
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 document.getElementById('cancelSaleBtn').addEventListener('click', () => {
   document.getElementById('saleFormCard').classList.add('hidden');
 });
 document.getElementById('logoutBtn').addEventListener('click', () => {
   if (confirm(currentLang === 'ar' ? 'متأكدة بغيتي تخرجي؟' : 'Confirmer la déconnexion ?')) {
-    clearToken();
-    showAuth();
+    clearToken(); showAuth();
   }
 });
 
-function showAuth() {
+function showAuth(){
   document.getElementById('authSection').classList.remove('hidden');
   document.getElementById('dashboardSection').classList.add('hidden');
 }
-
-function showDashboard() {
+function showDashboard(){
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('dashboardSection').classList.remove('hidden');
-  const aff = getAffiliate();
-  if (aff && aff.nom) {
-    document.getElementById('welcomeName').textContent = t('welcomeName') + ' ' + aff.nom + ' 👋';
-  }
+  updateWelcome();
   loadDashboard();
 }
 
-async function loadDashboard() {
-  const r = await postJson('/api/affiliate-dashboard', {}, true);
-  if (r.status === 401 || !r.ok) {
-    clearToken();
-    showAuth();
-    return;
+function animateValue(el, target){
+  const start = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+  const duration = 800;
+  const startTime = performance.now();
+  function step(now){
+    const p = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(start + (target - start) * eased).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
   }
-  document.getElementById('statCount').textContent = r.stats.count || 0;
-  document.getElementById('statTotal').textContent = (r.stats.total_mad || 0).toLocaleString();
-  document.getElementById('statPending').textContent = (r.stats.commission_pending || 0).toLocaleString();
-  document.getElementById('statPaid').textContent = (r.stats.commission_paid || 0).toLocaleString();
+  requestAnimationFrame(step);
+}
+
+async function loadDashboard(){
+  const r = await postJson('/api/affiliate-dashboard', {}, true);
+  if (r.status === 401 || !r.ok) { clearToken(); showAuth(); return; }
+  animateValue(document.getElementById('statCount'), r.stats.count || 0);
+  animateValue(document.getElementById('statTotal'), r.stats.total_mad || 0);
+  animateValue(document.getElementById('statPending'), r.stats.commission_pending || 0);
+  animateValue(document.getElementById('statPaid'), r.stats.commission_paid || 0);
   lastSales = r.sales || [];
+  lastStats = r.stats || { count: 0 };
   renderSales(lastSales);
+  renderAchievements(lastStats.count || 0);
 }
 
-function statusLabel(status) {
-  const key = 'status' + (status || 'pending').charAt(0).toUpperCase() + (status || 'pending').slice(1);
-  return t(key);
+function statusLabel(s){
+  const k = 'status' + (s || 'pending').charAt(0).toUpperCase() + (s || 'pending').slice(1);
+  return t(k);
 }
 
-function renderSales(sales) {
+function renderSales(sales){
   const c = document.getElementById('salesList');
   if (!c) return;
   if (!sales || sales.length === 0) {
-    c.innerHTML = '<div class="empty">' + t('emptyHistory') + '</div>';
+    c.innerHTML = '<div class="empty-state"><span class="emoji">📭</span><div class="empty-state-text">' + t('emptyHistory') + '</div></div>';
     return;
   }
   c.innerHTML = sales.map(s => {
-    const status = s.status || 'pending';
+    const st = s.status || 'pending';
     const date = String(s.date || '').slice(0, 16).replace('T', ' ');
     return `
-      <div class="sale">
+      <div class="sale-item">
         <div class="sale-head">
           <span class="sale-name">${escapeHtml(s.customer_nom || '')}</span>
           <span class="sale-date">${escapeHtml(date)}</span>
@@ -578,27 +834,64 @@ function renderSales(sales) {
           <span>📦 ×${s.quantite || 1}</span>
         </div>
         <div class="sale-foot">
-          <span class="status-badge status-${status}">${escapeHtml(statusLabel(status))}</span>
+          <span class="status-badge status-${st}">${escapeHtml(statusLabel(st))}</span>
           <span class="sale-commission">+${(s.commission || 0).toLocaleString()} MAD</span>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
-function escapeHtml(s) {
+function renderAchievements(count){
+  const targets = [
+    { n: 1, key: 'achFirst' },
+    { n: 3, key: 'achThree' },
+    { n: 10, key: 'achTen' },
+    { n: 25, key: 'achTwentyFive' },
+    { n: 50, key: 'achFifty' },
+    { n: 100, key: 'achHundred' },
+  ];
+  const c = document.getElementById('achievementsRow');
+  c.innerHTML = targets.map(a => {
+    const unlocked = count >= a.n;
+    const text = t(a.key);
+    const emoji = text.split(' ')[0];
+    const label = text.split(' ').slice(1).join(' ');
+    return `<div class="achievement ${unlocked ? 'unlocked' : 'locked'}">
+      <span class="emoji">${emoji}</span>
+      <span>${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s){
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ============= INIT =============
-applyLang();
-if (getToken()) {
-  showDashboard();
-} else {
-  showAuth();
+// ════════════════════ CONFETTI ════════════════════
+function confetti(){
+  const colors = ['#FF6B6B','#FF8C42','#F7C969','#C89860','#1B2D4D','#28a05a'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    el.style.animationDuration = (2 + Math.random() * 2) + 's';
+    el.style.width = el.style.height = (6 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.opacity = 0.9;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
 }
+
+// ════════════════════ INIT ════════════════════
+applyLang();
+updateQtySelect();
+if (getToken()) showDashboard();
+else showAuth();
 </script>
 
 </body>

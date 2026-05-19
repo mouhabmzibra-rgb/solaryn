@@ -2,7 +2,7 @@ import { clean, validPhone, clientIp, forwardToSheets, readBody } from './_lib.j
 import { verifyToken, bearerToken } from './_auth.js';
 
 const PRICE_MAD = 199;
-const COMMISSION_MAD = 35;
+const COMMISSION_MAD = 50;
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
