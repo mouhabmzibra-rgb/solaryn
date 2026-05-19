@@ -113,6 +113,104 @@ function affiliateSale(data) {
     return jsonResp({ ok: true, sale_id: saleId });
 }
 
+function adminData(data) {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var affSheet = ss.getSheetByName(AFFILIATES_SHEET);
+    var salesSheet = ss.getSheetByName(AFFILIATE_SALES_SHEET);
+
+    var affiliates = [];
+    var affMap = {};
+    if (affSheet) {
+        var aRows = affSheet.getDataRange().getValues();
+        for (var j = 1; j < aRows.length; j++) {
+            var aff = {
+                phone: String(aRows[j][0]),
+                nom: aRows[j][1],
+                ville: aRows[j][2],
+                registered_at: String(aRows[j][4]),
+                status: String(aRows[j][5] || 'active'),
+                sales_count: 0,
+                total_mad: 0,
+                commission_mad: 0,
+                commission_paid: 0,
+                commission_pending: 0,
+            };
+            affiliates.push(aff);
+            affMap[aff.phone] = aff;
+        }
+    }
+
+    var sales = [];
+    var globalStats = { affiliates: affiliates.length, count: 0, total_mad: 0, commission_mad: 0, commission_pending: 0, commission_paid: 0 };
+
+    if (salesSheet) {
+        var rows = salesSheet.getDataRange().getValues();
+        for (var i = 1; i < rows.length; i++) {
+            var status = String(rows[i][10] || 'pending');
+            var commission = Number(rows[i][9]) || 0;
+            var total = Number(rows[i][8]) || 0;
+            var affPhone = String(rows[i][2]);
+            var sale = {
+                sale_id: rows[i][0],
+                date: String(rows[i][1]),
+                affiliate_phone: affPhone,
+                affiliate_nom: affMap[affPhone] ? affMap[affPhone].nom : affPhone,
+                customer_nom: rows[i][3],
+                customer_tel: String(rows[i][4]),
+                customer_ville: rows[i][5],
+                customer_adresse: rows[i][6],
+                quantite: rows[i][7],
+                total: total,
+                commission: commission,
+                status: status,
+                notes: rows[i][11],
+            };
+            sales.push(sale);
+            globalStats.count++;
+            globalStats.total_mad += total;
+            globalStats.commission_mad += commission;
+            if (status === 'paid') globalStats.commission_paid += commission;
+            else if (status !== 'cancelled') globalStats.commission_pending += commission;
+            if (affMap[affPhone]) {
+                affMap[affPhone].sales_count++;
+                affMap[affPhone].total_mad += total;
+                affMap[affPhone].commission_mad += commission;
+                if (status === 'paid') affMap[affPhone].commission_paid += commission;
+                else if (status !== 'cancelled') affMap[affPhone].commission_pending += commission;
+            }
+        }
+    }
+
+    return jsonResp({ ok: true, affiliates: affiliates, sales: sales, stats: globalStats });
+}
+
+function adminUpdateSale(data) {
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(AFFILIATE_SALES_SHEET);
+    if (!sheet) return jsonResp({ ok: false, error: 'no_sheet' });
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.sale_id)) {
+            sheet.getRange(i + 1, 11).setValue(data.status);
+            return jsonResp({ ok: true });
+        }
+    }
+    return jsonResp({ ok: false, error: 'not_found' });
+}
+
+function adminToggleAffiliate(data) {
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(AFFILIATES_SHEET);
+    if (!sheet) return jsonResp({ ok: false, error: 'no_sheet' });
+    var rows = sheet.getDataRange().getValues();
+    var phone = normalizePhone(data.affiliate_phone);
+    for (var i = 1; i < rows.length; i++) {
+        if (normalizePhone(rows[i][0]) === phone) {
+            sheet.getRange(i + 1, 6).setValue(data.status);
+            return jsonResp({ ok: true });
+        }
+    }
+    return jsonResp({ ok: false, error: 'not_found' });
+}
+
 function affiliateDashboard(data) {
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var affSheet = ss.getSheetByName(AFFILIATES_SHEET);
@@ -172,6 +270,9 @@ function doPost(e) {
         if (kind === 'affiliate_login')    return affiliateLogin(data);
         if (kind === 'affiliate_sale')     return affiliateSale(data);
         if (kind === 'affiliate_dashboard') return affiliateDashboard(data);
+        if (kind === 'admin_data')         return adminData(data);
+        if (kind === 'admin_update_sale')  return adminUpdateSale(data);
+        if (kind === 'admin_toggle_affiliate') return adminToggleAffiliate(data);
 
         var ss = SpreadsheetApp.openById(SHEET_ID);
         var sheet = ss.getSheetByName(TARGET_SHEET);

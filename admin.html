@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1B2D4D">
+<title>Solaryn Admin 🛠️</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#1B2D4D; --navy-deep:#0F1B30; --navy-light:#2d4670;
+  --gold:#C89860; --gold-light:#F7C969;
+  --orange:#FF8C42; --coral:#FF6B6B; --green:#28a05a; --red:#c0392b; --blue:#1c5ba8;
+  --cream:#FFFAF0; --bg:#F4F6FA;
+  --border:#E5E9F0;
+  --shadow:0 2px 12px rgba(27,45,77,0.06);
+  --shadow-md:0 8px 24px rgba(27,45,77,0.1);
+  --shadow-lg:0 16px 48px rgba(27,45,77,0.18);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);
+  font-size:14px;line-height:1.5;min-height:100vh;
+}
+
+/* ─── LOGIN ─── */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 50%,var(--navy-light) 100%);
+}
+.login-card{
+  background:#fff;border-radius:24px;padding:36px 30px;width:100%;max-width:400px;
+  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
+}
+.login-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--gold),var(--orange),var(--coral));
+}
+.login-icon{
+  width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;
+  box-shadow:0 8px 20px rgba(200,152,96,0.35);
+}
+.login-title{font-size:24px;font-weight:900;text-align:center;margin-bottom:6px}
+.login-sub{text-align:center;color:#7a7e8a;font-size:13px;margin-bottom:24px}
+.login-card label{display:block;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;color:var(--navy)}
+.login-card input{
+  width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:12px;
+  font-size:15px;font-family:inherit;font-weight:500;
+}
+.login-card input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,152,96,0.12)}
+.login-btn{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:var(--navy);color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-top:20px;
+  transition:all .2s;font-family:inherit;
+}
+.login-btn:hover{background:var(--navy-deep);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* ─── ADMIN LAYOUT ─── */
+.admin-wrap{display:flex;flex-direction:column;min-height:100vh}
+
+.admin-header{
+  background:var(--navy);color:#fff;padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+.admin-brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px;letter-spacing:0.5px}
+.admin-brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:dotPulse 2s infinite}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.admin-brand .gold{color:var(--gold-light)}
+
+.admin-actions{display:flex;gap:8px;align-items:center}
+.refresh-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;
+  padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.refresh-btn:hover{background:rgba(255,255,255,0.2)}
+.refresh-btn.refreshing svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logout-btn{
+  background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;
+  padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .2s;
+}
+.logout-btn:hover{background:rgba(255,107,107,0.2);border-color:var(--coral)}
+
+.admin-content{flex:1;max-width:1400px;width:100%;margin:0 auto;padding:24px}
+
+/* ─── STATS ─── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:#fff;border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);
+  border:1px solid var(--border);position:relative;overflow:hidden;
+}
+.stat-card .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.stat-card .v{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat-card .l{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#7a7e8a;font-weight:700;margin-top:4px}
+.stat-card.gold .icon{background:rgba(200,152,96,0.15);color:var(--gold)}
+.stat-card.blue .icon{background:rgba(28,91,168,0.12);color:var(--blue)}
+.stat-card.green .icon{background:rgba(40,160,90,0.12);color:var(--green)}
+.stat-card.orange .icon{background:rgba(255,140,66,0.15);color:var(--orange)}
+.stat-card.pending{background:linear-gradient(135deg,#fff7ed,#fffbf0);border-color:#f9d896}
+.stat-card.pending .v{color:#a86d1c}
+.stat-card.paid{background:linear-gradient(135deg,var(--gold),var(--gold-light));border-color:transparent;color:#fff}
+.stat-card.paid .v,.stat-card.paid .l{color:#fff}
+.stat-card.paid .l{opacity:0.85}
+.stat-card.paid .icon{background:rgba(255,255,255,0.25)}
+
+/* ─── TABS ─── */
+.tabs{display:flex;gap:4px;margin-bottom:18px;background:#fff;padding:6px;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);width:fit-content}
+.tab{
+  padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;color:#7a7e8a;
+  transition:all .2s;border:none;background:transparent;font-family:inherit;
+}
+.tab.active{background:var(--navy);color:#fff}
+.tab:hover:not(.active){background:var(--bg)}
+
+/* ─── PANELS ─── */
+.panel{background:#fff;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#fafbfd}
+.panel-title{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+.panel-search{
+  padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;
+  font-family:inherit;width:220px;background:#fff;
+}
+.panel-search:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,152,96,0.12)}
+
+/* ─── TABLE ─── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  background:#fafbfd;text-align:left;padding:12px 14px;font-weight:700;font-size:11px;
+  text-transform:uppercase;letter-spacing:0.5px;color:#7a7e8a;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody td{padding:14px;border-bottom:1px solid #f0f2f6;vertical-align:middle}
+tbody tr:hover{background:#fafbfd}
+tbody tr:last-child td{border-bottom:none}
+
+.aff-name{font-weight:700;color:var(--navy)}
+.aff-meta{font-size:11px;color:#7a7e8a;margin-top:2px}
+
+/* ─── BADGES & PILLS ─── */
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap}
+.badge-pending{background:#fff4e0;color:#a86d1c;border:1px solid #f9d896}
+.badge-confirmed{background:#e0f0ff;color:#1c5ba8;border:1px solid #b6d4f0}
+.badge-delivered{background:#e7f7ec;color:#1c6b3a;border:1px solid #b6e6c4}
+.badge-paid{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border:1px solid transparent}
+.badge-cancelled{background:#f5e0e0;color:#8b1a1a;border:1px solid #f0c0c0}
+.badge-active{background:#e7f7ec;color:#1c6b3a;border:1px solid #b6e6c4}
+.badge-disabled{background:#f5e0e0;color:#8b1a1a;border:1px solid #f0c0c0}
+
+/* ─── STATUS DROPDOWN ─── */
+.status-select{
+  padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:700;
+  text-transform:uppercase;cursor:pointer;font-family:inherit;background:#fff;color:var(--navy);
+  transition:all .15s;
+}
+.status-select:hover{border-color:var(--gold)}
+.status-select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,152,96,0.12)}
+
+/* ─── BUTTONS ─── */
+.btn-sm{
+  padding:6px 12px;font-size:12px;border-radius:8px;border:none;cursor:pointer;font-weight:700;
+  transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:4px;
+}
+.btn-pay{background:var(--green);color:#fff}
+.btn-pay:hover{background:#1c6b3a;transform:translateY(-1px)}
+.btn-cancel{background:var(--red);color:#fff}
+.btn-cancel:hover{background:#8b1a1a;transform:translateY(-1px)}
+.btn-toggle{background:var(--bg);color:var(--navy);border:1px solid var(--border)}
+.btn-toggle:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.amount{font-weight:800;font-variant-numeric:tabular-nums;color:var(--navy)}
+.amount.gold{color:var(--gold);background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.muted{color:#a8acb5;font-size:12px}
+.tel-link{color:var(--blue);text-decoration:none;font-weight:600}
+.tel-link:hover{text-decoration:underline}
+
+.empty-state{padding:60px 20px;text-align:center;color:#a8acb5}
+.empty-state .icon{font-size:48px;display:block;margin-bottom:10px;opacity:0.4}
+
+/* ─── TOAST ─── */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:1000}
+.toast{
+  background:var(--navy-deep);color:#fff;padding:12px 20px;border-radius:10px;
+  font-weight:600;font-size:13px;box-shadow:var(--shadow-lg);margin-top:8px;
+  display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;
+  max-width:340px;
+}
+.toast.success{background:linear-gradient(135deg,var(--green),#1c6b3a)}
+.toast.error{background:linear-gradient(135deg,var(--red),#8b1a1a)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+.hidden{display:none !important}
+.loader{text-align:center;padding:40px}
+.loader .spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+
+@media (max-width: 768px){
+  .admin-content{padding:14px}
+  .panel-search{width:100%}
+  .panel-head{flex-direction:column;align-items:stretch;gap:10px}
+  thead{display:none}
+  tbody tr{display:block;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:10px}
+  tbody td{display:flex;justify-content:space-between;border:none;padding:6px 0;font-size:13px}
+  tbody td::before{content:attr(data-label);font-weight:700;color:#7a7e8a;font-size:11px;text-transform:uppercase}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ LOGIN ════════ -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">🛠️</div>
+    <h1 class="login-title">Solaryn Admin</h1>
+    <p class="login-sub">Panel de gestion des affiliés</p>
+    <form id="loginForm">
+      <label>Mot de passe</label>
+      <input type="password" name="password" required autofocus>
+      <div id="loginError" style="display:none;color:var(--red);font-size:13px;margin-top:10px;font-weight:600">⚠️ Mot de passe incorrect</div>
+      <button type="submit" class="login-btn">Se connecter →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ════════ DASHBOARD ════════ -->
+<div id="adminWrap" class="admin-wrap hidden">
+  <div class="admin-header">
+    <div class="admin-brand">
+      <span class="dot"></span>
+      <span>SOLARYN <span class="gold">/admin</span></span>
+    </div>
+    <div class="admin-actions">
+      <button class="refresh-btn" id="refreshBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Actualiser
+      </button>
+      <button class="logout-btn" id="logoutBtn">↩️ Déco</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <div class="icon">👥</div>
+        <div class="v" id="statAffiliates">0</div>
+        <div class="l">Affiliées</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="icon">📦</div>
+        <div class="v" id="statSales">0</div>
+        <div class="l">Ventes totales</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="icon">💰</div>
+        <div class="v" id="statRevenue">0</div>
+        <div class="l">CA MAD</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="icon">⏳</div>
+        <div class="v" id="statPending">0</div>
+        <div class="l">Commissions à payer</div>
+      </div>
+      <div class="stat-card paid">
+        <div class="icon">✅</div>
+        <div class="v" id="statPaid">0</div>
+        <div class="l">Commissions payées</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-view="sales">📦 Ventes</button>
+      <button class="tab" data-view="affiliates">👥 Affiliées</button>
+    </div>
+
+    <!-- ─── SALES ─── -->
+    <div id="viewSales" class="panel">
+      <div class="panel-head">
+        <div class="panel-title">📦 Toutes les ventes</div>
+        <input type="text" class="panel-search" id="salesSearch" placeholder="🔍 Filtrer par nom, ville, affiliée...">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Affiliée</th>
+              <th>Client</th>
+              <th>Ville</th>
+              <th>Tel</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Commission</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="salesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── AFFILIATES ─── -->
+    <div id="viewAffiliates" class="panel hidden">
+      <div class="panel-head">
+        <div class="panel-title">👥 Toutes les affiliées</div>
+        <input type="text" class="panel-search" id="affSearch" placeholder="🔍 Filtrer par nom, ville, tel...">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Affiliée</th>
+              <th>Ville</th>
+              <th>Tel</th>
+              <th>Inscrite le</th>
+              <th>Ventes</th>
+              <th>CA généré</th>
+              <th>Comm. due</th>
+              <th>Comm. payée</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="affBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const STATUSES = ['pending', 'confirmed', 'delivered', 'paid', 'cancelled'];
+const STATUS_LABEL = {
+  pending: 'En attente', confirmed: 'Confirmée', delivered: 'Livrée', paid: 'Payée', cancelled: 'Annulée'
+};
+
+const getToken = () => localStorage.getItem('solaryn_admin_token');
+const setToken = (t) => localStorage.setItem('solaryn_admin_token', t);
+const clearToken = () => localStorage.removeItem('solaryn_admin_token');
+
+async function api(action, payload, withAuth) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (withAuth) {
+    const tk = getToken();
+    if (tk) headers['Authorization'] = 'Bearer ' + tk;
+  }
+  const res = await fetch('/api/admin', {
+    method: 'POST', headers,
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json().catch(() => ({ ok: false, message: 'Parse error' }));
+  return { status: res.status, ...data };
+}
+
+function toast(text, type) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  const icon = type === 'success' ? '✅' : type === 'error' ? '⚠️' : '✨';
+  el.innerHTML = icon + ' <span>' + escapeHtml(text) + '</span>';
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+// ──── LOGIN ────
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+  const btn = f.querySelector('button');
+  btn.disabled = true;
+  const r = await api('login', { password: f.password.value });
+  btn.disabled = false;
+  if (r.ok) {
+    setToken(r.token);
+    showAdmin();
+  } else {
+    err.textContent = '⚠️ ' + (r.message || 'Mot de passe incorrect');
+    err.style.display = 'block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (confirm('Confirmer la déconnexion ?')) {
+    clearToken();
+    location.reload();
+  }
+});
+
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+  const b = document.getElementById('refreshBtn');
+  b.classList.add('refreshing');
+  await loadData();
+  b.classList.remove('refreshing');
+});
+
+// ──── TABS ────
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const v = t.dataset.view;
+    document.getElementById('viewSales').classList.toggle('hidden', v !== 'sales');
+    document.getElementById('viewAffiliates').classList.toggle('hidden', v !== 'affiliates');
+  });
+});
+
+// ──── SHOW ────
+function showAdmin() {
+  document.getElementById('loginWrap').classList.add('hidden');
+  document.getElementById('adminWrap').classList.remove('hidden');
+  loadData();
+}
+
+// ──── LOAD DATA ────
+let allSales = [], allAffiliates = [];
+
+async function loadData() {
+  const r = await api('data', {}, true);
+  if (r.status === 401) { clearToken(); location.reload(); return; }
+  if (!r.ok) { toast(r.message || 'Erreur', 'error'); return; }
+
+  const s = r.stats || {};
+  animVal('statAffiliates', s.affiliates || 0);
+  animVal('statSales', s.count || 0);
+  animVal('statRevenue', s.total_mad || 0);
+  animVal('statPending', s.commission_pending || 0);
+  animVal('statPaid', s.commission_paid || 0);
+
+  allSales = r.sales || [];
+  allAffiliates = r.affiliates || [];
+  renderSales(allSales);
+  renderAffiliates(allAffiliates);
+}
+
+function animVal(id, target) {
+  const el = document.getElementById(id);
+  const start = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+  const dur = 600;
+  const t0 = performance.now();
+  function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(start + (target - start) * e).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ──── RENDER SALES ────
+function renderSales(sales) {
+  const body = document.getElementById('salesBody');
+  if (!sales.length) {
+    body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><span class="icon">📭</span>Aucune vente</div></td></tr>';
+    return;
+  }
+  body.innerHTML = sales.map(s => {
+    const date = String(s.date || '').slice(0, 16).replace('T', ' ');
+    const tel = s.customer_tel || '';
+    return `
+      <tr data-sale-id="${escapeHtml(s.sale_id)}">
+        <td data-label="Date">${escapeHtml(date)}</td>
+        <td data-label="Affiliée"><div class="aff-name">${escapeHtml(s.affiliate_nom || '')}</div><div class="aff-meta">${escapeHtml(s.affiliate_phone || '')}</div></td>
+        <td data-label="Client"><strong>${escapeHtml(s.customer_nom || '')}</strong></td>
+        <td data-label="Ville">${escapeHtml(s.customer_ville || '')}</td>
+        <td data-label="Tel">
+          <a href="tel:+${escapeHtml(tel.replace(/[^0-9]/g, ''))}" class="tel-link">${escapeHtml(tel)}</a>
+          <a href="https://wa.me/${escapeHtml(tel.replace(/[^0-9]/g, ''))}" target="_blank" class="tel-link" style="margin-left:6px">💬</a>
+        </td>
+        <td data-label="Qty"><span class="amount">×${s.quantite || 1}</span></td>
+        <td data-label="Total"><span class="amount">${(s.total || 0).toLocaleString()}</span></td>
+        <td data-label="Commission"><span class="amount gold">${(s.commission || 0).toLocaleString()}</span></td>
+        <td data-label="Status">
+          <select class="status-select" onchange="updateSaleStatus('${escapeHtml(s.sale_id)}', this.value, this)">
+            ${STATUSES.map(st => `<option value="${st}" ${st === s.status ? 'selected' : ''}>${STATUS_LABEL[st]}</option>`).join('')}
+          </select>
+        </td>
+        <td data-label="Action">
+          ${s.status !== 'paid' && s.status !== 'cancelled' ? `<button class="btn-sm btn-pay" onclick="quickPay('${escapeHtml(s.sale_id)}')">💰 Payer</button>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function updateSaleStatus(saleId, status, selEl) {
+  if (selEl) selEl.disabled = true;
+  const r = await api('update_sale', { sale_id: saleId, status }, true);
+  if (selEl) selEl.disabled = false;
+  if (r.ok) {
+    toast('Status mis à jour', 'success');
+    loadData();
+  } else {
+    toast(r.message || 'Erreur', 'error');
+  }
+}
+
+function quickPay(saleId) {
+  if (!confirm('Marquer cette vente comme PAYÉE ?')) return;
+  updateSaleStatus(saleId, 'paid');
+}
+
+// ──── RENDER AFFILIATES ────
+function renderAffiliates(affs) {
+  const body = document.getElementById('affBody');
+  if (!affs.length) {
+    body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><span class="icon">👤</span>Aucune affiliée</div></td></tr>';
+    return;
+  }
+  body.innerHTML = affs.map(a => {
+    const reg = String(a.registered_at || '').slice(0, 10);
+    return `
+      <tr>
+        <td data-label="Affiliée"><div class="aff-name">${escapeHtml(a.nom || '')}</div></td>
+        <td data-label="Ville">${escapeHtml(a.ville || '')}</td>
+        <td data-label="Tel">
+          <a href="tel:+${escapeHtml(a.phone || '')}" class="tel-link">${escapeHtml(a.phone || '')}</a>
+          <a href="https://wa.me/${escapeHtml(a.phone || '')}" target="_blank" class="tel-link" style="margin-left:6px">💬</a>
+        </td>
+        <td data-label="Inscrite">${escapeHtml(reg)}</td>
+        <td data-label="Ventes"><span class="amount">${a.sales_count || 0}</span></td>
+        <td data-label="CA"><span class="amount">${(a.total_mad || 0).toLocaleString()} MAD</span></td>
+        <td data-label="Comm. due"><span class="amount gold">${(a.commission_pending || 0).toLocaleString()}</span></td>
+        <td data-label="Comm. payée"><span class="amount">${(a.commission_paid || 0).toLocaleString()}</span></td>
+        <td data-label="Status"><span class="badge badge-${a.status}">${a.status}</span></td>
+        <td data-label="Action">
+          <button class="btn-sm btn-toggle" onclick="toggleAffiliate('${escapeHtml(a.phone)}', '${a.status === 'active' ? 'disabled' : 'active'}')">
+            ${a.status === 'active' ? '🚫 Désactiver' : '✅ Activer'}
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function toggleAffiliate(phone, newStatus) {
+  if (!confirm(`Confirmer : passer cette affiliée en ${newStatus} ?`)) return;
+  const r = await api('toggle_affiliate', { affiliate_phone: phone, status: newStatus }, true);
+  if (r.ok) {
+    toast('Affiliée mise à jour', 'success');
+    loadData();
+  } else {
+    toast(r.message || 'Erreur', 'error');
+  }
+}
+
+// ──── SEARCH ────
+document.getElementById('salesSearch').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  const filtered = allSales.filter(s =>
+    String(s.customer_nom || '').toLowerCase().includes(q) ||
+    String(s.customer_ville || '').toLowerCase().includes(q) ||
+    String(s.affiliate_nom || '').toLowerCase().includes(q) ||
+    String(s.customer_tel || '').includes(q)
+  );
+  renderSales(filtered);
+});
+
+document.getElementById('affSearch').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  const filtered = allAffiliates.filter(a =>
+    String(a.nom || '').toLowerCase().includes(q) ||
+    String(a.ville || '').toLowerCase().includes(q) ||
+    String(a.phone || '').includes(q)
+  );
+  renderAffiliates(filtered);
+});
+
+// Expose for inline onclick
+window.updateSaleStatus = updateSaleStatus;
+window.quickPay = quickPay;
+window.toggleAffiliate = toggleAffiliate;
+
+// ──── INIT ────
+if (getToken()) showAdmin();
+</script>
+
+</body>
+</html>
