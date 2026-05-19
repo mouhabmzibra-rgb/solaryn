@@ -175,6 +175,65 @@ tbody tr:last-child td{border-bottom:none}
 .btn-cancel:hover{background:#8b1a1a;transform:translateY(-1px)}
 .btn-toggle{background:var(--bg);color:var(--navy);border:1px solid var(--border)}
 .btn-toggle:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-track{background:var(--bg);color:var(--navy);border:1px dashed var(--border)}
+.btn-track:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+.btn-track.has{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-style:solid;border-color:var(--gold)}
+
+/* ─── TRACKING MODAL ─── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:2000;
+  display:none;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn .2s ease;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:#fff;border-radius:16px;max-width:560px;width:100%;
+  max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);
+  animation:modalIn .25s ease;
+}
+.modal-head{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-head h3{margin:0;font-size:17px;font-weight:800;color:var(--navy)}
+.modal-close{
+  background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;
+  width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover{background:var(--bg);color:var(--navy)}
+.modal-body{padding:22px}
+.tracking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.tracking-thumb{
+  position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);background:var(--bg);cursor:pointer;
+}
+.tracking-thumb img{width:100%;height:100%;object-fit:cover}
+.tracking-thumb .del{
+  position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;
+  background:rgba(220,38,38,.95);color:#fff;border:none;cursor:pointer;
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+}
+.tracking-thumb .del:hover{background:#991b1b}
+.upload-zone{
+  border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;
+  cursor:pointer;transition:all .15s;background:var(--bg);
+}
+.upload-zone:hover{border-color:var(--gold);background:#fff8ec}
+.upload-zone.uploading{opacity:.6;pointer-events:none}
+.upload-zone .icon{font-size:36px;display:block;margin-bottom:8px}
+.upload-zone .label{font-weight:700;color:var(--navy);font-size:14px}
+.upload-zone .sub{color:#94a3b8;font-size:12px;margin-top:4px}
+.upload-zone input{display:none}
+
+.lightbox{
+  position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;
+  display:none;align-items:center;justify-content:center;padding:30px;
+  cursor:zoom-out;
+}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 .amount{font-weight:800;font-variant-numeric:tabular-nums;color:var(--navy)}
 .amount.gold{color:var(--gold);background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -300,6 +359,7 @@ tbody tr:last-child td{border-bottom:none}
               <th>Total</th>
               <th>Commission</th>
               <th>Status</th>
+              <th>Suivi</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -336,6 +396,30 @@ tbody tr:last-child td{border-bottom:none}
     </div>
 
   </div>
+</div>
+
+<!-- ════════ TRACKING MODAL ════════ -->
+<div class="modal-backdrop" id="trackingModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📦 Suivi Sendit</h3>
+      <button class="modal-close" onclick="closeTracking()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="tracking-grid" id="trackingGrid"></div>
+      <label class="upload-zone" id="uploadZone">
+        <span class="icon">📷</span>
+        <span class="label">Ajouter un screenshot</span>
+        <span class="sub">JPG/PNG/WEBP — max 4 MB</span>
+        <input type="file" id="trackingFile" accept="image/jpeg,image/png,image/webp,image/gif">
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ LIGHTBOX ════════ -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" alt="">
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -466,12 +550,15 @@ function animVal(id, target) {
 function renderSales(sales) {
   const body = document.getElementById('salesBody');
   if (!sales.length) {
-    body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><span class="icon">📭</span>Aucune vente</div></td></tr>';
+    body.innerHTML = '<tr><td colspan="11"><div class="empty-state"><span class="icon">📭</span>Aucune vente</div></td></tr>';
     return;
   }
   body.innerHTML = sales.map(s => {
     const date = String(s.date || '').slice(0, 16).replace('T', ' ');
     const tel = s.customer_tel || '';
+    const tracks = Array.isArray(s.tracking_urls) ? s.tracking_urls : [];
+    const trackLabel = tracks.length ? `📂 ${tracks.length}` : '📷 Ajouter';
+    const trackClass = tracks.length ? 'btn-track has' : 'btn-track';
     return `
       <tr data-sale-id="${escapeHtml(s.sale_id)}">
         <td data-label="Date">${escapeHtml(date)}</td>
@@ -489,6 +576,9 @@ function renderSales(sales) {
           <select class="status-select" onchange="updateSaleStatus('${escapeHtml(s.sale_id)}', this.value, this)">
             ${STATUSES.map(st => `<option value="${st}" ${st === s.status ? 'selected' : ''}>${STATUS_LABEL[st]}</option>`).join('')}
           </select>
+        </td>
+        <td data-label="Suivi">
+          <button class="btn-sm ${trackClass}" onclick="openTracking('${escapeHtml(s.sale_id)}')">${trackLabel}</button>
         </td>
         <td data-label="Action">
           ${s.status !== 'paid' && s.status !== 'cancelled' ? `<button class="btn-sm btn-pay" onclick="quickPay('${escapeHtml(s.sale_id)}')">💰 Payer</button>` : ''}
@@ -514,6 +604,103 @@ function quickPay(saleId) {
   if (!confirm('Marquer cette vente comme PAYÉE ?')) return;
   updateSaleStatus(saleId, 'paid');
 }
+
+// ──── TRACKING ────
+let currentTrackingSaleId = null;
+
+function openTracking(saleId) {
+  currentTrackingSaleId = saleId;
+  const sale = allSales.find(s => s.sale_id === saleId);
+  const urls = (sale && sale.tracking_urls) || [];
+  renderTrackingGrid(urls);
+  document.getElementById('trackingModal').classList.add('show');
+}
+
+function closeTracking() {
+  document.getElementById('trackingModal').classList.remove('show');
+  currentTrackingSaleId = null;
+}
+
+function renderTrackingGrid(urls) {
+  const grid = document.getElementById('trackingGrid');
+  if (!urls.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;font-size:13px;padding:20px">Aucun screenshot pour le moment</div>';
+    return;
+  }
+  grid.innerHTML = urls.map((u, i) => `
+    <div class="tracking-thumb" onclick="openLightbox('${escapeHtml(u)}')">
+      <img src="${escapeHtml(u)}" alt="Suivi ${i + 1}">
+      <button class="del" onclick="event.stopPropagation();deleteTracking('${escapeHtml(u)}')" title="Supprimer">×</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('trackingFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file || !currentTrackingSaleId) return;
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('uploading');
+  const fd = new FormData();
+  fd.append('sale_id', currentTrackingSaleId);
+  fd.append('file', file);
+  try {
+    const res = await fetch('/api/admin-upload-tracking', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({ ok: false, message: 'Parse error' }));
+    if (!data.ok) {
+      toast(data.message || 'Erreur upload', 'error');
+    } else {
+      toast('Screenshot ajouté ✨', 'success');
+      const sale = allSales.find(s => s.sale_id === currentTrackingSaleId);
+      if (sale) sale.tracking_urls = data.urls || [];
+      renderTrackingGrid(data.urls || []);
+      renderSales(allSales);
+    }
+  } catch (err) {
+    toast('Erreur réseau: ' + err.message, 'error');
+  } finally {
+    zone.classList.remove('uploading');
+    e.target.value = '';
+  }
+});
+
+async function deleteTracking(url) {
+  if (!currentTrackingSaleId) return;
+  if (!confirm('Supprimer ce screenshot ?')) return;
+  const r = await api('delete_tracking', { sale_id: currentTrackingSaleId, url }, true);
+  if (!r.ok) {
+    toast(r.message || 'Erreur', 'error');
+    return;
+  }
+  toast('Screenshot supprimé', 'success');
+  const sale = allSales.find(s => s.sale_id === currentTrackingSaleId);
+  if (sale) sale.tracking_urls = r.urls || [];
+  renderTrackingGrid(r.urls || []);
+  renderSales(allSales);
+}
+
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+  document.getElementById('lightboxImg').src = '';
+}
+
+document.getElementById('trackingModal').addEventListener('click', (e) => {
+  if (e.target.id === 'trackingModal') closeTracking();
+});
+
+window.openTracking = openTracking;
+window.closeTracking = closeTracking;
+window.deleteTracking = deleteTracking;
+window.openLightbox = openLightbox;
+window.closeLightbox = closeLightbox;
 
 // ──── RENDER AFFILIATES ────
 function renderAffiliates(affs) {

@@ -1,6 +1,6 @@
 import { clean, readBody } from './_lib.js';
 import { signToken, verifyToken, bearerToken } from './_auth.js';
-import { readAdminData, updateSaleStatus, toggleAffiliateStatus } from './_sheets.js';
+import { readAdminData, updateSaleStatus, toggleAffiliateStatus, removeTrackingUrl } from './_sheets.js';
 
 const ADMIN_ID = 'admin';
 const VALID_STATUSES = ['pending', 'confirmed', 'delivered', 'paid', 'cancelled'];
@@ -61,6 +61,15 @@ export default async function handler(req, res) {
             const r = await toggleAffiliateStatus(phone, status);
             if (!r.ok) return res.status(404).json({ ok: false, message: 'Affiliée introuvable' });
             return res.status(200).json({ ok: true });
+        }
+
+        if (action === 'delete_tracking') {
+            const saleId = clean(body.sale_id, 100);
+            const url = clean(body.url, 1000);
+            if (!saleId || !url) return res.status(400).json({ ok: false, message: 'sale_id et url requis' });
+            const r = await removeTrackingUrl(saleId, url);
+            if (!r.ok) return res.status(404).json({ ok: false, message: 'Vente introuvable' });
+            return res.status(200).json({ ok: true, urls: r.urls });
         }
 
         return res.status(400).json({ ok: false, message: 'action inconnue' });

@@ -1,5 +1,5 @@
-import { forwardToSheets } from './_lib.js';
 import { verifyToken, bearerToken } from './_auth.js';
+import { getAffiliateDashboard } from './_sheets.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET' && req.method !== 'POST') {
@@ -12,26 +12,18 @@ export default async function handler(req, res) {
         return res.status(401).json({ ok: false, message: 'الجلسة انتهات. / Session expirée.' });
     }
 
-    const sheetResult = await forwardToSheets({
-        kind: 'affiliate_dashboard',
-        affiliate_id: session.affiliateId,
-    });
-
-    if (!sheetResult.ok) {
-        return res.status(500).json({ ok: false, message: 'خطأ ف السرفير. / Erreur serveur.' });
+    try {
+        const r = await getAffiliateDashboard(session.affiliateId);
+        if (!r.ok) {
+            return res.status(404).json({ ok: false, message: 'الحساب ماشي موجود. / Compte introuvable.' });
+        }
+        return res.status(200).json({
+            ok: true,
+            affiliate: r.affiliate,
+            sales: r.sales,
+            stats: r.stats,
+        });
+    } catch (err) {
+        return res.status(500).json({ ok: false, message: 'خطأ ف الجلب. / Erreur: ' + (err.message || 'inconnue') });
     }
-
-    let parsed = {};
-    try { parsed = JSON.parse(sheetResult.body); } catch {}
-
-    if (!parsed || !parsed.ok) {
-        return res.status(500).json({ ok: false, message: 'خطأ ف الجلب. / Erreur de chargement.' });
-    }
-
-    return res.status(200).json({
-        ok: true,
-        affiliate: parsed.affiliate || { id: session.affiliateId },
-        sales: parsed.sales || [],
-        stats: parsed.stats || { count: 0, total_mad: 0, commission_mad: 0, commission_paid: 0, commission_pending: 0 },
-    });
 }
