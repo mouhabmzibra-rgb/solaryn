@@ -179,6 +179,8 @@ tbody tr:last-child td{border-bottom:none}
 .btn-track:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
 .btn-track.has{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;border-style:solid;border-color:var(--gold)}
 .online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 0 3px rgba(40,160,90,.18);vertical-align:middle;animation:pulse 1.6s ease-in-out infinite}
+.link-cell{background:none;border:none;padding:6px 8px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;color:var(--navy);text-align:left;transition:background .15s;display:inline-flex;align-items:center;gap:4px}
+.link-cell:hover{background:var(--bg);color:var(--gold)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(40,160,90,.18)}50%{box-shadow:0 0 0 6px rgba(40,160,90,.05)}}
 
 /* ─── TRACKING MODAL ─── */
@@ -582,7 +584,7 @@ function renderSales(sales) {
       <tr data-sale-id="${escapeHtml(s.sale_id)}">
         <td data-label="Date">${escapeHtml(date)}</td>
         <td data-label="Affiliée"><div class="aff-name">${escapeHtml(s.affiliate_nom || '')}</div><div class="aff-meta">${escapeHtml(s.affiliate_phone || '')}</div></td>
-        <td data-label="Client"><strong>${escapeHtml(s.customer_nom || '')}</strong></td>
+        <td data-label="Client"><button class="link-cell" onclick="openTracking('${escapeHtml(s.sale_id)}')" title="Voir tous les détails">👁️ <strong>${escapeHtml(s.customer_nom || '')}</strong></button></td>
         <td data-label="Ville">${escapeHtml(s.customer_ville || '')}</td>
         <td data-label="Tel">
           <a href="tel:+${escapeHtml(tel.replace(/[^0-9]/g, ''))}" class="tel-link">${escapeHtml(tel)}</a>
