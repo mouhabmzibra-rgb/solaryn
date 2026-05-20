@@ -57,10 +57,35 @@ export default async function handler(req, res) {
     const affiliateId = parsed.affiliate_id || phoneNormalized;
     const token = signToken(affiliateId);
 
+    await tryAddToWhatsAppGroup(phoneNormalized);
+
     return res.status(200).json({
         ok: true,
         message: 'مرحبا بيك ف Solaryn 🌞 / Bienvenue chez Solaryn 🌞',
         token,
         affiliate: { id: affiliateId, nom, tel: phoneNormalized, ville },
     });
+}
+
+async function tryAddToWhatsAppGroup(phone) {
+    const url = process.env.WHATSAPP_BOT_URL;
+    const token = process.env.WHATSAPP_BOT_TOKEN;
+    if (!url || !token) return;
+
+    const intl = phone.startsWith('0') ? '212' + phone.slice(1) : phone.replace(/^\+/, '');
+
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+        await fetch(`${url}/add-to-group`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone: intl }),
+            signal: controller.signal,
+        });
+        clearTimeout(timeout);
+    } catch {}
 }
