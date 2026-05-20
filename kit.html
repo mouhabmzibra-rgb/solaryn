@@ -144,19 +144,72 @@ section{margin-bottom:36px;scroll-margin-top:70px}
 .step-body h4{margin:0 0 6px;font-size:15px;color:var(--navy);font-weight:800}
 .step-body p{margin:0;font-size:14px;color:#3a3520;line-height:1.7}
 
-/* ─── VISUAL CHECKLIST ─── */
-.visuals-list{list-style:none;padding:0;margin:0}
-.visuals-list li{
+/* ─── VISUALS GALLERY ─── */
+.sub-title{
+  font-size:15px;font-weight:800;color:var(--navy);
+  margin:24px 0 12px;padding-right:10px;border-right:3px solid var(--gold);
+}
+.visuals-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px;
+}
+.visuals-grid.stories{grid-template-columns:repeat(3,1fr)}
+@media (max-width:560px){
+  .visuals-grid{grid-template-columns:repeat(2,1fr)}
+  .visuals-grid.stories{grid-template-columns:repeat(2,1fr)}
+}
+.visual-card{
   background:#fff;border:1px solid var(--border);border-radius:12px;
-  padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;
+  overflow:hidden;box-shadow:var(--shadow);
 }
-.visuals-list .icon{
-  width:36px;height:36px;border-radius:8px;background:var(--cream-deep);
-  color:var(--gold);display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;
+.visual-card img{width:100%;aspect-ratio:1/1.2;object-fit:cover;display:block}
+.visuals-grid.stories .visual-card img{aspect-ratio:9/16}
+.visual-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;gap:6px;font-size:12px;
 }
-.visuals-list .v-title{font-weight:800;color:var(--navy);font-size:14px}
-.visuals-list .v-desc{font-size:13px;color:var(--muted);margin-top:3px}
+.v-ratio{color:var(--muted);font-weight:700;font-size:11px}
+.dl-btn{
+  background:var(--navy);color:#fff;padding:6px 12px;border-radius:8px;
+  font-weight:800;font-size:12px;text-decoration:none;white-space:nowrap;
+  transition:background .15s;
+}
+.dl-btn:hover{background:var(--gold);text-decoration:none}
+.dl-btn-block{
+  display:block;text-align:center;background:var(--gradient-gold);color:#fff;
+  padding:12px 18px;border-radius:12px;font-weight:800;font-size:14px;
+  text-decoration:none;margin-top:6px;
+}
+.dl-btn-block:hover{text-decoration:none;opacity:.9}
+
+.video-card{
+  background:#000;border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow);margin-bottom:8px;
+}
+.video-card video{width:100%;display:block;max-height:60vh}
+
+.carousel-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+  overflow-x:auto;padding-bottom:6px;margin-bottom:8px;
+}
+@media (max-width:560px){.carousel-grid{grid-template-columns:repeat(2,1fr)}}
+.carousel-slide{
+  position:relative;border-radius:8px;overflow:hidden;
+  border:1px solid var(--border);background:#fff;
+}
+.carousel-slide img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.carousel-slide .num{
+  position:absolute;top:6px;right:6px;
+  background:var(--navy);color:#fff;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:11px;
+}
+
+.empty-card{
+  background:var(--cream-deep);border:1px dashed var(--border);
+  border-radius:12px;padding:18px;text-align:center;
+  color:var(--muted);font-size:13px;line-height:1.7;
+}
+.empty-card strong{color:var(--navy)}
 
 /* ─── CTA FOOTER ─── */
 .cta-foot{
@@ -390,46 +443,103 @@ Solaryn SPF 50 — طبيعي 100% 🇲🇦
   <section id="visuals">
     <div class="section-head">
       <h2>🖼️ الصور و الفيديوهات</h2>
-      <span class="badge">للنشر</span>
+      <span class="badge">جاهزة للتحميل</span>
     </div>
-    <p class="section-intro">هاد الصور غادي توصلوك منا فال WhatsApp. انسخيها واستعمليها فالنشر.</p>
-    <ul class="visuals-list">
-      <li>
-        <div class="icon">📸</div>
-        <div>
-          <div class="v-title">صورة المنتوج (1:1)</div>
-          <div class="v-desc">للنشر فال WhatsApp و Instagram posts</div>
+    <p class="section-intro">
+      كليكي على <strong>"تحميل"</strong> باش تحملي الصورة، ومن بعد نشريها فال WhatsApp Status, Stories Instagram, Facebook.<br>
+      💡 <em>نصيحة:</em> استعملي صورة وحدة كل نهار باش تخلي الناس يشوفوها بزاف ديال المرات.
+    </p>
+
+    <h3 class="sub-title">📸 صور المنتوج (للنشر فال posts)</h3>
+    <div class="visuals-grid">
+      <div class="visual-card">
+        <img src="/assets/images/opt/gallery-1.webp" alt="Solaryn produit" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Post</span>
+          <a class="dl-btn" href="/assets/images/opt/gallery-1.webp" download="solaryn-1.webp">📥 تحميل</a>
         </div>
-      </li>
-      <li>
-        <div class="icon">📱</div>
-        <div>
-          <div class="v-title">صورة Status (9:16)</div>
-          <div class="v-desc">للنشر فال WhatsApp Status و Instagram Stories</div>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/product-detail.webp" alt="Solaryn produit" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Post</span>
+          <a class="dl-btn" href="/assets/images/opt/product-detail.webp" download="solaryn-2.webp">📥 تحميل</a>
         </div>
-      </li>
-      <li>
-        <div class="icon">🎥</div>
-        <div>
-          <div class="v-title">فيديو قصير 15-30 ثانية</div>
-          <div class="v-desc">للنشر فال Reels و Stories</div>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/product-1.webp" alt="Solaryn pharmacie" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Post</span>
+          <a class="dl-btn" href="/assets/images/opt/product-1.webp" download="solaryn-3.webp">📥 تحميل</a>
         </div>
-      </li>
-      <li>
-        <div class="icon">🔄</div>
-        <div>
-          <div class="v-title">كاروسيل 5 شرائح Instagram</div>
-          <div class="v-desc">يشرح المنتوج بشكل احترافي</div>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/product-2.webp" alt="Solaryn produit" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Post</span>
+          <a class="dl-btn" href="/assets/images/opt/product-2.webp" download="solaryn-4.webp">📥 تحميل</a>
         </div>
-      </li>
-      <li>
-        <div class="icon">⭐</div>
-        <div>
-          <div class="v-title">قبل / بعد و شهادات الزبونات</div>
-          <div class="v-desc">+50% فالمصداقية و معدل البيع</div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">📲 صور Status WhatsApp / Stories Instagram (9:16)</h3>
+    <div class="visuals-grid stories">
+      <div class="visual-card">
+        <img src="/assets/images/opt/lifestyle-1.webp" alt="Une peau protégée" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Status</span>
+          <a class="dl-btn" href="/assets/images/opt/lifestyle-1.webp" download="solaryn-status-1.webp">📥 تحميل</a>
         </div>
-      </li>
-    </ul>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/lifestyle-2.webp" alt="Soleil oui défauts non" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Status</span>
+          <a class="dl-btn" href="/assets/images/opt/lifestyle-2.webp" download="solaryn-status-2.webp">📥 تحميل</a>
+        </div>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/lifestyle-3.webp" alt="Le soin solaire" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Status</span>
+          <a class="dl-btn" href="/assets/images/opt/lifestyle-3.webp" download="solaryn-status-3.webp">📥 تحميل</a>
+        </div>
+      </div>
+      <div class="visual-card">
+        <img src="/assets/images/opt/lifestyle.webp" alt="Protège Hydrate Sublime" loading="lazy">
+        <div class="visual-meta">
+          <span class="v-ratio">📱 Status</span>
+          <a class="dl-btn" href="/assets/images/opt/lifestyle.webp" download="solaryn-status-4.webp">📥 تحميل</a>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">🎥 فيديو قصير (للنشر فال Reels / Stories)</h3>
+    <div class="video-card">
+      <video controls preload="metadata" playsinline poster="/assets/images/opt/lifestyle.webp">
+        <source src="/assets/images/solaryn-video.mp4" type="video/mp4">
+      </video>
+      <a class="dl-btn-block" href="/assets/images/solaryn-video.mp4" download="solaryn-video.mp4">📥 تحميل الفيديو</a>
+    </div>
+
+    <h3 class="sub-title">🔄 كاروسيل Instagram (5 شرائح)</h3>
+    <p class="section-intro">
+      حملي هاد 5 صور وحملي واحدة بواحدة فبوست كاروسيل واحد فل Instagram (Swipe →).
+    </p>
+    <div class="carousel-grid">
+      <div class="carousel-slide"><span class="num">1</span><img src="/assets/images/opt/product-detail.webp" loading="lazy"></div>
+      <div class="carousel-slide"><span class="num">2</span><img src="/assets/images/opt/lifestyle-1.webp" loading="lazy"></div>
+      <div class="carousel-slide"><span class="num">3</span><img src="/assets/images/opt/lifestyle-2.webp" loading="lazy"></div>
+      <div class="carousel-slide"><span class="num">4</span><img src="/assets/images/opt/lifestyle-3.webp" loading="lazy"></div>
+      <div class="carousel-slide"><span class="num">5</span><img src="/assets/images/opt/gallery-1.webp" loading="lazy"></div>
+    </div>
+    <a class="dl-btn-block" id="dlCarousel" href="#" download>📥 تحميل الـ 5 صور دفعة وحدة</a>
+
+    <h3 class="sub-title">⭐ قبل / بعد و شهادات الزبونات</h3>
+    <div class="empty-card">
+      🚧 <strong>قريبا</strong><br>
+      <span>غادي نضيفو هنا صور حقيقية ديال الزبونات بعد ما يجربو المنتوج. إلا عندك أنتي صحبات استعملو Solaryn، صيفطيلنا الصور و الشهادة ديالهم — غادي نشاركوها مع الكل.</span>
+    </div>
   </section>
 
   <!-- ═════ CTA FOOTER ═════ -->
@@ -480,6 +590,40 @@ function showToast(msg) {
 if (typeof gtag === 'function') {
   gtag('event', 'kit_view', { source: 'direct' });
 }
+
+const carouselUrls = [
+  '/assets/images/opt/product-detail.webp',
+  '/assets/images/opt/lifestyle-1.webp',
+  '/assets/images/opt/lifestyle-2.webp',
+  '/assets/images/opt/lifestyle-3.webp',
+  '/assets/images/opt/gallery-1.webp',
+];
+
+document.getElementById('dlCarousel').addEventListener('click', (e) => {
+  e.preventDefault();
+  carouselUrls.forEach((url, i) => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `solaryn-carousel-${i + 1}.webp`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }, i * 250);
+  });
+  showToast('✓ 5 صور كيتحمّلو...');
+  if (typeof gtag === 'function') {
+    gtag('event', 'kit_carousel_downloaded');
+  }
+});
+
+document.querySelectorAll('.dl-btn, .dl-btn-block').forEach(el => {
+  el.addEventListener('click', () => {
+    if (typeof gtag === 'function') {
+      gtag('event', 'kit_visual_downloaded', { file: el.getAttribute('download') || el.href });
+    }
+  });
+});
 </script>
 
 </body>
