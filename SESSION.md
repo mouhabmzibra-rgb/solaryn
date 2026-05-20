@@ -1,10 +1,10 @@
 # Session — 2026-05-20
 
 ## Active goal
-Solaryn affiliate platform — currently blocked on WhatsApp bot session corruption preventing DM delivery to affiliates.
+Auto-add new affiliates to the Solaryn WhatsApp group on registration.
 
 ## Status
-**Blocked** — awaiting user confirmation to wipe `solaryn-bot` auth state on Fly and re-pair via QR scan.
+**Awaiting user** — needs Vercel env vars added before the new code does anything in production.
 
 ## Done this session
 - Migrated `/api/admin` from Apps Script webhook to direct Google Sheets API (commit `07e6d9c`).
@@ -21,19 +21,27 @@ Solaryn affiliate platform — currently blocked on WhatsApp bot session corrupt
 - Created Solaryn WhatsApp group via Baileys bot on Fly. Chat ID `120363426897628087@g.us`, invite link `https://chat.whatsapp.com/BabdgzeNwwL8K7ApZhCzZQ`. Only 13/20 actually joined (others have privacy restrictions).
 - Added `/send-message` + `/check-phone` endpoints to bot (`solaryn-bot/server.js`, deployed on Fly).
 - Sent 19 DMs via bot — Baileys returned success with `messageId` but messages **don't appear in user's WhatsApp** and likely weren't delivered.
+- Bot session corruption appears resolved after machine cold-start: `state=connected` confirmed via `/health` 2026-05-20.
+- Added `POST /add-to-group` to `solaryn-bot/server.js` (Baileys `groupParticipantsUpdate`, parses status 200/403/408/409). Deployed to Fly.
+- Set Fly secrets: `WHATSAPP_GROUP_JID=120363426897628087@g.us`, `WHATSAPP_GROUP_INVITE=https://chat.whatsapp.com/BabdgzeNwwL8K7ApZhCzZQ`.
+- Smoke-tested `/add-to-group` with fake number → returns `{ok:false, status:"not_on_whatsapp"}` as expected.
+- `api/affiliate-register.js` now calls bot `/add-to-group` after successful registration (non-blocking, 4s timeout, errors swallowed). Commit `3e80cc4` pushed.
 
 ## In progress
-- Diagnosing bot DM delivery. Logs show Signal session corruption: `PreKeyError: Invalid PreKey ID`, `No session found to decrypt message`, `unexpected error in 'init queries' — Timed Out`. Conclusion: bot's encryption sessions are stale → it generates fake messageIds without actually shipping messages.
+- Awaiting user to set `WHATSAPP_BOT_URL` + `WHATSAPP_BOT_TOKEN` env vars on Vercel before code becomes active.
+- End-to-end test pending: register a fresh affiliate and verify they appear in the group (or that bot logs privacy block).
 
 ## Blockers / pending decisions
-- Need user OK to wipe `/data/auth` on `solaryn-bot` Fly app, restart machine, present new QR for user to scan with their WhatsApp.
+- User must add 2 env vars on Vercel dashboard (Project → Settings → Environment Variables → Production):
+  - `WHATSAPP_BOT_URL=https://solaryn-bot.fly.dev`
+  - `WHATSAPP_BOT_TOKEN=<value from `flyctl ssh console -a solaryn-bot -C 'printenv BOT_TOKEN'`>`
 
 ## Next step
-1. Wipe Fly bot auth dir.
-2. Restart machine; verify bot enters `qr` state.
-3. Get new QR URL: `https://solaryn-bot.fly.dev/qr?token=<BOT_TOKEN>` — user scans with their WhatsApp (Settings → Linked Devices).
-4. Once `state=connected`, re-run `/tmp/send_invites.py` to DM the 19 affiliates with group invite + kit link.
-5. Verify user sees DMs in their WhatsApp before declaring success.
+1. User adds the 2 Vercel env vars (Production scope).
+2. Vercel auto-deploys (already pushed commit `3e80cc4` to main).
+3. Register a test affiliate via `https://solaryn-five.vercel.app/affiliates`.
+4. Verify in WhatsApp group OR check bot logs (`flyctl logs -a solaryn-bot`) for `add-to-group result` entry.
+5. If privacy block is common (likely), add fallback later: DM invite link to the affiliate.
 
 ## Context the next session needs
 - **Repo:** `/Users/a2024/solaryn`, GitHub `mouhabmzibra-rgb/solaryn`, main branch.
@@ -50,6 +58,6 @@ Solaryn affiliate platform — currently blocked on WhatsApp bot session corrupt
 - ⚠️ **Rotate the leaked service account key** `670f854a...` (user pasted full private_key in chat earlier this session). Memory: `feedback_solaryn_product_claims.md`. Action: GCP Console → IAM → Service Accounts → `solaryn-admin-sheets` → KEYS → delete that key → create new → update `GOOGLE_SERVICE_ACCOUNT_JSON` on Vercel.
 - 🐛 `api/affiliate-sale.js` rejects `quantite` as a JS number (validation accepts only strings). Frontend likely sends a number → silent failure mode. Add `Number(quantite)` parsing on backend.
 - 🐛 Customer `customer_tel` loses leading `0` because Google Sheets treats it as number. Prefix with `'` in Apps Script writer, or store as text formatted column.
-- 🤖 Once bot is re-paired, automate: on `/api/affiliate-register` success, fire-and-forget POST to bot `/send-message` with welcome + group invite + kit link.
+- 🤖 (Optional next step) On `/api/affiliate-register` success, *also* DM the new affiliate with welcome + kit link (currently only the silent group-add is wired). Use bot `/send-message`.
 - 🎨 No customer testimonials in `/kit` yet — placeholder "à venir" section. Add when first happy customers send reviews.
 - 📦 Plugins to install (user's choice): `marketing-skills`, `business-growth-skills`, `landing`, `product-skills`, `executive-mentor` from `alirezarezvani/claude-skills`. Commands prepared but not yet run.
