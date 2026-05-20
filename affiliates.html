@@ -254,6 +254,20 @@ textarea{min-height:70px;resize:vertical}
 html[dir="rtl"] .big-cta:hover .big-cta-arrow{transform:translateX(-4px)}
 html[dir="rtl"] .big-cta-arrow{transform:scaleX(-1)}
 
+.kit-cta{
+  display:flex;align-items:center;gap:14px;background:#fff;
+  border:1px dashed var(--gold);border-radius:16px;padding:14px 16px;
+  text-decoration:none;color:var(--navy);margin-bottom:18px;
+  transition:all .15s;box-shadow:0 4px 12px rgba(27,45,77,.05);
+}
+.kit-cta:hover{background:#fffaf0;border-style:solid;transform:translateY(-1px);box-shadow:0 8px 20px rgba(200,152,96,.18)}
+.kit-cta-icon{font-size:28px;line-height:1}
+.kit-cta-text{flex:1}
+.kit-cta-title{font-weight:800;font-size:15px;color:var(--navy)}
+.kit-cta-sub{font-size:12px;color:#7a7160;margin-top:2px;font-weight:600}
+.kit-cta-arrow{color:var(--gold);font-weight:900;font-size:18px}
+html[dir="ltr"] .kit-cta-arrow{transform:scaleX(-1)}
+
 /* ─── ACHIEVEMENTS ─── */
 .achievements{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none}
 .achievements::-webkit-scrollbar{display:none}
@@ -524,6 +538,15 @@ html[dir="ltr"] .sale-item::before{left:0;border-radius:0 4px 4px 0}
       <div class="big-cta-arrow">→</div>
     </button>
 
+    <a class="kit-cta" href="/kit" target="_blank">
+      <span class="kit-cta-icon">📦</span>
+      <div class="kit-cta-text">
+        <div class="kit-cta-title" data-i18n="kitCtaTitle">Kit ديال الإنطلاق</div>
+        <div class="kit-cta-sub" data-i18n="kitCtaSub">رسائل جاهزة + جوابات الزبناء + خطة 3 ساعات</div>
+      </div>
+      <span class="kit-cta-arrow">←</span>
+    </a>
+
     <!-- SALE FORM -->
     <div id="saleFormCard" class="sale-form-card hidden">
       <div class="card-title">
@@ -604,6 +627,7 @@ const I18N = {
     statSales: 'بيعات', statTotal: 'المجموع MAD',
     statPending: 'معلقة MAD', statPaid: 'مخلصة MAD',
     ctaSaleTitle: 'زيدي بيعة جديدة', ctaSaleSub: '+50 درهم على كل قطعة 💸',
+    kitCtaTitle: 'Kit ديال الإنطلاق', kitCtaSub: 'رسائل جاهزة + جوابات الزبناء + خطة 3 ساعات',
     saleTitle: 'بيعة جديدة',
     lblCustName: '👤 سمية الزبون', lblCustPhone: '📱 رقم الزبون', lblCustCity: '🏙️ المدينة',
     lblCustAddress: '📍 العنوان', lblQty: '📦 الكمية', lblNotes: '📝 ملاحظات',
@@ -635,6 +659,7 @@ const I18N = {
     statSales: 'Ventes', statTotal: 'Total MAD',
     statPending: 'En attente MAD', statPaid: 'Payée MAD',
     ctaSaleTitle: 'Nouvelle vente', ctaSaleSub: '+50 DH par produit 💸',
+    kitCtaTitle: 'Kit de démarrage', kitCtaSub: 'Messages prêts + FAQ + plan 3 heures',
     saleTitle: 'Nouvelle vente',
     lblCustName: '👤 Nom client', lblCustPhone: '📱 Tel client', lblCustCity: '🏙️ Ville',
     lblCustAddress: '📍 Adresse', lblQty: '📦 Quantité', lblNotes: '📝 Notes',

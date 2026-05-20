@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1B2D4D">
+<title>🌞 Solaryn — Kit ديال الإنطلاق</title>
+<meta name="description" content="كل اللي خاصك تبيعي من اليوم الأول مع Solaryn">
+<meta name="robots" content="noindex,nofollow">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C2C8ZJP45L"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C2C8ZJP45L');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#1B2D4D;--navy-deep:#0f1a30;
+  --gold:#C89860;--gold-light:#e8c489;
+  --cream:#FFFAF0;--cream-deep:#fef3df;
+  --green:#28a05a;--red:#dc2626;
+  --border:#e8dcc0;--ink:#1B2D4D;--muted:#7a7160;
+  --shadow:0 4px 16px rgba(27,45,77,.08);
+  --shadow-lg:0 16px 40px rgba(27,45,77,.18);
+  --gradient-gold:linear-gradient(135deg,#C89860,#e8c489);
+}
+html,body{margin:0;padding:0;font-family:'Cairo',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;font-size:15px}
+img{max-width:100%;display:block}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ─── HERO ─── */
+.hero{
+  background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
+  color:#fff;padding:36px 22px 30px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-50%;left:-20%;width:80%;height:200%;
+  background:radial-gradient(circle,rgba(200,152,96,.18),transparent 70%);pointer-events:none;
+}
+.hero-content{position:relative;z-index:1;max-width:780px;margin:0 auto;text-align:center}
+.hero h1{font-size:30px;font-weight:900;margin:0 0 8px;line-height:1.2}
+.hero h1 .gold{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{opacity:.85;font-size:15px;margin:0 0 18px;font-weight:600}
+.hero-goal{
+  background:rgba(255,255,255,.08);border:1px solid rgba(200,152,96,.4);
+  border-radius:14px;padding:14px 18px;display:inline-block;margin-top:8px;
+}
+.hero-goal strong{color:var(--gold-light)}
+
+/* ─── NAV ─── */
+.toc{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:14px 16px;position:sticky;top:0;z-index:100;overflow-x:auto;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.toc::-webkit-scrollbar{display:none}
+.toc-inner{display:flex;gap:8px;max-width:780px;margin:0 auto;white-space:nowrap}
+.toc a{
+  background:var(--cream);color:var(--navy);
+  padding:8px 14px;border-radius:20px;font-weight:700;font-size:13px;
+  border:1px solid var(--border);flex-shrink:0;text-decoration:none;
+}
+.toc a:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ─── CONTENT ─── */
+.container{max-width:780px;margin:0 auto;padding:24px 16px 80px}
+section{margin-bottom:36px;scroll-margin-top:70px}
+.section-head{
+  display:flex;align-items:center;gap:10px;margin:0 0 14px;
+  border-right:4px solid var(--gold);padding-right:12px;
+}
+.section-head h2{margin:0;font-size:20px;font-weight:900;color:var(--navy)}
+.section-head .badge{
+  background:var(--gradient-gold);color:#fff;
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;
+}
+.section-intro{color:var(--muted);font-size:14px;margin:0 0 14px;line-height:1.6}
+
+/* ─── CARD ─── */
+.card{
+  background:#fff;border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:14px;
+}
+.card-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;gap:10px;
+}
+.card-title{font-weight:800;font-size:16px;color:var(--navy);margin:0}
+.card-label{
+  background:var(--cream);color:var(--muted);
+  padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;
+}
+
+.msg-block{
+  position:relative;background:var(--cream);border:1px dashed var(--border);
+  border-radius:12px;padding:16px;white-space:pre-wrap;font-size:14px;
+  line-height:1.8;color:#3a3520;font-family:'Cairo',sans-serif;
+}
+.copy-btn{
+  background:var(--navy);color:#fff;border:none;cursor:pointer;
+  padding:10px 18px;border-radius:10px;font-weight:800;font-size:13px;
+  font-family:inherit;transition:all .15s;display:inline-flex;
+  align-items:center;gap:6px;margin-top:10px;
+}
+.copy-btn:hover{background:var(--gold);transform:translateY(-1px)}
+.copy-btn.copied{background:var(--green)}
+.copy-btn.copied::after{content:'✓ تنسخات'}
+.copy-btn.copied .lbl{display:none}
+
+/* ─── FAQ TABLE ─── */
+.faq-table{
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+}
+.faq-row{
+  display:grid;grid-template-columns:1fr 2fr;
+  border-bottom:1px solid var(--border);
+}
+.faq-row:last-child{border-bottom:none}
+.faq-row > div{padding:12px 16px;font-size:13.5px}
+.faq-q{font-weight:800;color:var(--navy);background:var(--cream)}
+.faq-a{color:#3a3520}
+@media (max-width:560px){
+  .faq-row{grid-template-columns:1fr}
+  .faq-q{border-bottom:1px solid var(--border)}
+}
+
+/* ─── PLAN STEPS ─── */
+.step{
+  display:flex;gap:14px;background:#fff;border:1px solid var(--border);
+  border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;
+}
+.step-num{
+  width:44px;height:44px;border-radius:50%;background:var(--gradient-gold);
+  color:#fff;font-weight:900;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-body h4{margin:0 0 6px;font-size:15px;color:var(--navy);font-weight:800}
+.step-body p{margin:0;font-size:14px;color:#3a3520;line-height:1.7}
+
+/* ─── VISUAL CHECKLIST ─── */
+.visuals-list{list-style:none;padding:0;margin:0}
+.visuals-list li{
+  background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;
+}
+.visuals-list .icon{
+  width:36px;height:36px;border-radius:8px;background:var(--cream-deep);
+  color:var(--gold);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.visuals-list .v-title{font-weight:800;color:var(--navy);font-size:14px}
+.visuals-list .v-desc{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* ─── CTA FOOTER ─── */
+.cta-foot{
+  background:var(--navy);color:#fff;border-radius:18px;padding:24px;
+  text-align:center;margin-top:24px;
+}
+.cta-foot h3{margin:0 0 10px;font-size:18px;color:var(--gold-light)}
+.cta-foot p{margin:0 0 16px;opacity:.85;font-size:14px}
+.cta-foot a{
+  display:inline-block;background:var(--gradient-gold);color:#fff;
+  padding:12px 24px;border-radius:12px;font-weight:800;text-decoration:none;
+}
+
+/* ─── DASHBOARD LINK ─── */
+.dash-link{
+  display:flex;align-items:center;gap:10px;background:var(--cream-deep);
+  border:1px dashed var(--gold);border-radius:12px;padding:12px 16px;
+  margin-top:14px;color:var(--navy);font-weight:700;font-size:14px;
+}
+.dash-link .arr{margin-right:auto;color:var(--gold)}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:28px 0}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--navy-deep);color:#fff;padding:12px 22px;border-radius:30px;
+  font-weight:700;box-shadow:var(--shadow-lg);z-index:1000;
+  opacity:0;transition:opacity .3s;font-size:14px;
+}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ═════ HERO ═════ -->
+<div class="hero">
+  <div class="hero-content">
+    <h1>🌞 مرحبا فعائلة <span class="gold">Solaryn</span></h1>
+    <p class="hero-sub">كلش اللي خاصك تبيعي من اليوم الأول — جاهز نسخ ولصق</p>
+    <div class="hero-goal">
+      🎯 <strong>الهدف ديالك ف 24 ساعة:</strong> 3 رسائل = 1 بيعة (50 درهم 💰)
+    </div>
+  </div>
+</div>
+
+<!-- ═════ NAV ═════ -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#welcome">💛 ترحيب</a>
+    <a href="#messages">📩 رسائل جاهزة</a>
+    <a href="#faq">❓ أسئلة الزبناء</a>
+    <a href="#plan">⏰ خطة 3 ساعات</a>
+    <a href="#visuals">🖼️ الصور</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═════ 1. WELCOME ═════ -->
+  <section id="welcome">
+    <div class="section-head">
+      <h2>أهلا بيك</h2>
+      <span class="badge">ابدي هنا</span>
+    </div>
+    <p class="section-intro">
+      دابا أنتي رسميا <strong>revendeuse</strong> ديال Solaryn. كنا فرحانين بيك! 💛<br>
+      📌 <strong>القاعدة الذهبية:</strong> ما تكتبي حتى رسالة من راسك فالبداية. غير نسخ ولصق من هاد الكيت،
+      حتى توّلفي وتعرفي اللي كيخدم معاك.
+    </p>
+    <a class="dash-link" href="/affiliates" target="_blank">
+      📊 <span>كاين عندك dashboard خاص بيك — سجلي البيعات و شوفي العمولة ديالك</span>
+      <span class="arr">←</span>
+    </a>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═════ 2. MESSAGES ═════ -->
+  <section id="messages">
+    <div class="section-head">
+      <h2>📩 رسائل جاهزة</h2>
+      <span class="badge">5 نماذج</span>
+    </div>
+    <p class="section-intro">
+      كليكي على <strong>"نسخ"</strong> فوق كل رسالة، بدّلي <code>[الإسم]</code> بإسم الزبونة، و سيفطيها على WhatsApp.
+    </p>
+
+    <div class="card">
+      <div class="card-head"><h3 class="card-title">#1 — لصاحبة قريبة</h3><span class="card-label">الأقرب أول</span></div>
+      <div class="msg-block" id="msg-1">سلام [الإسم] 💛
+كيداير(ة) ❤️
+
+عندي خبر زوين بغيت نقول ليك: ولّيت كنخدم *revendeuse* مع مارك مغربية ديال الكريم الواقي من الشمس، اسمها *سولاريان* 🌞
+
+المنتوج خطير و طبيعي 100%، و الناس كيشريوه بزاف. حبيت نشاركك المنتوج فحال ما ديما كنشاركك كل حاجة زوينة 😊
+
+شوفي الصورة 👇
+
+الثمن 199 درهم، و التوصيل لكاع المغرب مجاني، الخلاص عند الاستلام 💯
+
+إلا بغيتي تجربي، قولي ليا و نوصلوه ليك ❤️</div>
+      <button class="copy-btn" data-target="msg-1"><span class="lbl">📋 نسخ الرسالة</span></button>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 class="card-title">#2 — فمجموعة WhatsApp ديال الفاميلا</h3><span class="card-label">للمجموعات</span></div>
+      <div class="msg-block" id="msg-2">🌞 *عرض خاص بناتي* 🌞
+
+كنشارك معاكم اليوم منتوج مغربي زوين كنخدم معاه:
+
+✨ *Solaryn — كريم واقي من الشمس SPF 50*
+✨ طبيعي 100%، آمن للحامل والطفل
+✨ كيحمي البشرة من البقع، الشيخوخة، وحرارة الشمس
+✨ مناسب لكاع نوع البشرة (دهنية، جافة، حساسة)
+
+💰 الثمن: 199 درهم فقط
+🚚 التوصيل مجاني فجميع المدن
+💵 الخلاص عند الاستلام
+
+اللي بغات تطلب، تسيفطلي رسالة خاصة 💌</div>
+      <button class="copy-btn" data-target="msg-2"><span class="lbl">📋 نسخ الرسالة</span></button>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 class="card-title">#3 — DM Instagram / Facebook (cold)</h3><span class="card-label">لشخص ما تعرفيهش</span></div>
+      <div class="msg-block" id="msg-3">سلام 💛
+
+تفرجت فالبروفايل ديالك و عجبني الذوق ديالك ✨
+
+عندي مارك ديال الكريم الواقي من الشمس مغربية، طبيعية 100%، حبيت نقترح عليك تجربيها. كثير ديال البنات اللي كيهتمو بالبشرة كيشريوها معايا و كيبقاو راضيات 🌞
+
+199 درهم، توصيل لكاع المغرب، خلاص كاش عند الاستلام.
+
+واش ممكن نوصلهالك؟ 😊</div>
+      <button class="copy-btn" data-target="msg-3"><span class="lbl">📋 نسخ الرسالة</span></button>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 class="card-title">#4 — WhatsApp Status / Story</h3><span class="card-label">للنشر</span></div>
+      <div class="msg-block" id="msg-4">🌞 ولّيت كنبيع المنتوج اللي بدّل البشرة ديالي
+
+Solaryn SPF 50 — طبيعي 100% 🇲🇦
+
+199 درهم • توصيل مجاني • خلاص كاش
+
+⬇️ سيفطيلي PM</div>
+      <button class="copy-btn" data-target="msg-4"><span class="lbl">📋 نسخ الرسالة</span></button>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 class="card-title">#5 — تذكير لزبونة ماجاوبتش (بعد 24 ساعة)</h3><span class="card-label">تذكير</span></div>
+      <div class="msg-block" id="msg-5">سلام [الإسم] 🌞
+
+غير كنطمأن عليك. بقيتي مهتمة بـ Solaryn ولا لا؟
+
+إلا عندك شي سؤال، أنا هنا. و إلا بغيتي تطلبي دابا، التوصيل غادي يبدا غدا 💛</div>
+      <button class="copy-btn" data-target="msg-5"><span class="lbl">📋 نسخ الرسالة</span></button>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═════ 3. FAQ ═════ -->
+  <section id="faq">
+    <div class="section-head">
+      <h2>❓ أسئلة الزبناء و الجوابات</h2>
+      <span class="badge">10 أسئلة</span>
+    </div>
+    <p class="section-intro">احفظي هاد الأسئلة باش تجاوبي بسرعة وثقة على الزبون.</p>
+    <div class="faq-table">
+      <div class="faq-row"><div class="faq-q">شحال الثمن؟</div><div class="faq-a">199 درهم فقط، التوصيل مجاني 🚚</div></div>
+      <div class="faq-row"><div class="faq-q">واش طبيعي؟</div><div class="faq-a">إيه 100% طبيعي، فيه زيت Argan و Aloe Vera، ما فيه شي مواد كيميائية مضرة ✅</div></div>
+      <div class="faq-row"><div class="faq-q">واش كيخدم بصح؟</div><div class="faq-a">إيه! SPF 50، كيحمي البشرة من 98% ديال أشعة الشمس. خاصة لبشرتك إلى عندك بقع ولا حساسية للشمس</div></div>
+      <div class="faq-row"><div class="faq-q">واش كيخلي البشرة بيضا؟</div><div class="faq-a">لا، ما كيبيضش البشرة. كيوحدها وكينقي البقع الناتجة على الشمس</div></div>
+      <div class="faq-row"><div class="faq-q">واش مناسب لبشرتي الدهنية؟</div><div class="faq-a">إيه 100%. مكوناته light، ما كيتركش لمعة، و كيمتص بسرعة</div></div>
+      <div class="faq-row"><div class="faq-q">واش مناسب للحامل والطفل؟</div><div class="faq-a">إيه. طبيعي 100%، آمن للحامل والمرضعة وحتى للأطفال من 6 شهور</div></div>
+      <div class="faq-row"><div class="faq-q">كيفاش نخلّص؟</div><div class="faq-a">عند الاستلام، كاش لشركة التوصيل 💵</div></div>
+      <div class="faq-row"><div class="faq-q">فاش غادي يجيني؟</div><div class="faq-a">غادي يجيك ف 24-72 ساعة حسب المدينة ديالك</div></div>
+      <div class="faq-row"><div class="faq-q">واش كاين توصيل لـ[مدينة]؟</div><div class="faq-a">إيه، كاين توصيل لكاع المدن المغربية 🇲🇦</div></div>
+      <div class="faq-row"><div class="faq-q">واش غايبقا فالشمس بعد ما نسبح؟</div><div class="faq-a">إيه، Water-resistant. لكن خاص تعاودي تحطيه كل ساعتين فالبحر</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═════ 4. PLAN 3H ═════ -->
+  <section id="plan">
+    <div class="section-head">
+      <h2>⏰ خطة 3 ساعات = أول بيعة</h2>
+      <span class="badge">جربيها اليوم</span>
+    </div>
+    <p class="section-intro">إلا قمتي بهاد 3 خطوات، 90% فالميا غادي تجيبي أول بيعة اليوم.</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>🕐 الساعة الأولى — لائحة الناس</h4>
+        <p>خرجي 10 ديال الناس من contacts ديالك: 3 صاحبات قريبات + 3 من العائلة (خوتك، عمتك، خالتك) + 2 جيران + 2 من خدامين قدام معاك.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>🕑 الساعة الثانية — سيفطي الرسائل</h4>
+        <p>انسخي <strong>Message #1</strong>، بدّلي الإسم، و سيفطيه لـ 10 ديال الناس واحد بواحد. ما ديريش copy-paste فمجموعة واحدة — أرسليها بشكل شخصي.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>🕒 الساعة الثالثة — انشري Status</h4>
+        <p>انشري <strong>Message #4</strong> على WhatsApp Status، Stories Instagram، و Facebook. على الأقل 50 شخص غادي يشوفها.</p>
+      </div>
+    </div>
+
+    <div class="card" style="background:var(--cream-deep);border-color:var(--gold)">
+      <h4 style="margin:0 0 8px;color:var(--navy)">📊 الإحصائيات اللي ممكن تتوقعيها:</h4>
+      <ul style="margin:0;padding-right:18px;font-size:14px;line-height:1.9">
+        <li>من 10 رسائل → 5-7 غادي يجاوبوك</li>
+        <li>من 5-7 جواب → 2-3 غادي يطلبو معلومات</li>
+        <li>من 2-3 طلبات → 1-2 غادي يشري</li>
+      </ul>
+      <p style="margin:10px 0 0;font-weight:800;color:var(--gold)">= بيعة واحدة على الأقل = 50 درهم 💰</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═════ 5. VISUALS ═════ -->
+  <section id="visuals">
+    <div class="section-head">
+      <h2>🖼️ الصور و الفيديوهات</h2>
+      <span class="badge">للنشر</span>
+    </div>
+    <p class="section-intro">هاد الصور غادي توصلوك منا فال WhatsApp. انسخيها واستعمليها فالنشر.</p>
+    <ul class="visuals-list">
+      <li>
+        <div class="icon">📸</div>
+        <div>
+          <div class="v-title">صورة المنتوج (1:1)</div>
+          <div class="v-desc">للنشر فال WhatsApp و Instagram posts</div>
+        </div>
+      </li>
+      <li>
+        <div class="icon">📱</div>
+        <div>
+          <div class="v-title">صورة Status (9:16)</div>
+          <div class="v-desc">للنشر فال WhatsApp Status و Instagram Stories</div>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🎥</div>
+        <div>
+          <div class="v-title">فيديو قصير 15-30 ثانية</div>
+          <div class="v-desc">للنشر فال Reels و Stories</div>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🔄</div>
+        <div>
+          <div class="v-title">كاروسيل 5 شرائح Instagram</div>
+          <div class="v-desc">يشرح المنتوج بشكل احترافي</div>
+        </div>
+      </li>
+      <li>
+        <div class="icon">⭐</div>
+        <div>
+          <div class="v-title">قبل / بعد و شهادات الزبونات</div>
+          <div class="v-desc">+50% فالمصداقية و معدل البيع</div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ═════ CTA FOOTER ═════ -->
+  <div class="cta-foot">
+    <h3>🚀 جاهزة تبداي؟</h3>
+    <p>ابدي بال Message #1، سيفطيه ل 3 صحبات دابا. غير 5 دقايق و ممكن تجيبي أول بيعة اليوم.</p>
+    <a href="https://wa.me/212668111173?text=سلام، عندي سؤال على Solaryn" target="_blank">💬 احتاجت مساعدة؟ كلميني</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const target = document.getElementById(btn.dataset.target);
+    if (!target) return;
+    try {
+      await navigator.clipboard.writeText(target.textContent.trim());
+      btn.classList.add('copied');
+      showToast('✓ تنسخات! دير لصق فال WhatsApp 📋');
+      if (typeof gtag === 'function') {
+        gtag('event', 'kit_message_copied', { message_id: btn.dataset.target });
+      }
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    } catch (err) {
+      const range = document.createRange();
+      range.selectNode(target);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+      showToast('✓ تنسخات!');
+    }
+  });
+});
+
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+
+if (typeof gtag === 'function') {
+  gtag('event', 'kit_view', { source: 'direct' });
+}
+</script>
+
+</body>
+</html>
