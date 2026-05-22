@@ -6,7 +6,9 @@
 // JSON or x-www-form-urlencoded both accepted.
 
 const COMPOSIO_API = 'https://backend.composio.dev/api/v3';
-const SHEET_ID = process.env.LEADS_SHEET_ID || '1uyItM4b7XLPbo2xgTbOrS99MWEz6Ls16MKtVBb1F6hA';
+// Cible : nouveau spreadsheet "Solaryn Leads" (créé 2026-05-21, partageable sans exposer Affiliates/Sales)
+const SHEET_ID = process.env.LEADS_SHEET_ID || '1ewgyaw43M2FpFIlFxe0zXgLqhWxG_H0SFAv1vozjoqM';
+const SHEET_GID = parseInt(process.env.LEADS_SHEET_GID || '1713500090', 10);
 const COMPOSIO_KEY = process.env.COMPOSIO_API_KEY || 'ak_R9c7r97htFBcxtnsCASU';
 const COMPOSIO_ACCOUNT_ID = process.env.COMPOSIO_ACCOUNT_ID || 'ca_x66oW70jpGO6';
 const COMPOSIO_USER_ID = process.env.COMPOSIO_USER_ID || 'solaryn-default';
@@ -122,7 +124,7 @@ async function prependLeadRow(lead) {
     await callComposio('GOOGLESHEETS_INSERT_DIMENSION', {
         spreadsheet_id: SHEET_ID,
         insert_dimension: {
-            range: { sheet_id: 0, dimension: 'ROWS', start_index: 1, end_index: 2 },
+            range: { sheet_id: SHEET_GID, dimension: 'ROWS', start_index: 1, end_index: 2 },
             inherit_from_before: false,
         },
     });
