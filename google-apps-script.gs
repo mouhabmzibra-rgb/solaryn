@@ -111,11 +111,15 @@ function affiliateSale(data) {
     var sheet = getOrCreateSheet(AFFILIATE_SALES_SHEET, [
         'Sale_ID','Date','Affiliate_Phone','Customer_Nom','Customer_Tel','Customer_Ville',
         'Customer_Adresse','Quantite','Total_MAD','Commission_MAD','Status','Notes',
-        'Customer_WhatsApp','Customer_Call','Affiliate_Nom','Affiliate_WhatsApp'
+        'Customer_WhatsApp','Customer_Call','Affiliate_Nom','Affiliate_WhatsApp','Price_Tier'
     ]);
-    // Backfill new headers if sheet existed with old 14-col layout
+    // Backfill headers if sheet existed with old layout
     if (sheet.getRange(1, 15).getValue() === '') {
         sheet.getRange(1, 13, 1, 4).setValues([['Customer_WhatsApp','Customer_Call','Affiliate_Nom','Affiliate_WhatsApp']])
+            .setFontWeight('bold').setBackground('#1B2D4D').setFontColor('#FFFFFF');
+    }
+    if (sheet.getRange(1, 17).getValue() === '') {
+        sheet.getRange(1, 17).setValue('Price_Tier')
             .setFontWeight('bold').setBackground('#1B2D4D').setFontColor('#FFFFFF');
     }
     var saleId = 'SALE-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000);
@@ -123,12 +127,14 @@ function affiliateSale(data) {
     var phone = data.customer_tel || '';
     var affPhone = data.affiliate_id || '';
     var affNom = lookupAffiliateName(affPhone);
+    var priceTier = String(data.price_tier || 'A').toUpperCase();
     sheet.insertRowBefore(2);
-    sheet.getRange(2, 1, 1, 16).setValues([[
+    sheet.getRange(2, 1, 1, 17).setValues([[
         saleId, dateStr, affPhone, data.customer_nom, phone, data.customer_ville,
         data.customer_adresse, data.quantite, data.total, data.commission, 'pending', data.notes,
         whatsappFormula(phone), callFormula(phone),
-        affNom, whatsappFormula(affPhone)
+        affNom, whatsappFormula(affPhone),
+        priceTier
     ]]);
     return jsonResp({ ok: true, sale_id: saleId });
 }
@@ -268,6 +274,7 @@ function affiliateDashboard(data) {
                     total: total,
                     commission: commission,
                     status: status,
+                    price_tier: String(rows[i][16] || 'A'),
                 });
                 stats.count++;
                 stats.total_mad += total;

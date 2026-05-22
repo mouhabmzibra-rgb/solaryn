@@ -297,6 +297,27 @@ html[dir="ltr"] .kit-cta-arrow{transform:scaleX(-1)}
 .card-title .emoji{font-size:22px}
 
 /* ─── SALE FORM (slide-in) ─── */
+.tier-group{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.tier-opt{
+  display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1.5px solid #e6dbc4;
+  border-radius:10px;background:#fff;cursor:pointer;transition:all .15s;position:relative;
+}
+.tier-opt input{margin-top:3px;accent-color:var(--gold);cursor:pointer}
+.tier-opt:hover{border-color:var(--gold);background:#fffbf2}
+.tier-opt.selected{border-color:var(--gold);background:linear-gradient(135deg,#fff8e8,#fff);box-shadow:0 2px 8px rgba(200,152,96,0.15)}
+.tier-label{font-weight:700;color:var(--navy);font-size:14px}
+.tier-detail{font-size:11px;color:#8a7e62;font-weight:500;margin-top:2px}
+.tier-comm{margin-inline-start:auto;font-weight:800;color:#1e7e34;font-size:13px;white-space:nowrap;align-self:center}
+
+.sale-preview{
+  background:linear-gradient(135deg,#1B2D4D,#2d4670);color:#fff;padding:14px 16px;border-radius:12px;
+  margin:14px 0 8px;display:none;font-size:13px;
+}
+.sale-preview.show{display:block}
+.sale-preview-row{display:flex;justify-content:space-between;padding:4px 0;font-weight:600}
+.sale-preview-row.big{font-size:16px;padding-top:8px;margin-top:6px;border-top:1px dashed rgba(255,255,255,0.3)}
+.sale-preview-row.big .v{color:#FFD700}
+
 .sale-form-card{
   background:#fff;border-radius:var(--radius-xl);padding:24px 20px;margin-bottom:14px;
   box-shadow:var(--shadow-hard);border:2px solid var(--gold-light);
@@ -570,8 +591,13 @@ html[dir="ltr"] .sale-item::before{left:0;border-radius:0 4px 4px 0}
         <label data-i18n="lblCustAddress">📍 العنوان</label>
         <textarea name="customer_adresse" maxlength="200" placeholder="شارع، حي، رقم..."></textarea>
 
+        <label data-i18n="lblTier">💰 الثمن (اختاري لي اتفقتي عليه مع الزبون)</label>
+        <div id="tierGroup" class="tier-group"></div>
+
         <label data-i18n="lblQty">📦 الكمية</label>
         <select name="quantite" required id="qtySelect"></select>
+
+        <div class="sale-preview" id="salePreview"></div>
 
         <label data-i18n="lblNotes">📝 ملاحظات</label>
         <textarea name="notes" maxlength="500" placeholder="..."></textarea>
@@ -630,7 +656,7 @@ const I18N = {
     kitCtaTitle: 'Kit ديال الإنطلاق', kitCtaSub: 'رسائل جاهزة + جوابات الزبناء + خطة 3 ساعات',
     saleTitle: 'بيعة جديدة',
     lblCustName: '👤 سمية الزبون', lblCustPhone: '📱 رقم الزبون', lblCustCity: '🏙️ المدينة',
-    lblCustAddress: '📍 العنوان', lblQty: '📦 الكمية', lblNotes: '📝 ملاحظات',
+    lblCustAddress: '📍 العنوان', lblTier: '💰 الثمن (اختاري لي اتفقتي عليه مع الزبون)', lblQty: '📦 الكمية', lblNotes: '📝 ملاحظات',
     btnSubmitSale: 'سجلي البيعة', btnCancel: 'إلغاء',
     historyTitle: 'سجل البيعات', btnLogout: '↩️ خروج',
     emptyHistory: 'مازال ما عندك حتى بيعة. زيدي وحدة باش تبدا الرحلة! ✨',
@@ -662,7 +688,7 @@ const I18N = {
     kitCtaTitle: 'Kit de démarrage', kitCtaSub: 'Messages prêts + FAQ + plan 3 heures',
     saleTitle: 'Nouvelle vente',
     lblCustName: '👤 Nom client', lblCustPhone: '📱 Tel client', lblCustCity: '🏙️ Ville',
-    lblCustAddress: '📍 Adresse', lblQty: '📦 Quantité', lblNotes: '📝 Notes',
+    lblCustAddress: '📍 Adresse', lblTier: '💰 Prix (choisis ce qui est convenu avec le client)', lblQty: '📦 Quantité', lblNotes: '📝 Notes',
     btnSubmitSale: 'Enregistrer', btnCancel: 'Annuler',
     historyTitle: 'Historique', btnLogout: '↩️ Déconnexion',
     emptyHistory: 'Aucune vente pour le moment. Ajoute la première pour commencer ✨',
@@ -696,20 +722,82 @@ function applyLang(){
     if (text) el.textContent = text;
   });
   updateQtySelect();
+  renderTierGroup();
+  updateSalePreview();
   updateWelcome();
   renderSales(lastSales);
   renderAchievements(lastStats.count || 0);
 }
 
+const PRICE_TIERS = {
+  A: { customer_pays: 199, commission: 50,
+       ar: '199 درهم — التوصيل مجاني (الافتراضي)',
+       fr: '199 MAD — Livraison incluse (par défaut)' },
+  B: { customer_pays: 170, commission: 35,
+       ar: '170 درهم — 150 + 20 توصيل',
+       fr: '170 MAD — 150 + 20 livraison' },
+  C: { customer_pays: 150, commission: 30,
+       ar: '150 درهم — التوصيل مجاني (عرض خاص)',
+       fr: '150 MAD — Livraison incluse (offre spéciale)' },
+  D: { customer_pays: 140, commission: 20,
+       ar: '140 درهم — 120 + 20 توصيل (آخر اختيار)',
+       fr: '140 MAD — 120 + 20 livraison (dernier recours)' },
+};
+
+let selectedTier = 'A';
+
+function renderTierGroup(){
+  const c = document.getElementById('tierGroup');
+  if (!c) return;
+  const lang = currentLang === 'ar' ? 'ar' : 'fr';
+  const commWord = lang === 'ar' ? 'عمولتك' : 'commission';
+  c.innerHTML = Object.entries(PRICE_TIERS).map(([key, t]) => {
+    const checked = key === selectedTier ? 'checked' : '';
+    return `
+      <label class="tier-opt ${key === selectedTier ? 'selected' : ''}" data-tier="${key}">
+        <input type="radio" name="price_tier" value="${key}" ${checked}>
+        <div>
+          <div class="tier-label">${key} — ${t[lang]}</div>
+          <div class="tier-detail">${lang === 'ar' ? 'الزبون كيخلص' : 'Client paie'}: ${t.customer_pays} MAD</div>
+        </div>
+        <div class="tier-comm">+${t.commission} MAD ${commWord}</div>
+      </label>`;
+  }).join('');
+  c.querySelectorAll('input[name="price_tier"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      selectedTier = e.target.value;
+      c.querySelectorAll('.tier-opt').forEach(o => o.classList.remove('selected'));
+      e.target.closest('.tier-opt').classList.add('selected');
+      updateSalePreview();
+    });
+  });
+}
+
 function updateQtySelect(){
   const sel = document.getElementById('qtySelect');
   if (!sel) return;
-  const commWord = currentLang === 'ar' ? 'كوميسيون' : 'comm.';
-  sel.innerHTML = [1,2,3,5,10].map(q => {
-    const total = q * 199;
-    const comm = q * 50;
-    return `<option value="${q}">${q} × 199 = ${total} MAD ✨ ${commWord} ${comm} MAD</option>`;
-  }).join('');
+  sel.innerHTML = [1,2,3,5,10].map(q => `<option value="${q}">${q}</option>`).join('');
+  sel.addEventListener('change', updateSalePreview);
+}
+
+function updateSalePreview(){
+  const el = document.getElementById('salePreview');
+  if (!el) return;
+  const qty = parseInt(document.getElementById('qtySelect').value || '1', 10);
+  const tier = PRICE_TIERS[selectedTier];
+  if (!tier) { el.classList.remove('show'); return; }
+  const lang = currentLang === 'ar' ? 'ar' : 'fr';
+  const total = qty * tier.customer_pays;
+  const comm = qty * tier.commission;
+  const labels = lang === 'ar'
+    ? { paid: 'الزبون كيخلص', earn: 'كتربحي' }
+    : { paid: 'Client paie', earn: 'Tu gagnes' };
+  el.innerHTML = `
+    <div class="sale-preview-row"><span>${qty} × ${tier.customer_pays} MAD</span><span>= ${total} MAD</span></div>
+    <div class="sale-preview-row"><span>${labels.paid}</span><span>${total} MAD</span></div>
+    <div class="sale-preview-row big"><span>${labels.earn} 💰</span><span class="v">+${comm} MAD</span></div>
+  `;
+  el.classList.add('show');
 }
 
 function updateWelcome(){
@@ -824,6 +912,7 @@ document.getElementById('saleForm').addEventListener('submit', async (e) => {
     customer_ville: f.customer_ville.value.trim(),
     customer_adresse: f.customer_adresse.value.trim(),
     quantite: f.quantite.value,
+    price_tier: selectedTier,
     notes: f.notes.value.trim(),
     website: f.website.value,
   }, true);
@@ -932,6 +1021,7 @@ function renderSales(sales){
           <span>📱 ${escapeHtml(s.customer_tel || '')}</span>
           <span>🏙️ ${escapeHtml(s.customer_ville || '')}</span>
           <span>📦 ×${s.quantite || 1}</span>
+          <span>💰 ${escapeHtml(s.price_tier || 'A')}</span>
         </div>
         <div class="sale-foot">
           <span class="status-badge status-${st}">${escapeHtml(statusLabel(st))}</span>
@@ -1044,6 +1134,8 @@ document.addEventListener('visibilitychange', () => {
 // ════════════════════ INIT ════════════════════
 applyLang();
 updateQtySelect();
+renderTierGroup();
+updateSalePreview();
 if (getToken()) { showDashboard(); startAutoRefresh(); }
 else showAuth();
 </script>
