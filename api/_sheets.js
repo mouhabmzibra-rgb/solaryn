@@ -75,11 +75,13 @@ function buildSaleObject(r) {
 }
 
 function accumulateStats(stats, sale) {
+    // Ventes annulées exclues de tous les totaux (CA, commissions, count)
+    if (sale.status === 'cancelled') return;
     stats.count++;
     stats.total_mad += sale.total;
     stats.commission_mad += sale.commission;
     if (sale.status === 'paid') stats.commission_paid += sale.commission;
-    else if (sale.status !== 'cancelled') stats.commission_pending += sale.commission;
+    else stats.commission_pending += sale.commission;
 }
 
 export async function readAdminData() {
@@ -134,12 +136,12 @@ export async function readAdminData() {
         sales.push(sale);
         accumulateStats(stats, sale);
         const aff = affMap[sale.affiliate_phone];
-        if (aff) {
+        if (aff && sale.status !== 'cancelled') {
             aff.sales_count++;
             aff.total_mad += sale.total;
             aff.commission_mad += sale.commission;
             if (sale.status === 'paid') aff.commission_paid += sale.commission;
-            else if (sale.status !== 'cancelled') aff.commission_pending += sale.commission;
+            else aff.commission_pending += sale.commission;
         }
     }
 

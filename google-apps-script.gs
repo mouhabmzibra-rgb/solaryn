@@ -276,11 +276,14 @@ function affiliateDashboard(data) {
                     status: status,
                     price_tier: String(rows[i][16] || 'A'),
                 });
-                stats.count++;
-                stats.total_mad += total;
-                stats.commission_mad += commission;
-                if (status === 'paid') stats.commission_paid += commission;
-                else if (status !== 'cancelled') stats.commission_pending += commission;
+                // Ventes annulées exclues des totaux
+                if (status !== 'cancelled') {
+                    stats.count++;
+                    stats.total_mad += total;
+                    stats.commission_mad += commission;
+                    if (status === 'paid') stats.commission_paid += commission;
+                    else stats.commission_pending += commission;
+                }
             }
         }
     }
