@@ -215,36 +215,28 @@ tbody tr:last-child td{border-bottom:none}
 .sale-details .vv.notes{font-style:italic;color:#555;font-weight:500}
 .sale-details .vv a{color:var(--blue);text-decoration:none}
 .sale-details .vv a:hover{text-decoration:underline}
-.tracking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
-.tracking-thumb{
-  position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
-  border:1px solid var(--border);background:var(--bg);cursor:pointer;
+.tracking-input-row{display:flex;gap:8px;margin-bottom:10px}
+.tracking-input-row input{
+  flex:1;padding:11px 13px;border:1px solid var(--border);border-radius:10px;
+  font-size:13px;font-family:inherit;color:var(--navy);background:#fff;
 }
-.tracking-thumb img{width:100%;height:100%;object-fit:cover}
-.tracking-thumb .del{
-  position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;
-  background:rgba(220,38,38,.95);color:#fff;border:none;cursor:pointer;
-  font-size:14px;display:flex;align-items:center;justify-content:center;
+.tracking-input-row input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,152,96,0.12)}
+.tracking-input-row button{
+  padding:11px 16px;border:none;border-radius:10px;font-weight:700;font-size:13px;
+  cursor:pointer;background:var(--gradient-gold);color:#fff;white-space:nowrap;
 }
-.tracking-thumb .del:hover{background:#991b1b}
-.upload-zone{
-  border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;
-  cursor:pointer;transition:all .15s;background:var(--bg);
+.tracking-input-row button:hover{filter:brightness(1.05)}
+.tracking-input-row button:disabled{opacity:.6;cursor:not-allowed}
+.tracking-link-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.tracking-link-actions a,.tracking-link-actions button{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;
+  text-decoration:none;cursor:pointer;border:1px solid var(--border);
+  background:#fff;color:var(--navy);
 }
-.upload-zone:hover{border-color:var(--gold);background:#fff8ec}
-.upload-zone.uploading{opacity:.6;pointer-events:none}
-.upload-zone .icon{font-size:36px;display:block;margin-bottom:8px}
-.upload-zone .label{font-weight:700;color:var(--navy);font-size:14px}
-.upload-zone .sub{color:#94a3b8;font-size:12px;margin-top:4px}
-.upload-zone input{display:none}
-
-.lightbox{
-  position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;
-  display:none;align-items:center;justify-content:center;padding:30px;
-  cursor:zoom-out;
-}
-.lightbox.show{display:flex}
-.lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.tracking-link-actions a:hover{background:var(--bg);border-color:var(--gold)}
+.tracking-link-actions button.clear{color:#a8221c;border-color:#f0c0c0}
+.tracking-link-actions button.clear:hover{background:#fdebea}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
@@ -425,21 +417,14 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="modal-body">
       <div class="sale-details" id="saleDetails"></div>
-      <div class="modal-section-title">📦 Suivi Sendit</div>
-      <div class="tracking-grid" id="trackingGrid"></div>
-      <label class="upload-zone" id="uploadZone">
-        <span class="icon">📷</span>
-        <span class="label">Ajouter un screenshot</span>
-        <span class="sub">JPG/PNG/WEBP — max 4 MB</span>
-        <input type="file" id="trackingFile" accept="image/jpeg,image/png,image/webp,image/gif">
-      </label>
+      <div class="modal-section-title">📦 Lien de suivi Sendit</div>
+      <div class="tracking-input-row">
+        <input type="url" id="trackingInput" placeholder="https://sendit.ma/tracking/..." autocomplete="off">
+        <button type="button" id="trackingSaveBtn" onclick="saveTracking()">💾 Enregistrer</button>
+      </div>
+      <div class="tracking-link-actions" id="trackingActions"></div>
     </div>
   </div>
-</div>
-
-<!-- ════════ LIGHTBOX ════════ -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightboxImg" alt="">
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -577,9 +562,9 @@ function renderSales(sales) {
   body.innerHTML = sales.map(s => {
     const date = String(s.date || '').slice(0, 16).replace('T', ' ');
     const tel = s.customer_tel || '';
-    const tracks = Array.isArray(s.tracking_urls) ? s.tracking_urls : [];
-    const trackLabel = tracks.length ? `📂 ${tracks.length}` : '📷 Ajouter';
-    const trackClass = tracks.length ? 'btn-track has' : 'btn-track';
+    const hasTrack = !!(s.tracking_url && s.tracking_url.trim());
+    const trackLabel = hasTrack ? '🔗 Lien' : '➕ Ajouter';
+    const trackClass = hasTrack ? 'btn-track has' : 'btn-track';
     return `
       <tr data-sale-id="${escapeHtml(s.sale_id)}">
         <td data-label="Date">${escapeHtml(date)}</td>
@@ -633,9 +618,11 @@ function openTracking(saleId) {
   currentTrackingSaleId = saleId;
   const sale = allSales.find(s => s.sale_id === saleId);
   renderSaleDetails(sale);
-  const urls = (sale && sale.tracking_urls) || [];
-  renderTrackingGrid(urls);
+  const url = (sale && sale.tracking_url) || '';
+  document.getElementById('trackingInput').value = url;
+  renderTrackingActions(url);
   document.getElementById('trackingModal').classList.add('show');
+  if (!url) setTimeout(() => document.getElementById('trackingInput').focus(), 50);
 }
 
 function renderSaleDetails(s) {
@@ -666,90 +653,42 @@ function closeTracking() {
   currentTrackingSaleId = null;
 }
 
-function renderTrackingGrid(urls) {
-  const grid = document.getElementById('trackingGrid');
-  if (!urls.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;font-size:13px;padding:20px">Aucun screenshot pour le moment</div>';
-    return;
-  }
-  grid.innerHTML = urls.map((u, i) => `
-    <div class="tracking-thumb" onclick="openLightbox('${escapeHtml(u)}')">
-      <img src="${escapeHtml(u)}" alt="Suivi ${i + 1}">
-      <button class="del" onclick="event.stopPropagation();deleteTracking('${escapeHtml(u)}')" title="Supprimer">×</button>
-    </div>
-  `).join('');
+function renderTrackingActions(url) {
+  const el = document.getElementById('trackingActions');
+  if (!url) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <a href="${escapeHtml(url)}" target="_blank" rel="noopener">🔗 Ouvrir</a>
+    <button type="button" class="clear" onclick="clearTracking()">🗑️ Effacer</button>
+  `;
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || '');
-      const comma = result.indexOf(',');
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.onerror = () => reject(new Error('Lecture fichier impossible'));
-    reader.readAsDataURL(file);
-  });
-}
-
-document.getElementById('trackingFile').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file || !currentTrackingSaleId) return;
-  if (file.size > 4 * 1024 * 1024) {
-    toast('Fichier trop lourd (max 4 MB)', 'error');
-    e.target.value = '';
-    return;
-  }
-  const zone = document.getElementById('uploadZone');
-  zone.classList.add('uploading');
-  try {
-    const data_base64 = await fileToBase64(file);
-    const r = await api('upload_tracking', {
-      sale_id: currentTrackingSaleId,
-      content_type: file.type,
-      data_base64,
-    }, true);
-    if (!r.ok) {
-      toast(r.message || 'Erreur upload', 'error');
-    } else {
-      toast('Screenshot ajouté ✨', 'success');
-      const sale = allSales.find(s => s.sale_id === currentTrackingSaleId);
-      if (sale) sale.tracking_urls = r.urls || [];
-      renderTrackingGrid(r.urls || []);
-      renderSales(allSales);
-    }
-  } catch (err) {
-    toast('Erreur: ' + err.message, 'error');
-  } finally {
-    zone.classList.remove('uploading');
-    e.target.value = '';
-  }
-});
-
-async function deleteTracking(url) {
+async function saveTracking() {
   if (!currentTrackingSaleId) return;
-  if (!confirm('Supprimer ce screenshot ?')) return;
-  const r = await api('delete_tracking', { sale_id: currentTrackingSaleId, url }, true);
+  const input = document.getElementById('trackingInput');
+  const btn = document.getElementById('trackingSaveBtn');
+  const raw = (input.value || '').trim();
+  if (raw && !/^https?:\/\//i.test(raw)) {
+    toast('URL doit commencer par http:// ou https://', 'error');
+    return;
+  }
+  btn.disabled = true;
+  const r = await api('set_tracking', { sale_id: currentTrackingSaleId, tracking_url: raw }, true);
+  btn.disabled = false;
   if (!r.ok) {
     toast(r.message || 'Erreur', 'error');
     return;
   }
-  toast('Screenshot supprimé', 'success');
+  toast(raw ? 'Lien enregistré ✨' : 'Lien effacé', 'success');
   const sale = allSales.find(s => s.sale_id === currentTrackingSaleId);
-  if (sale) sale.tracking_urls = r.urls || [];
-  renderTrackingGrid(r.urls || []);
+  if (sale) sale.tracking_url = r.tracking_url || '';
+  renderTrackingActions(r.tracking_url || '');
   renderSales(allSales);
 }
 
-function openLightbox(url) {
-  document.getElementById('lightboxImg').src = url;
-  document.getElementById('lightbox').classList.add('show');
-}
-
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('show');
-  document.getElementById('lightboxImg').src = '';
+function clearTracking() {
+  if (!confirm('Effacer le lien de suivi ?')) return;
+  document.getElementById('trackingInput').value = '';
+  saveTracking();
 }
 
 document.getElementById('trackingModal').addEventListener('click', (e) => {
@@ -757,6 +696,8 @@ document.getElementById('trackingModal').addEventListener('click', (e) => {
 });
 
 window.openTracking = openTracking;
+window.saveTracking = saveTracking;
+window.clearTracking = clearTracking;
 window.closeTracking = closeTracking;
 window.deleteTracking = deleteTracking;
 window.openLightbox = openLightbox;

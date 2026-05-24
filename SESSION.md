@@ -1,63 +1,62 @@
-# Session — 2026-05-20
+# Session — 2026-05-24
 
 ## Active goal
-Auto-add new affiliates to the Solaryn WhatsApp group on registration.
+Refactor du tracking Sendit : remplacer l'upload de screenshots par un champ URL unique (admin colle un lien, affiliée clique → ouvre Sendit). ✅ Done (à déployer).
 
 ## Status
-**Awaiting user** — needs Vercel env vars added before the new code does anything in production.
+**Done localement** — non déployé. Tests manuels à faire après `vercel --prod`.
 
-## Done this session
-- Migrated `/api/admin` from Apps Script webhook to direct Google Sheets API (commit `07e6d9c`).
-- Added tracking screenshots feature for sales (Vercel Blob upload, displayed to affiliate). Reused `/api/admin` action `upload_tracking` (base64 in JSON) to stay under 12-function Hobby limit. Commit `729bd1f`.
-- Added `online_now` counter in admin (Last_Active col I on Affiliates sheet, 15-min window) + green pulsing dot. Commit `5d323e2`.
-- Made customer name in admin sales table clickable → full sale details modal showing customer address + notes + affiliate info. Commit `1e971da`.
-- Fixed GA4: site was sending events to `G-TQSQQBT50G` (foreign property). Replaced everywhere with `G-C2C8ZJP45L` (own property "solaryn pop" in account `395029314`). Commit `84335cb`.
-- Created `/kit` onboarding page in Darija (Arabic script): welcome, 5 ready-to-copy WhatsApp message templates, 9-question FAQ, 3-hour activation plan. Commit `17adc1d`.
-- Removed unverified product claims from kit (pregnancy/baby safety, specific ingredients, "no chemicals"). Commit `9cbcdf8`.
-- Added real product photos + Status visuals + video player + 5-slide Instagram carousel (download buttons + GA events). Commit `db2dde4`.
-- Swapped video to one without price overlay (149 DH was outdated). Commit `92bc0ee`.
-- Wiped all 4 test sales from `Affiliate_Sales` sheet (Composio API). 19 real affiliates registered.
-- Connected Google Analytics via Composio; identified `G-C2C8ZJP45L` as the correct measurement ID.
-- Created Solaryn WhatsApp group via Baileys bot on Fly. Chat ID `120363426897628087@g.us`, invite link `https://chat.whatsapp.com/BabdgzeNwwL8K7ApZhCzZQ`. Only 13/20 actually joined (others have privacy restrictions).
-- Added `/send-message` + `/check-phone` endpoints to bot (`solaryn-bot/server.js`, deployed on Fly).
-- Sent 19 DMs via bot — Baileys returned success with `messageId` but messages **don't appear in user's WhatsApp** and likely weren't delivered.
-- Bot session corruption appears resolved after machine cold-start: `state=connected` confirmed via `/health` 2026-05-20.
-- Added `POST /add-to-group` to `solaryn-bot/server.js` (Baileys `groupParticipantsUpdate`, parses status 200/403/408/409). Deployed to Fly.
-- Set Fly secrets: `WHATSAPP_GROUP_JID=120363426897628087@g.us`, `WHATSAPP_GROUP_INVITE=https://chat.whatsapp.com/BabdgzeNwwL8K7ApZhCzZQ`.
-- Smoke-tested `/add-to-group` with fake number → returns `{ok:false, status:"not_on_whatsapp"}` as expected.
-- `api/affiliate-register.js` now calls bot `/add-to-group` after successful registration (non-blocking, 4s timeout, errors swallowed). Commit `3e80cc4` pushed.
+## Done this session (tracking refactor)
+- `api/_sheets.js` : `parseTrackingCell` retourne string (URL) au lieu d'array ; ignore proprement les anciennes valeurs JSON. Champ renommé `tracking_urls` → `tracking_url`. `appendTrackingUrl`/`removeTrackingUrl` remplacés par `setTrackingUrl(saleId, url)`.
+- `api/admin.js` : suppression `upload_tracking` + `delete_tracking` + dépendance `@vercel/blob`. Nouvelle action `set_tracking` avec validation `http(s)://` + max 1000 chars.
+- `admin.html` : modal "Détails vente" garde la section tracking mais remplace la grille de thumbnails + upload zone par un input URL + bouton Enregistrer + Ouvrir/Effacer. Colonne "Suivi" affiche `🔗 Lien` (target=_blank) ou `➕ Ajouter`. Lightbox supprimé.
+- `affiliates.html` : bouton "Voir suivi" devient un `<a target="_blank">` direct vers Sendit. Modal + lightbox + JS associés supprimés. CSS nettoyé.
+- `package.json` : `@vercel/blob` retiré.
+- Données existantes : aucune perte. Les ~3-4 ventes avec anciens screenshots JSON sont ignorées à l'affichage (cellule O traitée comme vide) — l'admin peut coller un nouveau lien Sendit qui écrasera l'ancien JSON.
+
+## Done this session (avant — Composio MCP)
+- Vérifié santé système Solaryn : MCP `solaryn` ✓, Shopify token rafraîchi (valide ~24h depuis ~00:45 UTC), `solaryn.co` 200 (Shopify-served, pas Vercel).
+- Identifié `solaryn.co/affiliates` `/kit` → 404 (domaine pointe Shopify, app Vercel sous autre URL). Pas adressé — open follow-up.
+- Diagnostiqué l'échec MCP Composio : ancienne clé `oak_IhyYtVNzihfyqLTu9_oh` révoquée auto suite à l'**incident sécurité Composio 21 mai 2026**.
+- Expliqué l'attaque : brute-force LLM → outil monitoring interne Composio → sandbox exec arbitraire → ~5241 clés + 5040 OAuth tokens révoqués. Solaryn intact.
+- Récupéré IP publique : `105.157.113.33` (Maroc Telecom dynamique — pas utilisée en allowlist à cause du risque self-lockout).
+- 1ʳᵉ clé `ak_WYfF-5p111AtQCA5Zjcb` → invalide (l'utilisateur a re-récupéré : `ak_WJkN3Vp0gn2cczbGqdig` ✓).
+- Créé `/Users/a2024/solaryn/.composio/` isolé + `credentials.env` chmod 600 + gitignore.
+- Installé `@composio/core ai @ai-sdk/anthropic @ai-sdk/mcp` (28 pkgs).
+- Écrit 4 scripts utilitaires : `discover.mjs`, `connect-sheets.mjs`, `setup-auth-configs.mjs`, `regenerate-links.mjs`, `create-server.mjs`.
+- Découvert auth configs existants : `googlesheets` (`ac__9CUWJ2Cq0tE`) déjà créé.
+- Créé via SDK les 3 auth configs manquants : `googledrive` (`ac_nxqcH8XOlZXK`), `googlecalendar` (`ac_wQuLNVoUJS3b`), `google_analytics` (`ac_mMCvlUtQG0oW`). Tous en `use_composio_managed_auth`.
+- Utilisateur a fait OAuth flow pour Sheets/Drive/Analytics (status ACTIVE). Calendar laissé en INITIALIZING (choisi de pas autoriser). Gmail exclu.
+- Découvert que `composio.tools.list` n'existe pas — la bonne méthode est `composio.tools.getRawComposioTools({toolkits, limit})`.
+- Créé MCP server `solaryn-google` (id `92f1ad7f-1ad1-49da-87e3-a879e5874cf1`) avec 210 tools (52 Sheets + 89 Drive + 69 GA).
+- Branché à Claude Code : `claude mcp add --transport http composio ... --scope user --header "X-API-Key: ..."` → ✓ Connected.
+- Créé memory `project_solaryn_composio.md` + ajouté ligne dans MEMORY.md.
 
 ## In progress
-- Awaiting user to set `WHATSAPP_BOT_URL` + `WHATSAPP_BOT_TOKEN` env vars on Vercel before code becomes active.
-- End-to-end test pending: register a fresh affiliate and verify they appear in the group (or that bot logs privacy block).
+- Aucun.
 
 ## Blockers / pending decisions
-- User must add 2 env vars on Vercel dashboard (Project → Settings → Environment Variables → Production):
-  - `WHATSAPP_BOT_URL=https://solaryn-bot.fly.dev`
-  - `WHATSAPP_BOT_TOKEN=<value from `flyctl ssh console -a solaryn-bot -C 'printenv BOT_TOKEN'`>`
+- Aucun.
 
 ## Next step
-1. User adds the 2 Vercel env vars (Production scope).
-2. Vercel auto-deploys (already pushed commit `3e80cc4` to main).
-3. Register a test affiliate via `https://solaryn-five.vercel.app/affiliates`.
-4. Verify in WhatsApp group OR check bot logs (`flyctl logs -a solaryn-bot`) for `add-to-group result` entry.
-5. If privacy block is common (likely), add fallback later: DM invite link to the affiliate.
+- Déployer le refactor tracking : `cd /Users/a2024/solaryn && vercel --prod` (ou push si auto-deploy).
+- Tester en prod : connexion /admin → ouvrir une vente → coller un lien Sendit → vérifier que l'affiliée voit le bouton "Voir suivi" et qu'il ouvre bien Sendit.
+- Pour utiliser les tools Composio (autre sujet) : nouvelle session Claude Code ou `/mcp reconnect`.
 
 ## Context the next session needs
-- **Repo:** `/Users/a2024/solaryn`, GitHub `mouhabmzibra-rgb/solaryn`, main branch.
-- **Vercel:** project `solaryn`, prod URL `https://solaryn-five.vercel.app`. 12/12 Hobby function quota used.
-- **Bot:** `solaryn-bot.fly.dev` (Fly.io), Baileys WhatsApp client, env `BOT_TOKEN` (read via `flyctl ssh console -a solaryn-bot -C 'printenv BOT_TOKEN'`). Paired to user's `+212668111173`.
-- **Sheet:** `1uyItM4b7XLPbo2xgTbOrS99MWEz6Ls16MKtVBb1F6hA`. Tabs: `Affiliates` (cols A-I, I=`Last_Active`), `Affiliate_Sales` (cols A-O, O=`Tracking_URLs` as JSON array). Both #ERROR! columns G/H/M/N are broken HYPERLINK formulas, ignored by backend.
-- **Vercel env:** `GOOGLE_SERVICE_ACCOUNT_JSON` (service account, base64 or raw JSON), `ADMIN_PASSWORD`, `AFFILIATE_HMAC_SECRET`, `BLOB_READ_WRITE_TOKEN`, `SHEETS_WEBHOOK_URL`.
-- **Pricing/commission:** product 199 MAD, commission 50 MAD per unit (was 35 originally).
-- **GA4 measurement ID:** `G-C2C8ZJP45L` (property "solaryn pop", account `395029314`).
-- **Composio connections active:** `googlesheets` (mouhabmzibra@gmail.com), `google_analytics` (same), `googleads`, `metaads`, `shopify`.
-- **WhatsApp group:** `Solaryn — Equipe 🇲🇦`, invite `https://chat.whatsapp.com/BabdgzeNwwL8K7ApZhCzZQ`.
+- Composio setup complet documenté dans `project_solaryn_composio.md` (memory).
+- Credentials Composio : `/Users/a2024/solaryn/.composio/credentials.env`.
+- Scripts setup : `/Users/a2024/solaryn/.composio/*.mjs`.
+- MCP server URL stable : `https://backend.composio.dev/v3/mcp/92f1ad7f-1ad1-49da-87e3-a879e5874cf1?include_composio_helper_actions=true&user_id=IYzprdiiNYemTaU3O2SeTXRhqVR5nKfD`.
+- `composio_meta_ads` autre MCP existant en `! Needs authentication` (non touché cette session — séparé).
 
 ## Open follow-ups (not blocking)
-- ⚠️ **Rotate the leaked service account key** `670f854a...` (user pasted full private_key in chat earlier this session). Memory: `feedback_solaryn_product_claims.md`. Action: GCP Console → IAM → Service Accounts → `solaryn-admin-sheets` → KEYS → delete that key → create new → update `GOOGLE_SERVICE_ACCOUNT_JSON` on Vercel.
-- 🐛 `api/affiliate-sale.js` rejects `quantite` as a JS number (validation accepts only strings). Frontend likely sends a number → silent failure mode. Add `Number(quantite)` parsing on backend.
-- 🐛 Customer `customer_tel` loses leading `0` because Google Sheets treats it as number. Prefix with `'` in Apps Script writer, or store as text formatted column.
-- 🤖 (Optional next step) On `/api/affiliate-register` success, *also* DM the new affiliate with welcome + kit link (currently only the silent group-add is wired). Use bot `/send-message`.
-- 🎨 No customer testimonials in `/kit` yet — placeholder "à venir" section. Add when first happy customers send reviews.
-- 📦 Plugins to install (user's choice): `marketing-skills`, `business-growth-skills`, `landing`, `product-skills`, `executive-mentor` from `alirezarezvani/claude-skills`. Commands prepared but not yet run.
+- ⏸️ **AirDroid SMS bulk** (54 affiliées) — paused depuis la session d'avant-hier. Reprendre setup `web.airdroid.com` quand prêt. Voir `/tmp/solaryn_sms_retry.sh` (peut avoir été vidé — à vérifier).
+- 🌐 `solaryn.co/affiliates` et `/kit` → 404 (domaine pointe Shopify, app Vercel sur autre URL). Décider : rewrite Shopify, sous-domaine `affiliates.solaryn.co`, ou laisser tel quel.
+- 📅 Google Calendar laissé non-autorisé. Si l'utilisateur change d'avis : `node /Users/a2024/solaryn/.composio/regenerate-links.mjs` puis cliquer le lien Calendar, puis ajouter `{toolkit:'googlecalendar', authConfigId:'ac_wQuLNVoUJS3b'}` à `create-server.mjs` et re-run.
+- ⚠️ Rotate the leaked service account key `670f854a...` (voir session du 20-05).
+- 🐛 `api/affiliate-sale.js` rejects `quantite` as JS number (validation accepts only strings).
+- 🐛 Customer `customer_tel` loses leading `0` (Sheets treats as number) — prefix with `'` in Apps Script writer.
+- 🤖 (Optionnel) DM welcome via bot WhatsApp à chaque nouvelle inscription affiliate (bot down depuis 20-05).
+- 🎨 Pas de témoignages clients dans `/kit` — placeholder "à venir".
+- 📦 Plugins claude-skills à installer (cf. ancienne SESSION).

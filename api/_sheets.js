@@ -35,14 +35,11 @@ function toIso(val) {
 }
 
 function parseTrackingCell(raw) {
-    if (!raw) return [];
+    if (!raw) return '';
     const s = String(raw).trim();
-    if (!s) return [];
-    try {
-        const parsed = JSON.parse(s);
-        if (Array.isArray(parsed)) return parsed.filter((u) => typeof u === 'string' && u);
-    } catch {}
-    return s.split(/[\s,]+/).filter((u) => /^https?:\/\//i.test(u));
+    if (!s) return '';
+    if (s.startsWith('[') || s.startsWith('{')) return '';
+    return /^https?:\/\//i.test(s) ? s : '';
 }
 
 function normalizePhone(raw) {
@@ -70,7 +67,7 @@ function buildSaleObject(r) {
         commission,
         status,
         notes: r[11] || '',
-        tracking_urls: parseTrackingCell(r[14]),
+        tracking_url: parseTrackingCell(r[14]),
     };
 }
 
@@ -247,45 +244,15 @@ export async function toggleAffiliateStatus(phone, status) {
     return { ok: true };
 }
 
-async function readTrackingCell(saleId) {
-    const sheets = getSheetsClient();
-    const res = await sheets.spreadsheets.values.get({
-        spreadsheetId: SHEET_ID,
-        range: `${SALES_TAB}!A2:O`,
-        valueRenderOption: 'UNFORMATTED_VALUE',
-    });
-    const rows = res.data.values || [];
-    for (let i = 0; i < rows.length; i++) {
-        if (String(rows[i][0]) === String(saleId)) {
-            return { rowNum: i + 2, urls: parseTrackingCell(rows[i][14]) };
-        }
-    }
-    return { rowNum: -1, urls: [] };
-}
-
-async function writeTrackingCell(rowNum, urls) {
+export async function setTrackingUrl(saleId, url) {
+    const rowNum = await findRowIndex(SALES_TAB, 'A2:A', (r) => String(r[0]) === String(saleId));
+    if (rowNum === -1) return { ok: false, error: 'not_found' };
     const sheets = getSheetsClient();
     await sheets.spreadsheets.values.update({
         spreadsheetId: SHEET_ID,
         range: `${SALES_TAB}!${SALES_COL_TRACKING}${rowNum}`,
         valueInputOption: 'RAW',
-        requestBody: { values: [[urls.length ? JSON.stringify(urls) : '']] },
+        requestBody: { values: [[url || '']] },
     });
-}
-
-export async function appendTrackingUrl(saleId, url) {
-    if (!url) return { ok: false, error: 'no_url' };
-    const { rowNum, urls } = await readTrackingCell(saleId);
-    if (rowNum === -1) return { ok: false, error: 'not_found' };
-    if (!urls.includes(url)) urls.push(url);
-    await writeTrackingCell(rowNum, urls);
-    return { ok: true, urls };
-}
-
-export async function removeTrackingUrl(saleId, url) {
-    const { rowNum, urls } = await readTrackingCell(saleId);
-    if (rowNum === -1) return { ok: false, error: 'not_found' };
-    const next = urls.filter((u) => u !== url);
-    await writeTrackingCell(rowNum, next);
-    return { ok: true, urls: next };
+    return { ok: true, url: url || '' };
 }

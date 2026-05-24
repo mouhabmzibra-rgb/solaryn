@@ -364,42 +364,12 @@ html[dir="ltr"] .sale-item::before{left:0;border-radius:0 4px 4px 0}
 
 .sale-track{margin-top:10px;border-top:1px dashed #e6dbc4;padding-top:10px}
 .track-btn{
-  width:100%;background:var(--gradient-gold);color:#fff;border:none;
+  display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;
+  background:var(--gradient-gold);color:#fff;border:none;
   padding:10px 14px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;
   font-family:inherit;letter-spacing:.3px;transition:transform .15s;
 }
-.track-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(200,152,96,.35)}
-
-.tracking-modal{
-  position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:2000;
-  display:none;align-items:center;justify-content:center;padding:18px;
-}
-.tracking-modal.show{display:flex}
-.tracking-modal-inner{
-  background:#fff;border-radius:18px;max-width:520px;width:100%;max-height:88vh;
-  overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);
-}
-.tracking-modal-head{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px 20px;border-bottom:1px solid #f0e6cc;
-}
-.tracking-modal-head h3{margin:0;font-size:16px;color:var(--navy);font-weight:800}
-.tracking-modal-close{
-  background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8;
-  width:32px;height:32px;border-radius:8px;
-}
-.tracking-modal-close:hover{background:#fff8ec;color:var(--navy)}
-.tracking-modal-body{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-.tracking-modal-body img{
-  width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;
-  border:1px solid #f0e6cc;cursor:zoom-in;
-}
-.tracking-lightbox{
-  position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;
-  display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;
-}
-.tracking-lightbox.show{display:flex}
-.tracking-lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.track-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(200,152,96,.35);color:#fff}
 
 .empty-state{
   text-align:center;padding:40px 20px;
@@ -621,20 +591,6 @@ html[dir="ltr"] .sale-item::before{left:0;border-radius:0 4px 4px 0}
 
     <button class="btn btn-ghost" id="logoutBtn" data-i18n="btnLogout">↩️ خروج</button>
   </div>
-</div>
-
-<div class="tracking-modal" id="trackingModal">
-  <div class="tracking-modal-inner">
-    <div class="tracking-modal-head">
-      <h3 id="trackingModalTitle">📦</h3>
-      <button class="tracking-modal-close" onclick="closeTracking()">×</button>
-    </div>
-    <div class="tracking-modal-body" id="trackingModalBody"></div>
-  </div>
-</div>
-
-<div class="tracking-lightbox" id="trackingLightbox" onclick="closeTrackingLightbox()">
-  <img id="trackingLightboxImg" alt="">
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -1009,8 +965,8 @@ function renderSales(sales){
   c.innerHTML = sales.map(s => {
     const st = s.status || 'pending';
     const date = String(s.date || '').slice(0, 16).replace('T', ' ');
-    const tracks = Array.isArray(s.tracking_urls) ? s.tracking_urls : [];
-    const trackBtn = tracks.length ? `<button class="track-btn" onclick="showTracking('${escapeHtml(s.sale_id)}')">${t('trackingBtn')} (${tracks.length})</button>` : '';
+    const trackUrl = (s.tracking_url && String(s.tracking_url).trim()) || '';
+    const trackBtn = trackUrl ? `<a class="track-btn" href="${escapeHtml(trackUrl)}" target="_blank" rel="noopener">${t('trackingBtn')}</a>` : '';
     return `
       <div class="sale-item">
         <div class="sale-head">
@@ -1060,42 +1016,6 @@ function escapeHtml(s){
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ════════════════════ TRACKING ════════════════════
-function showTracking(saleId){
-  const sale = (lastSales || []).find(s => s.sale_id === saleId);
-  const urls = (sale && sale.tracking_urls) || [];
-  document.getElementById('trackingModalTitle').textContent = '📦 ' + t('trackingTitle');
-  const body = document.getElementById('trackingModalBody');
-  if (!urls.length) {
-    body.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#a89c80;padding:20px;font-size:13px">—</div>';
-  } else {
-    body.innerHTML = urls.map(u => `<img src="${escapeHtml(u)}" alt="" onclick="openTrackingLightbox('${escapeHtml(u)}')">`).join('');
-  }
-  document.getElementById('trackingModal').classList.add('show');
-}
-
-function closeTracking(){
-  document.getElementById('trackingModal').classList.remove('show');
-}
-
-function openTrackingLightbox(url){
-  document.getElementById('trackingLightboxImg').src = url;
-  document.getElementById('trackingLightbox').classList.add('show');
-}
-
-function closeTrackingLightbox(){
-  document.getElementById('trackingLightbox').classList.remove('show');
-  document.getElementById('trackingLightboxImg').src = '';
-}
-
-document.getElementById('trackingModal').addEventListener('click', (e) => {
-  if (e.target.id === 'trackingModal') closeTracking();
-});
-
-window.showTracking = showTracking;
-window.closeTracking = closeTracking;
-window.openTrackingLightbox = openTrackingLightbox;
-window.closeTrackingLightbox = closeTrackingLightbox;
 
 // ════════════════════ CONFETTI ════════════════════
 function confetti(){
