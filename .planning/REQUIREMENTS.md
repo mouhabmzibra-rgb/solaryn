@@ -142,20 +142,69 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 to LAYOUT-06 | Phase 2 | Pending |
-| FORM-01 to FORM-08 | Phase 2 | Pending |
-| TRUST-01 to TRUST-05 | Phase 2 + Phase 3 | Pending |
-| BACK-01 to BACK-08 | Phase 1 | Pending |
-| TRACK-01 to TRACK-07 | Phase 1 + Phase 2 | Pending |
-| CONFIRM-01 to CONFIRM-04 | Phase 2 | Pending |
-| PERF-01 to PERF-06 | Phase 4 | Pending |
-| SEC-01 to SEC-07 | Phase 1 + Phase 4 | Pending |
-| QA-01 to QA-06 | Phase 4 | Pending |
+| LAYOUT-01 | Phase 2 | Pending |
+| LAYOUT-02 | Phase 2 | Pending |
+| LAYOUT-03 | Phase 2 | Pending |
+| LAYOUT-04 | Phase 2 | Pending |
+| LAYOUT-05 | Phase 2 | Pending |
+| LAYOUT-06 | Phase 2 | Pending |
+| FORM-01 | Phase 2 | Pending |
+| FORM-02 | Phase 2 | Pending |
+| FORM-03 | Phase 1 | Pending |
+| FORM-04 | Phase 2 | Pending |
+| FORM-05 | Phase 2 | Pending |
+| FORM-06 | Phase 2 | Pending |
+| FORM-07 | Phase 2 | Pending |
+| FORM-08 | Phase 2 | Pending |
+| TRUST-01 | Phase 3 | Pending |
+| TRUST-02 | Phase 3 | Pending |
+| TRUST-03 | Phase 3 | Pending |
+| TRUST-04 | Phase 3 | Pending |
+| TRUST-05 | Phase 3 | Pending |
+| BACK-01 | Phase 1 | Pending |
+| BACK-02 | Phase 1 | Pending |
+| BACK-03 | Phase 1 | Pending |
+| BACK-04 | Phase 1 | Pending |
+| BACK-05 | Phase 1 | Pending |
+| BACK-06 | Phase 1 | Pending |
+| BACK-07 | Phase 1 | Pending |
+| BACK-08 | Phase 1 | Pending |
+| TRACK-01 | Phase 2 | Pending |
+| TRACK-02 | Phase 2 | Pending |
+| TRACK-03 | Phase 2 | Pending |
+| TRACK-04 | Phase 1 | Pending |
+| TRACK-05 | Phase 1 | Pending |
+| TRACK-06 | Phase 2 | Pending |
+| TRACK-07 | Phase 1 | Pending |
+| CONFIRM-01 | Phase 2 | Pending |
+| CONFIRM-02 | Phase 2 | Pending |
+| CONFIRM-03 | Phase 2 | Pending |
+| CONFIRM-04 | Phase 2 | Pending |
+| PERF-01 | Phase 4 | Pending |
+| PERF-02 | Phase 4 | Pending |
+| PERF-03 | Phase 4 | Pending |
+| PERF-04 | Phase 4 | Pending |
+| PERF-05 | Phase 4 | Pending |
+| PERF-06 | Phase 4 | Pending |
+| SEC-01 | Phase 2 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Pending |
+| SEC-05 | Phase 1 | Pending |
+| SEC-06 | Phase 1 | Pending |
+| SEC-07 | Phase 1 | Pending |
+| QA-01 | Phase 4 | Pending |
+| QA-02 | Phase 4 | Pending |
+| QA-03 | Phase 4 | Pending |
+| QA-04 | Phase 4 | Pending |
+| QA-05 | Phase 4 | Pending |
+| QA-06 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 51 total
 - Mapped to phases: 51
 - Unmapped: 0 ✓
+- Duplicates across phases: 0 ✓
 
 ## User Stories
 
@@ -194,4 +243,4 @@ For PR body generation by `/gsd:ship` (per ship.pr_body_sections config).
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after initial definition*
+*Last updated: 2026-05-26 after roadmap traceability update*
