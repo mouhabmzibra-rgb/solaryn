@@ -17,6 +17,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C2C8ZJP45L"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C2C8ZJP45L', {
+    page_path: '/ar',
+    page_title: 'AR Landing — Solaryn SPF 50'
+  });
+</script>
+<!-- End GA4 -->
+
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -540,7 +553,7 @@ img{max-width:100%;display:block;height:auto}
   $fbp.value = getCookie('_fbp') || '';
   $fbc.value = getCookie('_fbc') || '';
 
-  // ─── Fire InitiateCheckout on FIRST focus of any form field ───
+  // ─── Fire InitiateCheckout + form_start on FIRST focus of any form field ───
   let icFired = false;
   $form.addEventListener('focusin', () => {
     if (icFired) return;
@@ -552,6 +565,12 @@ img{max-width:100%;display:block;height:auto}
         value: 150,
         currency: 'MAD',
         num_items: 1
+      });
+    }
+    if (window.gtag) {
+      window.gtag('event', 'form_start', {
+        value: 150,
+        currency: 'MAD'
       });
     }
   }, { once: false });
@@ -636,6 +655,15 @@ img{max-width:100%;display:block;height:auto}
             value: 150,
             currency: 'MAD'
           }, { eventID: event_id });
+        }
+        // Fire GA4 Lead event (mirrors FB Pixel)
+        if(window.gtag){
+          window.gtag('event', 'lead_submit', {
+            value: 150,
+            currency: 'MAD',
+            ville: data.ville,
+            event_id: event_id
+          });
         }
         window.location.assign('/ar/merci');
         return;
