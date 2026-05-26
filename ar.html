@@ -27,6 +27,17 @@
     page_path: '/ar',
     page_title: 'AR Landing — Solaryn SPF 50'
   });
+  gtag('event', 'view_item', {
+    currency: 'MAD',
+    value: 150,
+    items: [{
+      item_id: 'solaryn-spf50-150',
+      item_name: 'Solaryn SPF 50',
+      item_category: 'Skincare',
+      price: 150,
+      quantity: 1
+    }]
+  });
 </script>
 <!-- End GA4 -->
 
@@ -553,9 +564,34 @@ img{max-width:100%;display:block;height:auto}
   $fbp.value = getCookie('_fbp') || '';
   $fbc.value = getCookie('_fbc') || '';
 
-  // ─── Fire InitiateCheckout + form_start on FIRST focus of any form field ───
+  // ─── Fire begin_checkout on CTA hero click ───
+  let bcFired = false;
+  function fireBeginCheckout() {
+    if (bcFired) return;
+    bcFired = true;
+    if (window.gtag) {
+      window.gtag('event', 'begin_checkout', {
+        currency: 'MAD',
+        value: 150,
+        items: [{
+          item_id: 'solaryn-spf50-150',
+          item_name: 'Solaryn SPF 50',
+          item_category: 'Skincare',
+          price: 150,
+          quantity: 1
+        }]
+      });
+    }
+  }
+  document.querySelectorAll('.cta-hero').forEach(el => {
+    el.addEventListener('click', fireBeginCheckout);
+  });
+
+  // ─── Fire InitiateCheckout (FB) + form_start (GA) on FIRST focus of any form field ───
+  // Also fire begin_checkout if not already fired (user scrolled directly to form)
   let icFired = false;
   $form.addEventListener('focusin', () => {
+    fireBeginCheckout(); // safety net if user skipped CTA
     if (icFired) return;
     icFired = true;
     if (window.fbq) {
