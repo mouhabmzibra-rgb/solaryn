@@ -8,6 +8,8 @@ const SALES_COL_TRACKING = 'O';
 const AFFILIATES_COL_LAST_ACTIVE = 'I';
 const ONLINE_WINDOW_MS = 15 * 60 * 1000;
 
+const AR_LEADS_TAB = 'Leads';
+
 let _sheetsClient = null;
 
 function getSheetsClient() {
@@ -255,4 +257,17 @@ export async function setTrackingUrl(saleId, url) {
         requestBody: { values: [[url || '']] },
     });
     return { ok: true, url: url || '' };
+}
+
+export async function appendArLead(row) {
+    const sheetId = process.env.AR_LEADS_SHEET_ID;
+    if (!sheetId) throw new Error('AR_LEADS_SHEET_ID env var not set');
+    const sheets = getSheetsClient();
+    await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: `${AR_LEADS_TAB}!A:H`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values: [row] },
+    });
 }

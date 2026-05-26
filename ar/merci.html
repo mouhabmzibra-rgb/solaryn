@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1B2D4D">
+<title>شكراً لك ! — Solaryn</title>
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#1B2D4D;
+  --gold:#C89860;
+  --gold-light:#F7C969;
+  --orange:#FF8C42;
+  --green:#1c6b3a;
+  --cream:#FFF8EC;
+  --bg:#FBF7EE;
+  --gradient-sun:linear-gradient(135deg,#FF8C42 0%,#F7C969 60%,#C89860 100%);
+  --gradient-gold:linear-gradient(135deg,#C89860 0%,#F7C969 100%);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--navy);line-height:1.6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+
+.merci-card{
+  background:#fff;border-radius:24px;max-width:520px;width:100%;
+  padding:36px 28px;text-align:center;
+  box-shadow:0 24px 64px rgba(15,23,42,.15);
+  border:2px solid var(--gold-light);
+  animation:fadeUp .5s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.check-icon{
+  width:84px;height:84px;border-radius:50%;
+  background:var(--gradient-sun);margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 14px 36px rgba(255,140,66,.4);
+  animation:bounce .6s ease .2s both;
+}
+@keyframes bounce{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+h1{
+  font-size:28px;font-weight:900;color:var(--navy);margin-bottom:10px;
+}
+h1 .grad{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.sub{
+  font-size:16px;color:#4a5568;margin-bottom:22px;font-weight:600;
+}
+
+.next-steps{
+  background:var(--cream);border:1px solid #f0e6cc;border-radius:14px;
+  padding:18px 16px;margin-bottom:18px;text-align:start;
+}
+.next-steps h3{
+  font-size:15px;font-weight:900;color:var(--gold);margin-bottom:12px;text-align:center;
+}
+.step{
+  display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;
+}
+.step:last-child{margin-bottom:0}
+.step-num{
+  flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--gradient-gold);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;
+}
+.step-text{font-size:14px;color:var(--navy);font-weight:600;line-height:1.5}
+.step-text strong{color:var(--orange);font-weight:800}
+
+.cod-reminder{
+  background:#e7f7ec;color:var(--green);padding:14px 16px;border-radius:12px;
+  font-size:14px;font-weight:800;text-align:center;margin-bottom:18px;
+  border:1px solid #b6e6c4;
+}
+
+.thanks-msg{
+  font-size:14px;color:#7a7e8a;font-weight:600;line-height:1.6;
+}
+.thanks-msg .heart{color:#e74c3c}
+
+.logo{
+  margin-top:24px;font-size:18px;font-weight:900;letter-spacing:1px;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.logo .sun{
+  width:18px;height:18px;border-radius:50%;background:var(--gradient-sun);
+}
+.logo .gold-txt{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
+</head>
+<body>
+
+<div class="merci-card">
+  <div class="check-icon">✅</div>
+
+  <h1>تسجل <span class="grad">طلبك</span> ! 🎉</h1>
+  <p class="sub">شكراً ليك بزاف على ثقتك فـ Solaryn</p>
+
+  <div class="next-steps">
+    <h3>📞 شنو غادي يوقع دابا ؟</h3>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>كنعيطو ليك فقاع وقت قريب</strong> باش نأكدو معاك الطلب و العنوان</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>كنسيفطو الكولي</strong> فـ 2-4 ايام عمل (حسب المدينة)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>كتخلصي 150 درهم</strong> ملي يوصلك الكولي للدار</div>
+    </div>
+  </div>
+
+  <div class="cod-reminder">💵 الدفع عند الاستلام — 150 درهم فقط (التوصيل مجاني)</div>
+
+  <p class="thanks-msg">
+    📱 يمكن نعيطو ليك من رقم غير معروف ولا واتساب<br>
+    عافاك جاوبي باش نأكدو الطلب
+  </p>
+
+  <div class="logo">
+    <span class="sun"></span>
+    <span class="gold-txt">SOLARYN</span>
+  </div>
+</div>
+
+</body>
+</html>

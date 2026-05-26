@@ -12,3 +12,6 @@ assets/images/grok-video-*
 .google/
 .telegram/
 .tiktok/
+.composio/credentials.env
+.greenapi/
+.planning/HANDOFF.json
