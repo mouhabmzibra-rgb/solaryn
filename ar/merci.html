@@ -21,11 +21,8 @@
     page_path: '/ar/merci',
     page_title: 'AR Merci — Solaryn SPF 50'
   });
-  gtag('event', 'lead_complete', {
-    value: 150,
-    currency: 'MAD',
-    page_path: '/ar/merci'
-  });
+  // Note: purchase event already fired on /ar form submit (mirrors FB Pixel).
+  // /ar/merci is the post-conversion thank-you page — page_view only.
 </script>
 <!-- End GA4 -->
 
@@ -41,12 +38,8 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1424942896066929');
 fbq('track', 'PageView');
-fbq('track', 'CompleteRegistration', {
-  content_name: 'Solaryn SPF 50 — Lead Form Submitted',
-  status: true,
-  value: 150,
-  currency: 'MAD'
-});
+// Note: Purchase event already fired on /ar form submit (with shared event_id).
+// /ar/merci is the post-conversion thank-you page — PageView only.
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1424942896066929&ev=PageView&noscript=1"

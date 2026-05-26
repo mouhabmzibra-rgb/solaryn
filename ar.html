@@ -748,23 +748,32 @@ img{max-width:100%;display:block;height:auto}
       const body = await res.json().catch(() => ({}));
 
       if(res.ok && body.ok === true){
-        // Fire FB Pixel Lead event with shared eventID for CAPI dedup
+        // Fire FB Pixel Purchase event with shared eventID for CAPI dedup
         if(window.fbq){
-          window.fbq('track', 'Lead', {
+          window.fbq('track', 'Purchase', {
             content_name: 'Solaryn SPF 50',
             content_category: 'Skincare',
             content_ids: ['solaryn-spf50-150'],
+            content_type: 'product',
             value: 150,
-            currency: 'MAD'
+            currency: 'MAD',
+            num_items: 1
           }, { eventID: event_id });
         }
-        // Fire GA4 Lead event (mirrors FB Pixel)
+        // Fire GA4 purchase event (standard e-commerce format)
         if(window.gtag){
-          window.gtag('event', 'lead_submit', {
+          window.gtag('event', 'purchase', {
+            transaction_id: event_id,
             value: 150,
             currency: 'MAD',
             ville: data.ville,
-            event_id: event_id
+            items: [{
+              item_id: 'solaryn-spf50-150',
+              item_name: 'Solaryn SPF 50',
+              item_category: 'Skincare',
+              price: 150,
+              quantity: 1
+            }]
           });
         }
         window.location.assign('/ar/merci');

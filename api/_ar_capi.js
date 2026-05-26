@@ -20,7 +20,7 @@ export function capiConfigured() {
     return Boolean(PIXEL_ID && ACCESS_TOKEN);
 }
 
-export async function fireLeadCapi({
+export async function firePurchaseCapi({
     event_id,
     event_source_url,
     ip,
@@ -51,13 +51,21 @@ export async function fireLeadCapi({
 
     const payload = {
         data: [{
-            event_name: 'Lead',
+            event_name: 'Purchase',
             event_time,
             event_id,
             event_source_url,
             action_source: 'website',
             user_data,
-            custom_data: { value: 150, currency: 'MAD' },
+            custom_data: {
+                value: 150,
+                currency: 'MAD',
+                content_name: 'Solaryn SPF 50',
+                content_category: 'Skincare',
+                content_ids: ['solaryn-spf50-150'],
+                content_type: 'product',
+                num_items: 1,
+            },
         }],
     };
     if (TEST_EVENT_CODE) payload.test_event_code = TEST_EVENT_CODE;

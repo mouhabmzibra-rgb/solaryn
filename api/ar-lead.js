@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { clean, readBody, validPhone, clientIp } from './_lib.js';
 import { appendArLead } from './_sheets.js';
-import { fireLeadCapi, capiConfigured } from './_ar_capi.js';
+import { firePurchaseCapi, capiConfigured } from './_ar_capi.js';
 
 const COUNTRY_GATE_OFF = process.env.AR_COUNTRY_GATE_OFF === '1';
 
@@ -118,7 +118,7 @@ export default async function handler(req, res) {
     // Fire CAPI best-effort (does NOT block response)
     if (capiConfigured()) {
         const eventSourceUrl = req.headers['referer'] || 'https://solaryn-five.vercel.app/ar';
-        fireLeadCapi({
+        firePurchaseCapi({
             event_id: eventId,
             event_source_url: eventSourceUrl,
             ip: clientIp(req),
@@ -130,7 +130,7 @@ export default async function handler(req, res) {
             fbc,
         }).then(r => {
             if (!r.ok && !r.skipped) {
-                console.error('ar_lead_capi_error', r.error || r.status || 'unknown', safeLogTel(telCanonical));
+                console.error('ar_purchase_capi_error', r.error || r.status || 'unknown', safeLogTel(telCanonical));
             }
         }).catch(() => {});
     }
