@@ -260,6 +260,30 @@ img{max-width:100%;display:block;height:auto}
 .page-ar .form-error-global.show{display:block}
 .page-ar .hp{display:none}
 
+/* ─── STICKY BOTTOM CTA ─── */
+.page-ar .sticky-cta{
+  position:fixed;bottom:0;inset-inline:0;z-index:90;
+  background:#fff;border-top:1px solid var(--border);
+  padding:10px 14px env(safe-area-inset-bottom, 10px);
+  box-shadow:0 -6px 20px rgba(15,23,42,.10);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(110%);transition:transform .25s ease;
+}
+.page-ar .sticky-cta.show{transform:translateY(0)}
+.page-ar .sticky-cta-price{
+  display:flex;flex-direction:column;line-height:1.1;flex-shrink:0;
+}
+.page-ar .sticky-cta-price b{font-size:18px;font-weight:900;color:var(--gold)}
+.page-ar .sticky-cta-price small{font-size:10px;color:#7a7e8a;font-weight:700}
+.page-ar .sticky-cta-btn{
+  flex:1;background:var(--gradient-sun);color:#fff;border:none;
+  padding:13px 16px;border-radius:50px;font-weight:900;font-size:15px;
+  cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+@media (min-width: 768px){ .page-ar .sticky-cta{display:none} }
+.page-ar .form-section{padding-bottom:90px}
+
 /* ─── TRUST ─── */
 .page-ar .trust{
   padding:24px 18px;background:var(--bg);text-align:center;
@@ -539,6 +563,15 @@ img{max-width:100%;display:block;height:auto}
     <strong class="gold-txt">SOLARYN</strong> · صنع فالمغرب 🇲🇦 · جميع الحقوق محفوظة
   </div>
 
+  <!-- STICKY BOTTOM CTA (mobile only) -->
+  <div class="sticky-cta" id="stickyCta">
+    <div class="sticky-cta-price">
+      <b>150 درهم</b>
+      <small>التوصيل مجاني</small>
+    </div>
+    <a href="#commande" class="sticky-cta-btn cta-hero">📦 طلبي دابا</a>
+  </div>
+
 </div>
 
 <script>
@@ -563,6 +596,39 @@ img{max-width:100%;display:block;height:auto}
   }
   $fbp.value = getCookie('_fbp') || '';
   $fbc.value = getCookie('_fbc') || '';
+
+  // ─── Smooth scroll to form when CTA clicked (TikTok/in-app browsers fail with native anchor) ───
+  document.querySelectorAll('a[href="#commande"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const target = document.getElementById('commande');
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Focus first input after scroll (helps mobile UX)
+        setTimeout(() => {
+          const firstInput = target.querySelector('input[type="text"]');
+          if (firstInput) firstInput.focus({ preventScroll: true });
+        }, 600);
+      }
+    });
+  });
+
+  // ─── Show sticky bottom CTA after user scrolls past hero ───
+  const $stickyCta = document.getElementById('stickyCta');
+  const $heroSection = document.querySelector('.hero');
+  if ($stickyCta && $heroSection) {
+    const onScroll = () => {
+      const heroBottom = $heroSection.getBoundingClientRect().bottom;
+      const formInView = document.getElementById('commande').getBoundingClientRect().top < window.innerHeight;
+      if (heroBottom < 0 && !formInView) {
+        $stickyCta.classList.add('show');
+      } else {
+        $stickyCta.classList.remove('show');
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
 
   // ─── Fire begin_checkout on CTA hero click ───
   let bcFired = false;
