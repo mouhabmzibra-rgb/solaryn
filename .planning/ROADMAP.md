@@ -24,7 +24,10 @@
   3. Invalid submissions are rejected with generic error codes (no PII echo): bad phone → `invalid_phone`, missing field → `missing_field`, sheet write fails → 500 (never swallowed)
   4. Anti-spam layers reject silently or with 4xx: honeypot filled → 200 with no sheet write, time-to-submit < 2s → reject, `x-vercel-ip-country !== 'MA'` → reject (testing-flag overrideable), URL/Cyrillic/Chinese in name fields → reject
   5. Server fires Meta CAPI `Lead` event with SHA-256-hashed phone/first-name/city and a shared `event_id` UUID; `META_CAPI_ACCESS_TOKEN` is set as a server-only env var (never `NEXT_PUBLIC_*`); no PII ever appears in `console.log`
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] PLANS/01-prerequisites.md — Manual setup: new Google Sheet, 3 Vercel env vars, Meta CAPI system-user token
+  - [ ] PLANS/02-helpers.md — Node 22 pin + additive `appendArLead()` in `_sheets.js` + new `_ar_capi.js` module
+  - [ ] PLANS/03-endpoint.md — New `api/ar-lead.js` handler + sentinel curl + 9-case negative test suite
 
 ### Phase 2: Landing Page Build (HTML + RTL + Form + Pixel)
 **Goal**: A visitor from a FB/IG ad lands on `/ar`, sees a fast-rendering RTL darija page with hero + price + form, submits the 5-field form, and is redirected to `/ar/merci` only after the server confirms the lead — with a matching Pixel `Lead` event fired client-side
@@ -76,7 +79,7 @@ Phase 1 must complete first (frontend depends on working endpoint). Phase 3 can 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation & Sheet Provisioning | 0/0 | Not started | - |
+| 1. Backend Foundation & Sheet Provisioning | 0/3 | Planned (3 plans) | - |
 | 2. Landing Page Build (HTML + RTL + Form + Pixel) | 0/0 | Not started | - |
 | 3. Content Localization & Trust Signal Polish | 0/0 | Not started | - |
 | 4. Performance, QA, Deploy & Monitoring | 0/0 | Not started | - |
