@@ -654,7 +654,7 @@ img{max-width:100%;display:block;height:auto}
   });
 
   // ─── Fire InitiateCheckout (FB) + form_start (GA) on FIRST focus of any form field ───
-  // Also fire begin_checkout if not already fired (user scrolled directly to form)
+  // (= user tapped a field, keyboard opens — but hasn't typed yet)
   let icFired = false;
   $form.addEventListener('focusin', () => {
     fireBeginCheckout(); // safety net if user skipped CTA
@@ -676,6 +676,36 @@ img{max-width:100%;display:block;height:auto}
       });
     }
   }, { once: false });
+
+  // ─── Fire form_typing_start on FIRST keystroke in any text field ───
+  // (= user actually started writing — stronger signal than just focus)
+  // Also tracks AddToCart on FB side as a mid-funnel signal between IC and Purchase
+  let typingFired = false;
+  $form.addEventListener('input', (e) => {
+    if (typingFired) return;
+    // Ignore non-text inputs (hidden fields, checkboxes)
+    if (!e.target || !['text', 'tel', 'textarea'].includes(e.target.type || e.target.tagName.toLowerCase())) return;
+    // Need at least 1 real character (not empty after autocomplete clears)
+    if (!e.target.value || !e.target.value.trim()) return;
+    typingFired = true;
+    const fieldName = e.target.name || 'unknown';
+    if (window.gtag) {
+      window.gtag('event', 'form_typing_start', {
+        first_field: fieldName,
+        value: 150,
+        currency: 'MAD'
+      });
+    }
+    if (window.fbq) {
+      window.fbq('track', 'AddToCart', {
+        content_name: 'Solaryn SPF 50',
+        content_ids: ['solaryn-spf50-150'],
+        value: 150,
+        currency: 'MAD',
+        num_items: 1
+      });
+    }
+  });
 
   // ─── FAQ accordion ───
   document.querySelectorAll('.faq-item').forEach(item => {
