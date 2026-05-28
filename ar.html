@@ -796,31 +796,82 @@ img{max-width:100%;display:block;height:auto}
   }
 
   // ─── Track validation errors (client-side, before fetch) ───
+  // Granular event names (no custom dims needed in GA4):
+  //   form_submit_error             — overall (always fires on validation fail)
+  //   form_error_{field}            — per-field that failed validation
+  //   form_submit_empty             — user clicked submit with 0 fields filled
+  //   form_submit_partial           — 1-2 fields filled, others empty/invalid
+  //   form_submit_all_filled_invalid — all 3 fields had content but validation failed
+  //   form_partial_with_{field}     — which fields user did fill in a partial submit
+  //   form_submit_after_typing      — user had typed before submit error (engagement signal)
   function fireValidationError(form, data){
     const errors = [];
+    const filledFields = [];
+
+    // What's filled (regardless of validity)
+    if(data.prenom && data.prenom.trim()) filledFields.push('prenom');
+    if(data.tel && data.tel.trim()) filledFields.push('tel');
+    if(data.adresse && data.adresse.trim()) filledFields.push('adresse');
+
+    // What's invalid
     if(!data.prenom || !data.prenom.trim()) errors.push('prenom');
     const telClean = (data.tel || '').replace(/\D/g, '');
     if(!/^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean)) errors.push('tel');
     if(!data.adresse || !data.adresse.trim()) errors.push('adresse');
     if(errors.length === 0) return;
+
+    const formId = form.id || 'unknown';
+    const filledCount = filledFields.length;
+
     if(window.gtag){
+      // Overall event
       window.gtag('event', 'form_submit_error', {
         error_type: 'client_validation',
         error_fields: errors.join('|'),
-        form_id: form.id || 'unknown'
+        filled_fields: filledFields.join('|') || 'none',
+        filled_count: filledCount,
+        had_typed: typingFired ? 1 : 0,
+        form_id: formId
       });
-      // Per-field event (queryable without custom dims registered in GA4)
+      // Per-field error
       errors.forEach(field => {
         window.gtag('event', 'form_error_' + field, {
-          form_id: form.id || 'unknown',
+          form_id: formId,
           error_type: 'client_validation'
         });
       });
+      // State events (queryable purely by event name)
+      if(filledCount === 0){
+        window.gtag('event', 'form_submit_empty', { form_id: formId });
+      } else if(filledCount === 3){
+        window.gtag('event', 'form_submit_all_filled_invalid', {
+          form_id: formId,
+          invalid_count: errors.length
+        });
+      } else {
+        window.gtag('event', 'form_submit_partial', {
+          form_id: formId,
+          filled_count: filledCount,
+          filled_fields: filledFields.join('|')
+        });
+        // Which fields user did manage to fill
+        filledFields.forEach(f => {
+          window.gtag('event', 'form_partial_with_' + f, { form_id: formId });
+        });
+      }
+      // Engagement signal: did user type anywhere before submitting?
+      if(typingFired){
+        window.gtag('event', 'form_submit_after_typing', { form_id: formId });
+      } else {
+        window.gtag('event', 'form_submit_no_typing', { form_id: formId });
+      }
     }
     if(window.fbq){
       window.fbq('trackCustom', 'FormSubmitError', {
         error_type: 'client_validation',
-        error_fields: errors.join('|')
+        error_fields: errors.join('|'),
+        filled_fields: filledFields.join('|') || 'none',
+        filled_count: filledCount
       });
     }
   }
