@@ -163,21 +163,25 @@ img{max-width:100%;display:block;height:auto}
 
 /* ─── HERO FORM (compact, above the fold) ─── */
 .page-ar .hero-form-wrap{
-  margin-top:14px;background:#fff;border:2px solid var(--gold);border-radius:18px;
-  padding:14px 14px 12px;box-shadow:var(--shadow);text-align:start;
+  margin-top:12px;background:#fff;border:2px solid var(--gold);border-radius:16px;
+  padding:12px 12px 10px;box-shadow:var(--shadow);text-align:start;
 }
 .page-ar .hero-form-title{
-  text-align:center;font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;
+  text-align:center;font-size:14px;font-weight:900;color:var(--navy);margin-bottom:8px;
 }
 .page-ar .hero-form-title .grad{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
-.page-ar .ar-form .field{margin-bottom:10px}
-.page-ar .ar-form .field:last-of-type{margin-bottom:14px}
+.page-ar .ar-form .field{margin-bottom:8px}
+.page-ar .ar-form .field:last-of-type{margin-bottom:10px}
 .page-ar .hero-form-wrap .field input,
 .page-ar .hero-form-wrap .field textarea{
-  padding:12px 12px;font-size:16px;border-radius:10px;
+  padding:11px 12px;font-size:16px;border-radius:10px;
+  scroll-margin-bottom:160px; /* keep visible when keyboard opens */
 }
-.page-ar .hero-form-wrap textarea{min-height:56px}
-.page-ar .hero-form-wrap .submit-btn{padding:14px 18px;font-size:16px}
+.page-ar .hero-form-wrap textarea{min-height:44px;resize:none}
+.page-ar .hero-form-wrap .submit-btn{
+  padding:13px 18px;font-size:16px;
+  scroll-margin-bottom:80px; /* ensure submit btn is fully scrolled into view */
+}
 
 /* ─── BENEFITS ─── */
 .page-ar .benefits{padding:30px 18px 20px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -259,6 +263,7 @@ img{max-width:100%;display:block;height:auto}
   padding:16px 20px;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;
   font-family:inherit;letter-spacing:.3px;box-shadow:var(--shadow-hard);
   transition:transform .15s,opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;
+  scroll-margin-bottom:80px; /* ensure visible when keyboard opens */
 }
 .page-ar .submit-btn:hover:not(:disabled){transform:translateY(-2px)}
 .page-ar .submit-btn:disabled{opacity:.7;cursor:not-allowed}
@@ -421,8 +426,8 @@ img{max-width:100%;display:block;height:auto}
           </div>
 
           <div class="field">
-            <textarea name="adresse" required autocomplete="street-address" minlength="1"
-                      placeholder="🏙️ المدينة و العنوان الكامل"></textarea>
+            <input type="text" name="adresse" required autocomplete="street-address" minlength="1"
+                   placeholder="🏙️ المدينة و العنوان الكامل">
             <div class="field-error">عافاك دخلي المدينة و العنوان</div>
           </div>
 
@@ -713,11 +718,32 @@ img{max-width:100%;display:block;height:auto}
     el.addEventListener('click', fireBeginCheckout);
   });
 
+  // ─── Ensure submit button visible when keyboard opens ───
+  // Mobile keyboards hide bottom of viewport. After a field is focused
+  // (~350ms for keyboard to appear), check if submit button is below
+  // visible area, scroll it into view if needed.
+  function ensureSubmitVisible(form){
+    const btn = form.querySelector('.submit-btn');
+    if (!btn) return;
+    setTimeout(() => {
+      const rect = btn.getBoundingClientRect();
+      // Use visualViewport when available (knows real height after keyboard opens)
+      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      if (rect.bottom > vh - 20) {
+        btn.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      }
+    }, 400);
+  }
+
   // ─── Attach event listeners to BOTH forms ───
   $forms.forEach(form => {
-    form.addEventListener('focusin', () => {
+    form.addEventListener('focusin', (e) => {
       fireBeginCheckout();    // safety net
       fireInitiateCheckout(); // FB IC + GA form_start
+      // Make sure submit button is reachable after keyboard opens
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
+        ensureSubmitVisible(form);
+      }
     });
 
     form.addEventListener('input', (e) => {
@@ -729,6 +755,14 @@ img{max-width:100%;display:block;height:auto}
       fireTypingStart(e.target.name);
     });
   });
+
+  // ─── Visual Viewport listener (re-check on keyboard show/hide) ───
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', () => {
+      const activeForm = document.activeElement && document.activeElement.closest('form.ar-form');
+      if (activeForm) ensureSubmitVisible(activeForm);
+    });
+  }
 
   // ─── FAQ accordion ───
   document.querySelectorAll('.faq-item').forEach(item => {
