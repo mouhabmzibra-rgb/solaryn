@@ -271,3 +271,17 @@ export async function appendArLead(row) {
         requestBody: { values: [row] },
     });
 }
+
+const AR_PARTIALS_TAB = 'Partials';
+export async function appendArPartial(row) {
+    const sheetId = process.env.AR_LEADS_SHEET_ID;
+    if (!sheetId) throw new Error('AR_LEADS_SHEET_ID env var not set');
+    const sheets = getSheetsClient();
+    await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: `${AR_PARTIALS_TAB}!A:I`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values: [row] },
+    });
+}

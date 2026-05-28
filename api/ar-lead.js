@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { clean, readBody, validPhone, clientIp } from './_lib.js';
-import { appendArLead } from './_sheets.js';
+import { appendArLead, appendArPartial } from './_sheets.js';
 import { firePurchaseCapi, capiConfigured } from './_ar_capi.js';
 
 const COUNTRY_GATE_OFF = process.env.AR_COUNTRY_GATE_OFF === '1';
@@ -48,6 +48,52 @@ export default async function handler(req, res) {
     }
 
     const body = readBody(req);
+
+    // ─── PARTIAL submission path (typing snapshot, not a real purchase) ───
+    // Body shape: { partial: true, session_id, form_id, prenom, tel, adresse, status, source }
+    // Bypasses all validation; just logs whatever was typed to the Partials sheet tab.
+    if (body.partial === true || body.partial === 'true' || body.partial === 1 || body.partial === '1') {
+        const session_id = clean(body.session_id, 80);
+        if (!session_id) return res.status(200).json({ ok: false, error: 'missing_session' });
+
+        const p_form_id = clean(body.form_id, 32);
+        const p_prenom = clean(body.prenom, 80);
+        const p_tel = clean(body.tel, 30);
+        const p_telDigits = asciiDigits(p_tel).replace(/\D/g, '');
+        const p_adresse = clean(body.adresse, 400);
+        const p_status = clean(body.status, 32) || 'snapshot';
+        const p_source = clean(body.source, 32) || 'fb_ar';
+
+        // Skip if user typed absolutely nothing
+        if (!p_prenom && !p_telDigits && !p_adresse) {
+            return res.status(200).json({ ok: true, skipped: 'empty' });
+        }
+
+        const p_tz = '+01:00';
+        const p_iso = new Date().toISOString().replace('Z', p_tz);
+        const p_country = req.headers['x-vercel-ip-country'] || '';
+        const p_city = req.headers['x-vercel-ip-city'] || '';
+
+        const p_row = [
+            p_iso,
+            session_id,
+            p_form_id || '',
+            p_status,
+            p_prenom,
+            "'" + p_tel,
+            p_adresse,
+            p_source,
+            `${p_country}/${decodeURIComponent(p_city)}`,
+        ];
+
+        try {
+            await appendArPartial(p_row);
+            return res.status(200).json({ ok: true });
+        } catch (err) {
+            console.error('ar_partial_sheet_error', err.message || 'unknown');
+            return res.status(200).json({ ok: false, error: 'sheet_error' });
+        }
+    }
 
     // Honeypot — silent 200 (don't tip off the bot)
     if (body.website) {

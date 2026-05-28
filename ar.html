@@ -627,12 +627,72 @@ img{max-width:100%;display:block;height:auto}
   const fbpVal = getCookie('_fbp') || '';
   const fbcVal = getCookie('_fbc') || '';
 
+  // Stable session ID for partial-typing tracking (so multiple snapshots
+  // can be tied back to the same visitor in the Partials sheet)
+  const partialSessionId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'ps-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+
   $forms.forEach(form => {
     const ts = form.querySelector('input[name="ts_rendered"]');
     if (ts) ts.value = String(Date.now());
     form.querySelectorAll('.fbpField').forEach(el => el.value = fbpVal);
     form.querySelectorAll('.fbcField').forEach(el => el.value = fbcVal);
   });
+
+  // ─── Partial typing tracker ────────────────────────────────────────
+  // Captures what user typed even if they never submit. Sends snapshots
+  // to /api/ar-lead with { partial: true } flag → logged to "Partials"
+  // Sheet tab. Triggers:
+  //   - on `blur` of any field that has content (debounced/deduped)
+  //   - on `pagehide` (last chance before tab close — uses sendBeacon)
+  function snapshotForm(form){
+    const fd = new FormData(form);
+    return {
+      session_id: partialSessionId,
+      form_id: form.id || '',
+      prenom: (fd.get('prenom') || '').toString().slice(0, 80),
+      tel: (fd.get('tel') || '').toString().slice(0, 30),
+      adresse: (fd.get('adresse') || '').toString().slice(0, 400),
+      source: (fd.get('source') || 'fb_ar').toString().slice(0, 32),
+      partial: true,
+    };
+  }
+  function sendPartial(form, status){
+    const snap = snapshotForm(form);
+    if (!snap.prenom && !snap.tel && !snap.adresse) return; // nothing to log
+    snap.status = status;
+    const body = JSON.stringify(snap);
+    try {
+      if (navigator.sendBeacon){
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon('/api/ar-lead', blob);
+      } else {
+        fetch('/api/ar-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: body,
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  }
+  const lastSentPerForm = new WeakMap();
+  function maybeSendPartial(form, status){
+    const sig = JSON.stringify(snapshotForm(form));
+    if (lastSentPerForm.get(form) === sig) return;
+    lastSentPerForm.set(form, sig);
+    sendPartial(form, status);
+  }
+  $forms.forEach(form => {
+    form.querySelectorAll('input, textarea').forEach(field => {
+      field.addEventListener('blur', () => maybeSendPartial(form, 'blur'));
+    });
+  });
+  window.addEventListener('pagehide', () => {
+    $forms.forEach(form => maybeSendPartial(form, 'pagehide'));
+  });
+  // ─────────────────────────────────────────────────────────────────────
 
   // ─── Smooth scroll for #commande anchor (kept for sticky CTA + any link) ───
   document.querySelectorAll('a[href="#commande"]').forEach(link => {
