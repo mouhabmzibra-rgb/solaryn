@@ -415,20 +415,20 @@ img{max-width:100%;display:block;height:auto}
           <input type="hidden" name="source" value="fb_ar_hero">
 
           <div class="field">
-            <input type="text" name="prenom" required autocomplete="given-name" placeholder="👤 السمية ديالك">
-            <div class="field-error">عافاك دخلي السمية</div>
+            <input type="text" name="prenom" autocomplete="given-name" placeholder="👤 السمية ديالك (اختياري)">
+            <div class="field-error">السمية ماشي صحيحة</div>
           </div>
 
           <div class="field">
             <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
-                   maxlength="25" placeholder="📱 0612345678">
+                   maxlength="25" placeholder="📱 0612345678 (إجباري)">
             <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
           </div>
 
           <div class="field">
-            <input type="text" name="adresse" required autocomplete="street-address" minlength="1"
-                   placeholder="🏙️ المدينة و العنوان الكامل">
-            <div class="field-error">عافاك دخلي المدينة و العنوان</div>
+            <input type="text" name="adresse" autocomplete="street-address"
+                   placeholder="🏙️ المدينة و العنوان (اختياري)">
+            <div class="field-error">العنوان ماشي صحيح</div>
           </div>
 
           <button type="submit" class="submit-btn">
@@ -527,12 +527,12 @@ img{max-width:100%;display:block;height:auto}
 
         <div class="field">
           <label>👤 السمية الشخصية</label>
-          <input type="text" name="prenom" required autocomplete="given-name" placeholder="مثال: نادية">
-          <div class="field-error">عافاك دخلي السمية ديالك</div>
+          <input type="text" name="prenom" autocomplete="given-name" placeholder="مثال: نادية (اختياري)">
+          <div class="field-error">السمية ماشي صحيحة</div>
         </div>
 
         <div class="field">
-          <label>📱 رقم الهاتف (واتساب)</label>
+          <label>📱 رقم الهاتف (واتساب) — <span style="color:var(--orange)">إجباري</span></label>
           <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
                  maxlength="25" placeholder="0612345678">
           <div class="field-help">📌 باش نعيطو ليك ونأكدو الطلب</div>
@@ -540,11 +540,11 @@ img{max-width:100%;display:block;height:auto}
         </div>
 
         <div class="field">
-          <label>🏙️ المدينة و العنوان الكامل</label>
-          <textarea name="adresse" required autocomplete="street-address" minlength="1"
-                    placeholder="مثال: الدار البيضاء، حي الفتح، زنقة 12، رقم 5"></textarea>
-          <div class="field-help">📌 باش يقدر يلقاك الموزع</div>
-          <div class="field-error">عافاك دخلي المدينة و العنوان الكامل (على الأقل 10 حروف)</div>
+          <label>🏙️ المدينة و العنوان (اختياري)</label>
+          <textarea name="adresse" autocomplete="street-address"
+                    placeholder="مثال: الدار البيضاء، حي الفتح، زنقة 12 (اختياري)"></textarea>
+          <div class="field-help">📌 يمكن نسولوك عليه فالتلفون</div>
+          <div class="field-error">العنوان ماشي صحيح</div>
         </div>
 
         <button type="submit" class="submit-btn">
@@ -780,19 +780,17 @@ img{max-width:100%;display:block;height:auto}
   }
 
   function validate(form, data){
-    let ok = true;
-    if(!data.prenom || !data.prenom.trim()){ setFieldError(form, 'prenom', true); ok = false; }
-    else setFieldError(form, 'prenom', false);
-
+    // Only tel is required. prenom + adresse are optional (we'll call back).
     const telClean = (data.tel || '').replace(/\D/g, '');
     const telOk = /^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean);
-    if(!telOk){ setFieldError(form, 'tel', true); ok = false; }
+    if(!telOk){ setFieldError(form, 'tel', true); }
     else setFieldError(form, 'tel', false);
 
-    if(!data.adresse || !data.adresse.trim()){ setFieldError(form, 'adresse', true); ok = false; }
-    else setFieldError(form, 'adresse', false);
+    // Always clear prenom / adresse error states (no longer required)
+    setFieldError(form, 'prenom', false);
+    setFieldError(form, 'adresse', false);
 
-    return ok;
+    return telOk;
   }
 
   // ─── Track validation errors (client-side, before fetch) ───
@@ -805,61 +803,44 @@ img{max-width:100%;display:block;height:auto}
   //   form_partial_with_{field}     — which fields user did fill in a partial submit
   //   form_submit_after_typing      — user had typed before submit error (engagement signal)
   function fireValidationError(form, data){
-    const errors = [];
-    const filledFields = [];
-
-    // What's filled (regardless of validity)
-    if(data.prenom && data.prenom.trim()) filledFields.push('prenom');
-    if(data.tel && data.tel.trim()) filledFields.push('tel');
-    if(data.adresse && data.adresse.trim()) filledFields.push('adresse');
-
-    // What's invalid
-    if(!data.prenom || !data.prenom.trim()) errors.push('prenom');
-    const telClean = (data.tel || '').replace(/\D/g, '');
-    if(!/^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean)) errors.push('tel');
-    if(!data.adresse || !data.adresse.trim()) errors.push('adresse');
-    if(errors.length === 0) return;
+    // Only tel is required now. Other fields can be empty.
+    const telRaw = data.tel || '';
+    const telTrimmed = telRaw.trim();
+    const telClean = telRaw.replace(/\D/g, '');
+    const telOk = /^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean);
+    if (telOk) return; // not an error
 
     const formId = form.id || 'unknown';
-    const filledCount = filledFields.length;
+    // Bonus tracking: did they fill prenom / adresse too?
+    const filledOptional = [];
+    if(data.prenom && data.prenom.trim()) filledOptional.push('prenom');
+    if(data.adresse && data.adresse.trim()) filledOptional.push('adresse');
 
     if(window.gtag){
-      // Overall event
       window.gtag('event', 'form_submit_error', {
         error_type: 'client_validation',
-        error_fields: errors.join('|'),
-        filled_fields: filledFields.join('|') || 'none',
-        filled_count: filledCount,
+        error_fields: 'tel',
+        tel_was_empty: telTrimmed ? 0 : 1,
+        tel_digit_count: telClean.length,
+        filled_optional: filledOptional.join('|') || 'none',
         had_typed: typingFired ? 1 : 0,
         form_id: formId
       });
-      // Per-field error
-      errors.forEach(field => {
-        window.gtag('event', 'form_error_' + field, {
-          form_id: formId,
-          error_type: 'client_validation'
-        });
+      window.gtag('event', 'form_error_tel', {
+        form_id: formId,
+        tel_was_empty: telTrimmed ? 0 : 1
       });
-      // State events (queryable purely by event name)
-      if(filledCount === 0){
-        window.gtag('event', 'form_submit_empty', { form_id: formId });
-      } else if(filledCount === 3){
-        window.gtag('event', 'form_submit_all_filled_invalid', {
-          form_id: formId,
-          invalid_count: errors.length
-        });
+      // Granular tel state events (queryable purely by event name)
+      if(!telTrimmed){
+        window.gtag('event', 'form_error_tel_empty', { form_id: formId });
+      } else if(telClean.length < 9){
+        window.gtag('event', 'form_error_tel_too_short', { form_id: formId, len: telClean.length });
+      } else if(telClean.length > 12){
+        window.gtag('event', 'form_error_tel_too_long', { form_id: formId, len: telClean.length });
       } else {
-        window.gtag('event', 'form_submit_partial', {
-          form_id: formId,
-          filled_count: filledCount,
-          filled_fields: filledFields.join('|')
-        });
-        // Which fields user did manage to fill
-        filledFields.forEach(f => {
-          window.gtag('event', 'form_partial_with_' + f, { form_id: formId });
-        });
+        window.gtag('event', 'form_error_tel_wrong_prefix', { form_id: formId, len: telClean.length });
       }
-      // Engagement signal: did user type anywhere before submitting?
+      // Engagement
       if(typingFired){
         window.gtag('event', 'form_submit_after_typing', { form_id: formId });
       } else {
@@ -869,9 +850,8 @@ img{max-width:100%;display:block;height:auto}
     if(window.fbq){
       window.fbq('trackCustom', 'FormSubmitError', {
         error_type: 'client_validation',
-        error_fields: errors.join('|'),
-        filled_fields: filledFields.join('|') || 'none',
-        filled_count: filledCount
+        error_fields: 'tel',
+        tel_was_empty: telTrimmed ? 0 : 1
       });
     }
   }

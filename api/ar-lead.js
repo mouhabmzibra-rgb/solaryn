@@ -78,10 +78,9 @@ export default async function handler(req, res) {
     const fbp = clean(body.fbp, 200);
     const fbc = clean(body.fbc, 200);
 
-    if (!prenom || !adresse) {
-        return res.status(400).json({ ok: false, error: 'missing_field' });
-    }
-    if (!looksClean(prenom)) {
+    // Only tel is required. prenom + adresse + nom are optional now
+    // (we'll get them on the confirmation call).
+    if (prenom && !looksClean(prenom)) {
         return res.status(400).json({ ok: false, error: 'invalid_name' });
     }
     if (nom && !looksClean(nom)) {
