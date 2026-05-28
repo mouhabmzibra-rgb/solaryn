@@ -775,6 +775,13 @@ img{max-width:100%;display:block;height:auto}
         error_fields: errors.join('|'),
         form_id: form.id || 'unknown'
       });
+      // Per-field event (queryable without custom dims registered in GA4)
+      errors.forEach(field => {
+        window.gtag('event', 'form_error_' + field, {
+          form_id: form.id || 'unknown',
+          error_type: 'client_validation'
+        });
+      });
     }
     if(window.fbq){
       window.fbq('trackCustom', 'FormSubmitError', {
@@ -848,12 +855,18 @@ img{max-width:100%;display:block;height:auto}
         $globalErr.textContent = body.error_msg || '⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.';
         $globalErr.classList.add('show');
       }
+      const errCode = (body.error || 'unknown').toString().replace(/[^a-z0-9_]/gi, '_').slice(0, 32);
       if(window.gtag){
         window.gtag('event', 'form_server_error', {
           error_type: 'server_rejected',
           error_code: body.error || 'unknown',
           http_status: res.status,
           form_id: form.id || 'unknown'
+        });
+        // Per-code event (queryable without custom dims)
+        window.gtag('event', 'form_server_error_' + errCode, {
+          form_id: form.id || 'unknown',
+          http_status: res.status
         });
       }
       if(window.fbq){
@@ -867,10 +880,14 @@ img{max-width:100%;display:block;height:auto}
         $globalErr.textContent = '⚠️ ما قدرناش نتصلو بالسرفر. شيكي على الانترنت و حاولي عاود.';
         $globalErr.classList.add('show');
       }
+      const netCode = ((err && err.name) || 'unknown').toString().replace(/[^a-z0-9_]/gi, '_').slice(0, 32);
       if(window.gtag){
         window.gtag('event', 'form_server_error', {
           error_type: 'network_failure',
           error_code: (err && err.name) || 'unknown',
+          form_id: form.id || 'unknown'
+        });
+        window.gtag('event', 'form_network_error_' + netCode, {
           form_id: form.id || 'unknown'
         });
       }
