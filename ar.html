@@ -161,6 +161,24 @@ img{max-width:100%;display:block;height:auto}
   border:1px solid #b6e6c4;
 }
 
+/* ─── HERO FORM (compact, above the fold) ─── */
+.page-ar .hero-form-wrap{
+  margin-top:14px;background:#fff;border:2px solid var(--gold);border-radius:18px;
+  padding:14px 14px 12px;box-shadow:var(--shadow);text-align:start;
+}
+.page-ar .hero-form-title{
+  text-align:center;font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;
+}
+.page-ar .hero-form-title .grad{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-ar .ar-form .field{margin-bottom:10px}
+.page-ar .ar-form .field:last-of-type{margin-bottom:14px}
+.page-ar .hero-form-wrap .field input,
+.page-ar .hero-form-wrap .field textarea{
+  padding:12px 12px;font-size:16px;border-radius:10px;
+}
+.page-ar .hero-form-wrap textarea{min-height:56px}
+.page-ar .hero-form-wrap .submit-btn{padding:14px 18px;font-size:16px}
+
 /* ─── BENEFITS ─── */
 .page-ar .benefits{padding:30px 18px 20px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .page-ar .section-title{
@@ -221,8 +239,9 @@ img{max-width:100%;display:block;height:auto}
 .page-ar .field input,
 .page-ar .field textarea{
   width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;
-  font-size:15px;font-family:inherit;background:#fff;color:var(--navy);
+  font-size:16px;font-family:inherit;background:#fff;color:var(--navy);
   transition:border-color .15s,box-shadow .15s;
+  scroll-margin-top:90px;
 }
 .page-ar .field input:focus,
 .page-ar .field textarea:focus{
@@ -367,24 +386,52 @@ img{max-width:100%;display:block;height:auto}
     <div class="hero-inner">
       <div class="promo-badge">🔥 عرض خاص — اليوم فقط</div>
       <h1>
-        كريم الوقاية من الشمس<br>
         <span class="grad">SOLARYN SPF 50</span>
       </h1>
-      <p class="hero-sub">texture خفيفة · بلا traces بيضة · مناسب لكل أنواع البشرة</p>
-
-      <img src="/assets/images/hero-product.png" alt="Solaryn SPF 50" class="hero-img" fetchpriority="high">
+      <p class="hero-sub">texture خفيفة · بلا traces بيضة</p>
 
       <div class="price-block">
         <span class="price-old">199</span>
         <span class="price-new">150</span>
         <span class="price-cur">درهم</span>
       </div>
-      <span class="delivery-free">✅ التوصيل مجاني لجميع المدن المغربية</span>
+      <span class="delivery-free">✅ التوصيل مجاني · 💵 الدفع عند الاستلام</span>
 
-      <br>
-      <a href="#commande" class="cta-hero">📦 طلبي دابا — 150 درهم</a>
+      <!-- COMPACT FORM (above the fold) -->
+      <div class="hero-form-wrap">
+        <h2 class="hero-form-title">📦 <span class="grad">طلبي دابا</span> — 150 درهم</h2>
+        <div class="form-error-global" id="formErrorHero">⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.</div>
 
-      <div class="cod-badge">💵 خلصي ملي يوصل الكولي</div>
+        <form id="ar-form-hero" class="ar-form" novalidate>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <input type="hidden" name="ts_rendered">
+          <input type="hidden" name="fbp" class="fbpField">
+          <input type="hidden" name="fbc" class="fbcField">
+          <input type="hidden" name="source" value="fb_ar_hero">
+
+          <div class="field">
+            <input type="text" name="prenom" required autocomplete="given-name" placeholder="👤 السمية ديالك">
+            <div class="field-error">عافاك دخلي السمية</div>
+          </div>
+
+          <div class="field">
+            <input type="tel" name="tel" required autocomplete="tel" inputmode="numeric" dir="ltr"
+                   pattern="(0|\+212)[5-7][0-9]{8}" maxlength="13" placeholder="📱 رقم الهاتف">
+            <div class="field-error">رقم الهاتف ماشي صحيح</div>
+          </div>
+
+          <div class="field">
+            <textarea name="adresse" required autocomplete="street-address" minlength="10"
+                      placeholder="🏙️ المدينة و العنوان الكامل"></textarea>
+            <div class="field-error">عافاك دخلي المدينة و العنوان</div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span class="spinner"></span>
+            <span class="btn-text">📦 طلبي دابا — 150 درهم</span>
+          </button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -456,7 +503,7 @@ img{max-width:100%;display:block;height:auto}
     </div>
   </section>
 
-  <!-- FORM -->
+  <!-- FORM (second instance — middle of page) -->
   <section class="form-section" id="commande">
     <div class="form-card">
       <h2 class="form-title">📦 <span class="grad">طلبي دابا</span></h2>
@@ -466,51 +513,38 @@ img{max-width:100%;display:block;height:auto}
 
       <div class="form-error-global" id="formError">⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.</div>
 
-      <form id="ar-form" novalidate>
-        <!-- honeypot (bot trap) -->
+      <form id="ar-form-main" class="ar-form" novalidate>
         <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <input type="hidden" name="ts_rendered" id="tsRendered">
-        <input type="hidden" name="fbp" id="fbpField">
-        <input type="hidden" name="fbc" id="fbcField">
-        <input type="hidden" name="source" value="fb_ar">
+        <input type="hidden" name="ts_rendered">
+        <input type="hidden" name="fbp" class="fbpField">
+        <input type="hidden" name="fbc" class="fbcField">
+        <input type="hidden" name="source" value="fb_ar_main">
 
         <div class="field">
-          <label for="prenom">👤 السمية الشخصية</label>
-          <input type="text" id="prenom" name="prenom" required autocomplete="given-name" placeholder="مثال: نادية">
+          <label>👤 السمية الشخصية</label>
+          <input type="text" name="prenom" required autocomplete="given-name" placeholder="مثال: نادية">
           <div class="field-error">عافاك دخلي السمية ديالك</div>
         </div>
 
         <div class="field">
-          <label for="nom">👥 السمية العائلية</label>
-          <input type="text" id="nom" name="nom" required autocomplete="family-name" placeholder="مثال: العلوي">
-          <div class="field-error">عافاك دخلي السمية العائلية</div>
-        </div>
-
-        <div class="field">
-          <label for="tel">📱 رقم الهاتف (واتساب)</label>
-          <input type="tel" id="tel" name="tel" required autocomplete="tel" inputmode="numeric" dir="ltr"
+          <label>📱 رقم الهاتف (واتساب)</label>
+          <input type="tel" name="tel" required autocomplete="tel" inputmode="numeric" dir="ltr"
                  pattern="(0|\+212)[5-7][0-9]{8}" maxlength="13" placeholder="0612345678">
           <div class="field-help">📌 باش نعيطو ليك ونأكدو الطلب</div>
           <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
         </div>
 
         <div class="field">
-          <label for="ville">🏙️ المدينة</label>
-          <input type="text" id="ville" name="ville" required autocomplete="address-level2" placeholder="مثال: الدار البيضاء">
-          <div class="field-error">عافاك دخلي المدينة</div>
-        </div>
-
-        <div class="field">
-          <label for="adresse">📍 العنوان الكامل</label>
-          <textarea id="adresse" name="adresse" required autocomplete="street-address" minlength="10"
-                    placeholder="مثال: حي الفتح، زنقة 12، رقم 5"></textarea>
+          <label>🏙️ المدينة و العنوان الكامل</label>
+          <textarea name="adresse" required autocomplete="street-address" minlength="10"
+                    placeholder="مثال: الدار البيضاء، حي الفتح، زنقة 12، رقم 5"></textarea>
           <div class="field-help">📌 باش يقدر يلقاك الموزع</div>
-          <div class="field-error">عافاك دخلي العنوان الكامل (على الأقل 10 حروف)</div>
+          <div class="field-error">عافاك دخلي المدينة و العنوان الكامل (على الأقل 10 حروف)</div>
         </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">
+        <button type="submit" class="submit-btn">
           <span class="spinner"></span>
-          <span class="btn-text">📦 سجلي الطلب — 150 درهم</span>
+          <span class="btn-text">📦 طلبي دابا — 150 درهم</span>
         </button>
 
         <p class="callback-note">
@@ -578,35 +612,32 @@ img{max-width:100%;display:block;height:auto}
 (function(){
   'use strict';
 
-  // ─── Init ───
-  const $form = document.getElementById('ar-form');
-  const $btn = document.getElementById('submitBtn');
-  const $globalErr = document.getElementById('formError');
-  const $tsRendered = document.getElementById('tsRendered');
-  const $fbp = document.getElementById('fbpField');
-  const $fbc = document.getElementById('fbcField');
+  // ─── Init: discover both forms ───
+  const $forms = Array.from(document.querySelectorAll('form.ar-form'));
 
-  // Set rendered timestamp (for time-trap anti-spam server-side)
-  $tsRendered.value = String(Date.now());
-
-  // Capture FB cookies for CAPI dedup
   function getCookie(name){
     const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return m ? m[2] : '';
   }
-  $fbp.value = getCookie('_fbp') || '';
-  $fbc.value = getCookie('_fbc') || '';
+  const fbpVal = getCookie('_fbp') || '';
+  const fbcVal = getCookie('_fbc') || '';
 
-  // ─── Smooth scroll to form when CTA clicked (TikTok/in-app browsers fail with native anchor) ───
+  $forms.forEach(form => {
+    const ts = form.querySelector('input[name="ts_rendered"]');
+    if (ts) ts.value = String(Date.now());
+    form.querySelectorAll('.fbpField').forEach(el => el.value = fbpVal);
+    form.querySelectorAll('.fbcField').forEach(el => el.value = fbcVal);
+  });
+
+  // ─── Smooth scroll for #commande anchor (kept for sticky CTA + any link) ───
   document.querySelectorAll('a[href="#commande"]').forEach(link => {
     link.addEventListener('click', (e) => {
       const target = document.getElementById('commande');
       if (target) {
         e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Focus first input after scroll (helps mobile UX)
         setTimeout(() => {
-          const firstInput = target.querySelector('input[type="text"]');
+          const firstInput = target.querySelector('input, textarea');
           if (firstInput) firstInput.focus({ preventScroll: true });
         }, 600);
       }
@@ -617,9 +648,10 @@ img{max-width:100%;display:block;height:auto}
   const $stickyCta = document.getElementById('stickyCta');
   const $heroSection = document.querySelector('.hero');
   if ($stickyCta && $heroSection) {
+    const $mainForm = document.getElementById('commande');
     const onScroll = () => {
       const heroBottom = $heroSection.getBoundingClientRect().bottom;
-      const formInView = document.getElementById('commande').getBoundingClientRect().top < window.innerHeight;
+      const formInView = $mainForm && $mainForm.getBoundingClientRect().top < window.innerHeight;
       if (heroBottom < 0 && !formInView) {
         $stickyCta.classList.add('show');
       } else {
@@ -630,81 +662,72 @@ img{max-width:100%;display:block;height:auto}
     onScroll();
   }
 
-  // ─── Fire begin_checkout on CTA hero click ───
+  // ─── Shared event-fire flags (once per page, regardless of which form) ───
   let bcFired = false;
+  let icFired = false;
+  let typingFired = false;
+
   function fireBeginCheckout() {
     if (bcFired) return;
     bcFired = true;
     if (window.gtag) {
       window.gtag('event', 'begin_checkout', {
-        currency: 'MAD',
-        value: 150,
-        items: [{
-          item_id: 'solaryn-spf50-150',
-          item_name: 'Solaryn SPF 50',
-          item_category: 'Skincare',
-          price: 150,
-          quantity: 1
-        }]
+        currency: 'MAD', value: 150,
+        items: [{ item_id:'solaryn-spf50-150', item_name:'Solaryn SPF 50', item_category:'Skincare', price:150, quantity:1 }]
       });
     }
   }
-  document.querySelectorAll('.cta-hero').forEach(el => {
-    el.addEventListener('click', fireBeginCheckout);
-  });
 
-  // ─── Fire InitiateCheckout (FB) + form_start (GA) on FIRST focus of any form field ───
-  // (= user tapped a field, keyboard opens — but hasn't typed yet)
-  let icFired = false;
-  $form.addEventListener('focusin', () => {
-    fireBeginCheckout(); // safety net if user skipped CTA
+  function fireInitiateCheckout() {
     if (icFired) return;
     icFired = true;
     if (window.fbq) {
       window.fbq('track', 'InitiateCheckout', {
-        content_name: 'Solaryn SPF 50',
-        content_ids: ['solaryn-spf50-150'],
-        value: 150,
-        currency: 'MAD',
-        num_items: 1
+        content_name:'Solaryn SPF 50', content_ids:['solaryn-spf50-150'],
+        value:150, currency:'MAD', num_items:1
       });
     }
     if (window.gtag) {
-      window.gtag('event', 'form_start', {
-        value: 150,
-        currency: 'MAD'
-      });
+      window.gtag('event', 'form_start', { value:150, currency:'MAD' });
     }
-  }, { once: false });
+  }
 
-  // ─── Fire form_typing_start on FIRST keystroke in any text field ───
-  // (= user actually started writing — stronger signal than just focus)
-  // Also tracks AddToCart on FB side as a mid-funnel signal between IC and Purchase
-  let typingFired = false;
-  $form.addEventListener('input', (e) => {
+  function fireTypingStart(fieldName) {
     if (typingFired) return;
-    // Ignore non-text inputs (hidden fields, checkboxes)
-    if (!e.target || !['text', 'tel', 'textarea'].includes(e.target.type || e.target.tagName.toLowerCase())) return;
-    // Need at least 1 real character (not empty after autocomplete clears)
-    if (!e.target.value || !e.target.value.trim()) return;
     typingFired = true;
-    const fieldName = e.target.name || 'unknown';
     if (window.gtag) {
       window.gtag('event', 'form_typing_start', {
-        first_field: fieldName,
-        value: 150,
-        currency: 'MAD'
+        first_field: fieldName || 'unknown', value:150, currency:'MAD'
       });
     }
     if (window.fbq) {
       window.fbq('track', 'AddToCart', {
-        content_name: 'Solaryn SPF 50',
-        content_ids: ['solaryn-spf50-150'],
-        value: 150,
-        currency: 'MAD',
-        num_items: 1
+        content_name:'Solaryn SPF 50', content_ids:['solaryn-spf50-150'],
+        value:150, currency:'MAD', num_items:1
       });
     }
+  }
+
+  // ─── CTA hero button(s): fire begin_checkout (kept for legacy sticky CTA + any explicit CTA) ───
+  document.querySelectorAll('.cta-hero, .sticky-cta-btn').forEach(el => {
+    el.addEventListener('click', fireBeginCheckout);
+  });
+
+  // ─── Attach event listeners to BOTH forms ───
+  $forms.forEach(form => {
+    form.addEventListener('focusin', () => {
+      fireBeginCheckout();    // safety net
+      fireInitiateCheckout(); // FB IC + GA form_start
+    });
+
+    form.addEventListener('input', (e) => {
+      if (typingFired) return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      const type = (e.target.type || '').toLowerCase();
+      if (!['text','tel','textarea'].includes(type) && tag !== 'textarea') return;
+      if (!e.target.value || !e.target.value.trim()) return;
+      fireTypingStart(e.target.name);
+    });
   });
 
   // ─── FAQ accordion ───
@@ -714,30 +737,26 @@ img{max-width:100%;display:block;height:auto}
     });
   });
 
-  // ─── Form validation ───
-  function setFieldError(name, hasError){
-    const field = $form.querySelector(`[name="${name}"]`).closest('.field');
-    field.classList.toggle('error', hasError);
+  // ─── Form validation (3 fields: prenom, tel, adresse-combined) ───
+  function setFieldError(form, name, hasError){
+    const el = form.querySelector(`[name="${name}"]`);
+    if (!el) return;
+    const field = el.closest('.field');
+    if (field) field.classList.toggle('error', hasError);
   }
 
-  function validate(data){
+  function validate(form, data){
     let ok = true;
-    if(!data.prenom || data.prenom.length < 2){ setFieldError('prenom', true); ok = false; }
-    else setFieldError('prenom', false);
-
-    if(!data.nom || data.nom.length < 2){ setFieldError('nom', true); ok = false; }
-    else setFieldError('nom', false);
+    if(!data.prenom || data.prenom.length < 2){ setFieldError(form, 'prenom', true); ok = false; }
+    else setFieldError(form, 'prenom', false);
 
     const telClean = (data.tel || '').replace(/\D/g, '');
     const telOk = /^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean);
-    if(!telOk){ setFieldError('tel', true); ok = false; }
-    else setFieldError('tel', false);
+    if(!telOk){ setFieldError(form, 'tel', true); ok = false; }
+    else setFieldError(form, 'tel', false);
 
-    if(!data.ville || data.ville.length < 2){ setFieldError('ville', true); ok = false; }
-    else setFieldError('ville', false);
-
-    if(!data.adresse || data.adresse.length < 10){ setFieldError('adresse', true); ok = false; }
-    else setFieldError('adresse', false);
+    if(!data.adresse || data.adresse.length < 10){ setFieldError(form, 'adresse', true); ok = false; }
+    else setFieldError(form, 'adresse', false);
 
     return ok;
   }
@@ -750,21 +769,25 @@ img{max-width:100%;display:block;height:auto}
       });
   }
 
-  // ─── Submit handler ───
-  $form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    $globalErr.classList.remove('show');
+  function getErrEl(form){
+    if (form.id === 'ar-form-hero') return document.getElementById('formErrorHero');
+    return document.getElementById('formError');
+  }
 
-    const fd = new FormData($form);
+  // ─── Submit handler (shared for both forms) ───
+  async function handleSubmit(form, e){
+    e.preventDefault();
+    const $globalErr = getErrEl(form);
+    if ($globalErr) $globalErr.classList.remove('show');
+
+    const $btn = form.querySelector('.submit-btn');
+    const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
 
-    if(!validate(data)) return;
-
-    // honeypot check (client-side defense; server re-checks)
+    if(!validate(form, data)) return;
     if(data.website){ console.warn('hp triggered'); return; }
 
-    $btn.classList.add('loading');
-    $btn.disabled = true;
+    if ($btn){ $btn.classList.add('loading'); $btn.disabled = true; }
 
     const event_id = genEventId();
     data.event_id = event_id;
@@ -778,48 +801,39 @@ img{max-width:100%;display:block;height:auto}
       const body = await res.json().catch(() => ({}));
 
       if(res.ok && body.ok === true){
-        // Fire FB Pixel Purchase event with shared eventID for CAPI dedup
         if(window.fbq){
           window.fbq('track', 'Purchase', {
-            content_name: 'Solaryn SPF 50',
-            content_category: 'Skincare',
-            content_ids: ['solaryn-spf50-150'],
-            content_type: 'product',
-            value: 150,
-            currency: 'MAD',
-            num_items: 1
+            content_name:'Solaryn SPF 50', content_category:'Skincare',
+            content_ids:['solaryn-spf50-150'], content_type:'product',
+            value:150, currency:'MAD', num_items:1
           }, { eventID: event_id });
         }
-        // Fire GA4 purchase event (standard e-commerce format)
         if(window.gtag){
           window.gtag('event', 'purchase', {
-            transaction_id: event_id,
-            value: 150,
-            currency: 'MAD',
-            ville: data.ville,
-            items: [{
-              item_id: 'solaryn-spf50-150',
-              item_name: 'Solaryn SPF 50',
-              item_category: 'Skincare',
-              price: 150,
-              quantity: 1
-            }]
+            transaction_id: event_id, value: 150, currency: 'MAD',
+            items: [{ item_id:'solaryn-spf50-150', item_name:'Solaryn SPF 50', item_category:'Skincare', price:150, quantity:1 }]
           });
         }
         window.location.assign('/ar/merci');
         return;
       }
 
-      // Server returned an error
-      $globalErr.textContent = body.error_msg || '⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.';
-      $globalErr.classList.add('show');
+      if ($globalErr){
+        $globalErr.textContent = body.error_msg || '⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.';
+        $globalErr.classList.add('show');
+      }
     } catch(err) {
-      $globalErr.textContent = '⚠️ ما قدرناش نتصلو بالسرفر. شيكي على الانترنت و حاولي عاود.';
-      $globalErr.classList.add('show');
+      if ($globalErr){
+        $globalErr.textContent = '⚠️ ما قدرناش نتصلو بالسرفر. شيكي على الانترنت و حاولي عاود.';
+        $globalErr.classList.add('show');
+      }
     } finally {
-      $btn.classList.remove('loading');
-      $btn.disabled = false;
+      if ($btn){ $btn.classList.remove('loading'); $btn.disabled = false; }
     }
+  }
+
+  $forms.forEach(form => {
+    form.addEventListener('submit', (e) => handleSubmit(form, e));
   });
 })();
 </script>

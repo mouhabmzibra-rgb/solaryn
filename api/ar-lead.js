@@ -66,24 +66,28 @@ export default async function handler(req, res) {
         return res.status(403).json({ ok: false, error: 'country_not_allowed' });
     }
 
-    // Validate + clean fields
+    // Validate + clean fields (3-field form: prenom + tel + adresse-combined)
+    // nom and ville are now optional (kept for backward compat with any older client cached)
     const prenom = clean(body.prenom, 80);
     const nom = clean(body.nom, 80);
     const telRaw = clean(body.tel, 30);
     const ville = clean(body.ville, 80);
-    const adresse = clean(body.adresse, 300);
+    const adresse = clean(body.adresse, 400);
     const source = clean(body.source, 32) || 'fb_ar';
     const eventId = clean(body.event_id, 64) || crypto.randomUUID();
     const fbp = clean(body.fbp, 200);
     const fbc = clean(body.fbc, 200);
 
-    if (!prenom || !nom || !ville || !adresse) {
+    if (!prenom || !adresse) {
         return res.status(400).json({ ok: false, error: 'missing_field' });
     }
     if (adresse.length < 10) {
         return res.status(400).json({ ok: false, error: 'address_too_short' });
     }
-    if (!looksClean(prenom) || !looksClean(nom)) {
+    if (!looksClean(prenom)) {
+        return res.status(400).json({ ok: false, error: 'invalid_name' });
+    }
+    if (nom && !looksClean(nom)) {
         return res.status(400).json({ ok: false, error: 'invalid_name' });
     }
 
