@@ -81,9 +81,6 @@ export default async function handler(req, res) {
     if (!prenom || !adresse) {
         return res.status(400).json({ ok: false, error: 'missing_field' });
     }
-    if (adresse.length < 10) {
-        return res.status(400).json({ ok: false, error: 'address_too_short' });
-    }
     if (!looksClean(prenom)) {
         return res.status(400).json({ ok: false, error: 'invalid_name' });
     }

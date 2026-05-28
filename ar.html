@@ -421,7 +421,7 @@ img{max-width:100%;display:block;height:auto}
           </div>
 
           <div class="field">
-            <textarea name="adresse" required autocomplete="street-address" minlength="10"
+            <textarea name="adresse" required autocomplete="street-address" minlength="1"
                       placeholder="🏙️ المدينة و العنوان الكامل"></textarea>
             <div class="field-error">عافاك دخلي المدينة و العنوان</div>
           </div>
@@ -536,7 +536,7 @@ img{max-width:100%;display:block;height:auto}
 
         <div class="field">
           <label>🏙️ المدينة و العنوان الكامل</label>
-          <textarea name="adresse" required autocomplete="street-address" minlength="10"
+          <textarea name="adresse" required autocomplete="street-address" minlength="1"
                     placeholder="مثال: الدار البيضاء، حي الفتح، زنقة 12، رقم 5"></textarea>
           <div class="field-help">📌 باش يقدر يلقاك الموزع</div>
           <div class="field-error">عافاك دخلي المدينة و العنوان الكامل (على الأقل 10 حروف)</div>
@@ -755,10 +755,33 @@ img{max-width:100%;display:block;height:auto}
     if(!telOk){ setFieldError(form, 'tel', true); ok = false; }
     else setFieldError(form, 'tel', false);
 
-    if(!data.adresse || data.adresse.length < 10){ setFieldError(form, 'adresse', true); ok = false; }
+    if(!data.adresse || !data.adresse.trim()){ setFieldError(form, 'adresse', true); ok = false; }
     else setFieldError(form, 'adresse', false);
 
     return ok;
+  }
+
+  // ─── Track validation errors (client-side, before fetch) ───
+  function fireValidationError(form, data){
+    const errors = [];
+    if(!data.prenom || data.prenom.length < 2) errors.push('prenom');
+    const telClean = (data.tel || '').replace(/\D/g, '');
+    if(!/^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean)) errors.push('tel');
+    if(!data.adresse || !data.adresse.trim()) errors.push('adresse');
+    if(errors.length === 0) return;
+    if(window.gtag){
+      window.gtag('event', 'form_submit_error', {
+        error_type: 'client_validation',
+        error_fields: errors.join('|'),
+        form_id: form.id || 'unknown'
+      });
+    }
+    if(window.fbq){
+      window.fbq('trackCustom', 'FormSubmitError', {
+        error_type: 'client_validation',
+        error_fields: errors.join('|')
+      });
+    }
   }
 
   function genEventId(){
@@ -784,7 +807,10 @@ img{max-width:100%;display:block;height:auto}
     const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
 
-    if(!validate(form, data)) return;
+    if(!validate(form, data)){
+      fireValidationError(form, data);
+      return;
+    }
     if(data.website){ console.warn('hp triggered'); return; }
 
     if ($btn){ $btn.classList.add('loading'); $btn.disabled = true; }
@@ -822,10 +848,31 @@ img{max-width:100%;display:block;height:auto}
         $globalErr.textContent = body.error_msg || '⚠️ كاين شي حاجة ما مشاتش. حاولي عاود.';
         $globalErr.classList.add('show');
       }
+      if(window.gtag){
+        window.gtag('event', 'form_server_error', {
+          error_type: 'server_rejected',
+          error_code: body.error || 'unknown',
+          http_status: res.status,
+          form_id: form.id || 'unknown'
+        });
+      }
+      if(window.fbq){
+        window.fbq('trackCustom', 'FormServerError', {
+          error_code: body.error || 'unknown',
+          http_status: res.status
+        });
+      }
     } catch(err) {
       if ($globalErr){
         $globalErr.textContent = '⚠️ ما قدرناش نتصلو بالسرفر. شيكي على الانترنت و حاولي عاود.';
         $globalErr.classList.add('show');
+      }
+      if(window.gtag){
+        window.gtag('event', 'form_server_error', {
+          error_type: 'network_failure',
+          error_code: (err && err.name) || 'unknown',
+          form_id: form.id || 'unknown'
+        });
       }
     } finally {
       if ($btn){ $btn.classList.remove('loading'); $btn.disabled = false; }
