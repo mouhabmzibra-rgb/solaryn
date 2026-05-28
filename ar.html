@@ -747,7 +747,7 @@ img{max-width:100%;display:block;height:auto}
 
   function validate(form, data){
     let ok = true;
-    if(!data.prenom || data.prenom.length < 2){ setFieldError(form, 'prenom', true); ok = false; }
+    if(!data.prenom || !data.prenom.trim()){ setFieldError(form, 'prenom', true); ok = false; }
     else setFieldError(form, 'prenom', false);
 
     const telClean = (data.tel || '').replace(/\D/g, '');
@@ -764,7 +764,7 @@ img{max-width:100%;display:block;height:auto}
   // ─── Track validation errors (client-side, before fetch) ───
   function fireValidationError(form, data){
     const errors = [];
-    if(!data.prenom || data.prenom.length < 2) errors.push('prenom');
+    if(!data.prenom || !data.prenom.trim()) errors.push('prenom');
     const telClean = (data.tel || '').replace(/\D/g, '');
     if(!/^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telClean)) errors.push('tel');
     if(!data.adresse || !data.adresse.trim()) errors.push('adresse');
