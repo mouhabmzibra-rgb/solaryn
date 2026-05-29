@@ -267,6 +267,9 @@ img{max-width:100%;display:block;height:auto}
 }
 .page-ar .submit-btn:hover:not(:disabled){transform:translateY(-2px)}
 .page-ar .submit-btn:disabled{opacity:.7;cursor:not-allowed}
+.page-ar .submit-btn:disabled:not(.loading){
+  opacity:.4;filter:grayscale(.7);
+}
 .page-ar .submit-btn .spinner{
   display:none;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
   animation:spin 0.7s linear infinite;
@@ -795,6 +798,18 @@ img{max-width:100%;display:block;height:auto}
     }, 400);
   }
 
+  // ─── Disable submit button until tel has 9+ digits ───
+  // This prevents blind-click submits that fire form_submit_error with empty
+  // form. GA4 data showed 60%+ of submit errors came from users who clicked
+  // submit without typing anything. Greying the button signals "fill tel first".
+  function checkTelReady(form){
+    const tel = form.querySelector('input[name="tel"]');
+    const btn = form.querySelector('.submit-btn');
+    if (!tel || !btn) return;
+    const digits = (tel.value || '').replace(/\D/g, '');
+    btn.disabled = digits.length < 9;
+  }
+
   // ─── Attach event listeners to BOTH forms ───
   $forms.forEach(form => {
     form.addEventListener('focusin', (e) => {
@@ -807,6 +822,9 @@ img{max-width:100%;display:block;height:auto}
     });
 
     form.addEventListener('input', (e) => {
+      // Re-check tel readiness on every keystroke (any field)
+      checkTelReady(form);
+
       if (typingFired) return;
       const tag = (e.target.tagName || '').toLowerCase();
       const type = (e.target.type || '').toLowerCase();
@@ -814,6 +832,9 @@ img{max-width:100%;display:block;height:auto}
       if (!e.target.value || !e.target.value.trim()) return;
       fireTypingStart(e.target.name);
     });
+
+    // Set initial disabled state on page load (tel is empty)
+    checkTelReady(form);
   });
 
   // ─── Visual Viewport listener (re-check on keyboard show/hide) ───
