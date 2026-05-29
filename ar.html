@@ -196,23 +196,49 @@ img{max-width:100%;display:block;height:auto}
   scroll-margin-bottom:80px; /* ensure submit btn is fully scrolled into view */
 }
 
-/* ─── TEL field pulse animation (attract attention) ─── */
-@keyframes telPulse {
+/* ─── TEL field BIG pulse (attention grabber, infinite until focus) ─── */
+@keyframes telBigPulse {
   0%, 100% {
-    border-color:var(--border);
-    box-shadow:0 0 0 0 rgba(255,140,66,0);
+    transform:scale(1);
+    background:#fff;
+    box-shadow:0 0 0 0 rgba(255,140,66,.7), 0 0 0 0 rgba(255,140,66,0);
   }
   50% {
-    border-color:var(--orange);
-    box-shadow:0 0 0 4px rgba(255,140,66,.25);
+    transform:scale(1.025);
+    background:#FFF4E8;
+    box-shadow:0 0 0 6px rgba(255,140,66,.35), 0 8px 32px rgba(255,140,66,.45);
   }
 }
 .page-ar input.tel-pulse{
-  animation: telPulse 1.3s ease-in-out 4;
-  border-color:var(--orange);
+  animation: telBigPulse 1.2s ease-in-out infinite;
+  border:2.5px solid var(--orange) !important;
+  font-weight:700;color:var(--navy);
+  position:relative;z-index:2;
 }
 .page-ar input.tel-pulse:focus{
-  animation:none; /* stop pulsing once user engages */
+  animation:none;
+  transform:none;
+  background:#fff;
+  border-color:var(--orange) !important;
+  box-shadow:0 0 0 3px rgba(255,140,66,.18);
+}
+
+/* ─── Floating "ابدا هنا" arrow above tel field ─── */
+@keyframes arrowBounce {
+  0%, 100% { transform:translateY(0); }
+  50%      { transform:translateY(-6px); }
+}
+.page-ar .tel-cta-arrow{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:13px;font-weight:900;color:#fff;
+  background:var(--gradient-sun);
+  padding:5px 14px;border-radius:20px;
+  width:fit-content;margin:0 auto 6px;
+  animation: arrowBounce .8s ease-in-out infinite;
+  box-shadow:0 4px 14px rgba(255,140,66,.45);
+}
+.page-ar .tel-field-wrap:focus-within .tel-cta-arrow{
+  animation:none;opacity:.4;transform:scale(.9);transition:opacity .3s,transform .3s;
 }
 
 /* ─── BENEFITS ─── */
@@ -450,7 +476,8 @@ img{max-width:100%;display:block;height:auto}
           <input type="hidden" name="fbc" class="fbcField">
           <input type="hidden" name="source" value="fb_ar_hero">
 
-          <div class="field">
+          <div class="field tel-field-wrap">
+            <div class="tel-cta-arrow">👇 ابدا هنا — رقم تلفونك</div>
             <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
                    maxlength="25" placeholder="📱 0612345678" class="tel-pulse">
             <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
@@ -561,8 +588,9 @@ img{max-width:100%;display:block;height:auto}
         <input type="hidden" name="fbc" class="fbcField">
         <input type="hidden" name="source" value="fb_ar_main">
 
-        <div class="field">
+        <div class="field tel-field-wrap">
           <label>📱 رقم الهاتف (واتساب) — <span style="color:var(--orange)">إجباري</span></label>
+          <div class="tel-cta-arrow">👇 ابدا هنا</div>
           <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
                  maxlength="25" placeholder="0612345678" class="tel-pulse">
           <div class="field-help">📌 باش نعيطو ليك ونأكدو الطلب</div>
