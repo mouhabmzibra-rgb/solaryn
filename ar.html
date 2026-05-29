@@ -324,9 +324,9 @@ img{max-width:100%;display:block;height:auto}
   scroll-margin-bottom:80px; /* ensure visible when keyboard opens */
 }
 .page-ar .submit-btn:hover:not(:disabled){transform:translateY(-2px)}
-.page-ar .submit-btn:disabled{opacity:.7;cursor:not-allowed}
+.page-ar .submit-btn:disabled{opacity:.9;cursor:not-allowed}
 .page-ar .submit-btn:disabled:not(.loading){
-  opacity:.4;filter:grayscale(.7);
+  opacity:.85; /* slight fade but stays orange — no grayscale */
 }
 /* Submit ready: enabled + not loading → infinite subtle pulse to signal it's clickable */
 @keyframes btnReady {
