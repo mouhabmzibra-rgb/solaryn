@@ -91,10 +91,10 @@ img{max-width:100%;display:block;height:auto}
 
 .page-ar{min-height:100vh;overflow-x:hidden}
 
-/* ─── HEADER ─── */
+/* ─── HEADER (minimal) ─── */
 .page-ar .header{
   background:#fff;border-bottom:1px solid var(--border);
-  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  padding:8px 18px;display:flex;align-items:center;justify-content:center;
   position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
 .page-ar .logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:900;color:var(--navy);letter-spacing:.5px}
@@ -108,7 +108,7 @@ img{max-width:100%;display:block;height:auto}
 /* ─── HERO ─── */
 .page-ar .hero{
   background:linear-gradient(180deg,#fff 0%,var(--cream) 100%);
-  padding:16px 18px 24px;text-align:center;position:relative;overflow:hidden;
+  padding:12px 18px 20px;text-align:center;position:relative;overflow:hidden;
 }
 .page-ar .hero::before{
   content:"";position:absolute;top:-80px;inline-start:-80px;
@@ -133,8 +133,8 @@ img{max-width:100%;display:block;height:auto}
   filter:drop-shadow(0 18px 40px rgba(200,152,96,.35));
 }
 .page-ar .price-block{
-  background:#fff;border:2px solid var(--gold);border-radius:18px;
-  padding:14px 18px;margin:14px auto;display:inline-flex;align-items:center;gap:14px;
+  background:#fff;border:2px solid var(--gold);border-radius:16px;
+  padding:10px 16px;margin:6px auto;display:inline-flex;align-items:center;gap:12px;
   box-shadow:var(--shadow);max-width:90%;
 }
 .page-ar .price-old{font-size:18px;color:#94a3b8;text-decoration:line-through;font-weight:700}
@@ -161,25 +161,18 @@ img{max-width:100%;display:block;height:auto}
   border:1px solid #b6e6c4;
 }
 
-/* ─── HERO TOP (image + title side-by-side) ─── */
-.page-ar .hero-top{
-  display:flex;align-items:center;gap:12px;margin:8px 0 10px;text-align:start;
+/* ─── HERO IMAGE (big, centered) ─── */
+.page-ar .hero-img-big{
+  width:200px;max-width:55%;height:auto;margin:0 auto 8px;
+  filter:drop-shadow(0 16px 32px rgba(200,152,96,.38));
 }
-.page-ar .hero-img-mini{
-  width:84px;height:84px;flex-shrink:0;object-fit:contain;
-  filter:drop-shadow(0 8px 18px rgba(200,152,96,.32));
+.page-ar .hero-stars-row{
+  display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--navy);
+  font-weight:700;margin-bottom:8px;
 }
-.page-ar .hero-text-block{flex:1;min-width:0}
-.page-ar .hero-text-block h1{
-  font-size:22px;font-weight:900;line-height:1.2;color:var(--navy);margin-bottom:4px;
-}
-.page-ar .hero-text-block h1 .grad{background:var(--gradient-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
-.page-ar .hero-stars{
-  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--navy);font-weight:700;
-}
-.page-ar .hero-stars .stars{color:#F7C969;font-size:14px;letter-spacing:1px}
-.page-ar .hero-stars .rating{font-weight:900;color:var(--gold)}
-.page-ar .hero-stars .sales{color:#6b7280;font-weight:700;font-size:11px}
+.page-ar .hero-stars-row .stars{color:#F7C969;font-size:15px;letter-spacing:1px}
+.page-ar .hero-stars-row .rating{font-weight:900;color:var(--gold)}
+.page-ar .hero-stars-row .sales{color:#6b7280;font-weight:700;font-size:12px}
 
 /* ─── HERO FORM (compact, above the fold) ─── */
 .page-ar .hero-form-wrap{
@@ -400,30 +393,23 @@ img{max-width:100%;display:block;height:auto}
 
 <div class="page-ar">
 
-  <!-- HEADER -->
+  <!-- HEADER (minimal — sun icon only) -->
   <div class="header">
     <div class="logo">
       <span class="sun"></span>
-      <span class="gold-txt">SOLARYN</span>
     </div>
-    <div class="header-trust">🔒 <span>الدفع عند الاستلام</span></div>
   </div>
 
   <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="promo-badge">🔥 عرض خاص — اليوم فقط</div>
 
-      <div class="hero-top">
-        <img src="/assets/images/hero-product.png" alt="Solaryn SPF 50" class="hero-img-mini" fetchpriority="high">
-        <div class="hero-text-block">
-          <h1><span class="grad">SOLARYN SPF 50</span></h1>
-          <div class="hero-stars">
-            <span class="stars">★★★★★</span>
-            <span class="rating">4.8</span>
-            <span class="sales">· +500 طلبية</span>
-          </div>
-        </div>
+      <img src="/assets/images/hero-product.png" alt="Solaryn SPF 50" class="hero-img-big" fetchpriority="high">
+
+      <div class="hero-stars-row">
+        <span class="stars">★★★★★</span>
+        <span class="rating">4.8</span>
+        <span class="sales">· +500 طلبية</span>
       </div>
 
       <div class="price-block">
