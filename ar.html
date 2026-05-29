@@ -196,6 +196,25 @@ img{max-width:100%;display:block;height:auto}
   scroll-margin-bottom:80px; /* ensure submit btn is fully scrolled into view */
 }
 
+/* ─── TEL field pulse animation (attract attention) ─── */
+@keyframes telPulse {
+  0%, 100% {
+    border-color:var(--border);
+    box-shadow:0 0 0 0 rgba(255,140,66,0);
+  }
+  50% {
+    border-color:var(--orange);
+    box-shadow:0 0 0 4px rgba(255,140,66,.25);
+  }
+}
+.page-ar input.tel-pulse{
+  animation: telPulse 1.3s ease-in-out 4;
+  border-color:var(--orange);
+}
+.page-ar input.tel-pulse:focus{
+  animation:none; /* stop pulsing once user engages */
+}
+
 /* ─── BENEFITS ─── */
 .page-ar .benefits{padding:30px 18px 20px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .page-ar .section-title{
@@ -432,14 +451,14 @@ img{max-width:100%;display:block;height:auto}
           <input type="hidden" name="source" value="fb_ar_hero">
 
           <div class="field">
-            <input type="text" name="prenom" autocomplete="given-name" placeholder="👤 السمية ديالك (اختياري)">
-            <div class="field-error">السمية ماشي صحيحة</div>
+            <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
+                   maxlength="25" placeholder="📱 0612345678" class="tel-pulse">
+            <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
           </div>
 
           <div class="field">
-            <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
-                   maxlength="25" placeholder="📱 0612345678 (إجباري)">
-            <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
+            <input type="text" name="prenom" autocomplete="given-name" placeholder="👤 السمية ديالك (اختياري)">
+            <div class="field-error">السمية ماشي صحيحة</div>
           </div>
 
           <div class="field">
@@ -543,17 +562,17 @@ img{max-width:100%;display:block;height:auto}
         <input type="hidden" name="source" value="fb_ar_main">
 
         <div class="field">
-          <label>👤 السمية الشخصية</label>
-          <input type="text" name="prenom" autocomplete="given-name" placeholder="مثال: نادية (اختياري)">
-          <div class="field-error">السمية ماشي صحيحة</div>
+          <label>📱 رقم الهاتف (واتساب) — <span style="color:var(--orange)">إجباري</span></label>
+          <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
+                 maxlength="25" placeholder="0612345678" class="tel-pulse">
+          <div class="field-help">📌 باش نعيطو ليك ونأكدو الطلب</div>
+          <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
         </div>
 
         <div class="field">
-          <label>📱 رقم الهاتف (واتساب) — <span style="color:var(--orange)">إجباري</span></label>
-          <input type="tel" name="tel" required autocomplete="tel" inputmode="tel" dir="ltr"
-                 maxlength="25" placeholder="0612345678">
-          <div class="field-help">📌 باش نعيطو ليك ونأكدو الطلب</div>
-          <div class="field-error">رقم الهاتف ماشي صحيح (مثال: 0612345678)</div>
+          <label>👤 السمية الشخصية</label>
+          <input type="text" name="prenom" autocomplete="given-name" placeholder="مثال: نادية (اختياري)">
+          <div class="field-error">السمية ماشي صحيحة</div>
         </div>
 
         <div class="field">
