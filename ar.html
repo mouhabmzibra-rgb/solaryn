@@ -328,6 +328,23 @@ img{max-width:100%;display:block;height:auto}
 .page-ar .submit-btn:disabled:not(.loading){
   opacity:.4;filter:grayscale(.7);
 }
+/* Submit ready: enabled + not loading → infinite subtle pulse to signal it's clickable */
+@keyframes btnReady {
+  0%, 100% { box-shadow:var(--shadow-hard),0 0 0 0 rgba(255,140,66,0); }
+  50%      { box-shadow:0 14px 36px rgba(255,140,66,.5),0 0 0 6px rgba(255,140,66,.25); }
+}
+.page-ar .submit-btn:not(:disabled):not(.loading) {
+  animation: btnReady 1.4s ease-in-out infinite;
+}
+/* Big flash when transitioning from disabled → enabled */
+@keyframes btnReadyFlash {
+  0% { transform:scale(1); }
+  40% { transform:scale(1.08); box-shadow:0 0 0 10px rgba(255,140,66,.35),0 16px 48px rgba(255,140,66,.55); }
+  100% { transform:scale(1); }
+}
+.page-ar .submit-btn.btn-ready-flash:not(:disabled) {
+  animation: btnReadyFlash .55s ease-in-out 3;
+}
 .page-ar .submit-btn .spinner{
   display:none;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
   animation:spin 0.7s linear infinite;
@@ -886,7 +903,37 @@ img{max-width:100%;display:block;height:auto}
     const btn = form.querySelector('.submit-btn');
     if (!tel || !btn) return;
     const digits = (tel.value || '').replace(/\D/g, '');
-    btn.disabled = digits.length < 9;
+    const wasDisabled = btn.disabled;
+    const willBeDisabled = digits.length < 9;
+    btn.disabled = willBeDisabled;
+
+    // Transition disabled → enabled: flash + scroll into view + change CTA text
+    if (wasDisabled && !willBeDisabled) {
+      btn.classList.add('btn-ready-flash');
+      const txt = btn.querySelector('.btn-text');
+      if (txt && !txt.dataset.readyApplied) {
+        txt.dataset.readyApplied = '1';
+        txt.textContent = '✅ ' + txt.textContent;
+      }
+      // Re-scroll submit into view after a tiny delay (keyboard might still be open)
+      setTimeout(() => {
+        const rect = btn.getBoundingClientRect();
+        const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        if (rect.bottom > vh - 20 || rect.top < 0) {
+          btn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      }, 120);
+      // Stop one-shot flash class after animation
+      setTimeout(() => btn.classList.remove('btn-ready-flash'), 2000);
+    }
+    // Transition enabled → disabled (user erased tel): revert prefix
+    if (!wasDisabled && willBeDisabled) {
+      const txt = btn.querySelector('.btn-text');
+      if (txt && txt.dataset.readyApplied) {
+        txt.textContent = txt.textContent.replace(/^✅\s*/, '');
+        delete txt.dataset.readyApplied;
+      }
+    }
   }
 
   // ─── Attach event listeners to BOTH forms ───
