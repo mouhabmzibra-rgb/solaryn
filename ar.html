@@ -323,26 +323,23 @@ img{max-width:100%;display:block;height:auto}
   transition:transform .15s,opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;
   scroll-margin-bottom:80px; /* ensure visible when keyboard opens */
 }
-.page-ar .submit-btn:hover:not(:disabled){transform:translateY(-2px)}
-.page-ar .submit-btn:disabled{opacity:.9;cursor:not-allowed}
-.page-ar .submit-btn:disabled:not(.loading){
-  opacity:.85; /* slight fade but stays orange — no grayscale */
-}
-/* Submit ready: enabled + not loading → infinite subtle pulse to signal it's clickable */
+.page-ar .submit-btn:hover{transform:translateY(-2px)}
+.page-ar .submit-btn:disabled{opacity:.9;cursor:wait} /* only loading state now */
+/* Submit ready: tel valid → infinite subtle pulse to signal it's primed */
 @keyframes btnReady {
   0%, 100% { box-shadow:var(--shadow-hard),0 0 0 0 rgba(255,140,66,0); }
   50%      { box-shadow:0 14px 36px rgba(255,140,66,.5),0 0 0 6px rgba(255,140,66,.25); }
 }
-.page-ar .submit-btn:not(:disabled):not(.loading) {
+.page-ar .submit-btn.tel-ready:not(.loading) {
   animation: btnReady 1.4s ease-in-out infinite;
 }
-/* Big flash when transitioning from disabled → enabled */
+/* Big flash when transitioning empty → ready */
 @keyframes btnReadyFlash {
   0% { transform:scale(1); }
   40% { transform:scale(1.08); box-shadow:0 0 0 10px rgba(255,140,66,.35),0 16px 48px rgba(255,140,66,.55); }
   100% { transform:scale(1); }
 }
-.page-ar .submit-btn.btn-ready-flash:not(:disabled) {
+.page-ar .submit-btn.btn-ready-flash {
   animation: btnReadyFlash .55s ease-in-out 3;
 }
 .page-ar .submit-btn .spinner{
@@ -898,24 +895,26 @@ img{max-width:100%;display:block;height:auto}
   // This prevents blind-click submits that fire form_submit_error with empty
   // form. GA4 data showed 60%+ of submit errors came from users who clicked
   // submit without typing anything. Greying the button signals "fill tel first".
+  // Button is ALWAYS clickable now. checkTelReady just tracks "is ready" state
+  // via a class (for the pulse animation + ✅ prefix). If user clicks without
+  // a valid tel, the submit handler shows a friendly inline message instead.
   function checkTelReady(form){
     const tel = form.querySelector('input[name="tel"]');
     const btn = form.querySelector('.submit-btn');
     if (!tel || !btn) return;
     const digits = (tel.value || '').replace(/\D/g, '');
-    const wasDisabled = btn.disabled;
-    const willBeDisabled = digits.length < 9;
-    btn.disabled = willBeDisabled;
+    const isReady = digits.length >= 9;
+    const wasReady = btn.classList.contains('tel-ready');
+    btn.classList.toggle('tel-ready', isReady);
 
-    // Transition disabled → enabled: flash + scroll into view + change CTA text
-    if (wasDisabled && !willBeDisabled) {
+    if (!wasReady && isReady) {
+      // Transition empty → ready: flash + scroll + ✅ prefix
       btn.classList.add('btn-ready-flash');
       const txt = btn.querySelector('.btn-text');
       if (txt && !txt.dataset.readyApplied) {
         txt.dataset.readyApplied = '1';
         txt.textContent = '✅ ' + txt.textContent;
       }
-      // Re-scroll submit into view after a tiny delay (keyboard might still be open)
       setTimeout(() => {
         const rect = btn.getBoundingClientRect();
         const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
@@ -923,11 +922,9 @@ img{max-width:100%;display:block;height:auto}
           btn.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
       }, 120);
-      // Stop one-shot flash class after animation
       setTimeout(() => btn.classList.remove('btn-ready-flash'), 2000);
-    }
-    // Transition enabled → disabled (user erased tel): revert prefix
-    if (!wasDisabled && willBeDisabled) {
+    } else if (wasReady && !isReady) {
+      // Transition ready → empty (user erased): revert ✅
       const txt = btn.querySelector('.btn-text');
       if (txt && txt.dataset.readyApplied) {
         txt.textContent = txt.textContent.replace(/^✅\s*/, '');
@@ -1086,8 +1083,31 @@ img{max-width:100%;display:block;height:auto}
     const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
 
-    if(!validate(form, data)){
-      fireValidationError(form, data);
+    // Friendly handling: clicked submit but tel is empty or invalid
+    // → focus the tel field, scroll to it, show inline soft message
+    // → do NOT call fireValidationError (scary red errors)
+    const telCheck = (data.tel || '').replace(/\D/g, '');
+    const telOk = /^(0[5-7][0-9]{8}|212[5-7][0-9]{8})$/.test(telCheck);
+    if (!telOk) {
+      const telEl = form.querySelector('input[name="tel"]');
+      if (telEl) {
+        telEl.focus();
+        telEl.classList.remove('tel-pulse');
+        // Force a CSS reflow then re-add pulse so animation restarts
+        void telEl.offsetWidth;
+        telEl.classList.add('tel-pulse');
+        telEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if ($globalErr) {
+        $globalErr.textContent = '📱 عافاك دخل رقم تلفونك باش نعيطو ليك';
+        $globalErr.classList.add('show');
+      }
+      if (window.gtag) {
+        window.gtag('event', 'submit_click_no_tel', {
+          form_id: form.id || 'unknown',
+          tel_digit_count: telCheck.length
+        });
+      }
       return;
     }
     if(data.website){ console.warn('hp triggered'); return; }
