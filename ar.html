@@ -687,13 +687,31 @@ img{max-width:100%;display:block;height:auto}
     lastSentPerForm.set(form, sig);
     sendPartial(form, status);
   }
+  // Debounced input listener — fires snapshot 2s after user stops typing.
+  // Catches mobile users who type then submit/leave without ever blurring.
+  const debouncePerForm = new WeakMap();
+  function scheduleDebouncedPartial(form){
+    const existing = debouncePerForm.get(form);
+    if (existing) clearTimeout(existing);
+    const t = setTimeout(() => maybeSendPartial(form, 'typing_pause'), 2000);
+    debouncePerForm.set(form, t);
+  }
   $forms.forEach(form => {
     form.querySelectorAll('input, textarea').forEach(field => {
       field.addEventListener('blur', () => maybeSendPartial(form, 'blur'));
+      field.addEventListener('input', () => scheduleDebouncedPartial(form));
     });
+    // Snapshot just before submit too (validation OR success path)
+    form.addEventListener('submit', () => maybeSendPartial(form, 'pre_submit'), { capture: true });
   });
   window.addEventListener('pagehide', () => {
     $forms.forEach(form => maybeSendPartial(form, 'pagehide'));
+  });
+  // visibilitychange is more reliable than pagehide on FB/IG in-app browsers
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden'){
+      $forms.forEach(form => maybeSendPartial(form, 'visibility_hidden'));
+    }
   });
   // ─────────────────────────────────────────────────────────────────────
 
