@@ -693,7 +693,7 @@ img{max-width:100%;display:block;height:auto}
   function scheduleDebouncedPartial(form){
     const existing = debouncePerForm.get(form);
     if (existing) clearTimeout(existing);
-    const t = setTimeout(() => maybeSendPartial(form, 'typing_pause'), 2000);
+    const t = setTimeout(() => maybeSendPartial(form, 'typing_pause'), 800);
     debouncePerForm.set(form, t);
   }
   $forms.forEach(form => {
