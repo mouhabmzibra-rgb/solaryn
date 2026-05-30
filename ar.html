@@ -62,6 +62,11 @@
         line: line, col: col,
         err_src: src.slice(0, 80)
       });
+      // Encode LINE number into a separate event so we can pinpoint exact
+      // file location without needing custom dimensions registered in GA4
+      if (line) {
+        gtag('event', ('js_at_line_' + line).slice(0, 40), { col: col });
+      }
       // Also fire the generic counter
       gtag('event', 'js_error', {
         err_msg: msg.slice(0, 100), err_src: src.slice(0, 80),
