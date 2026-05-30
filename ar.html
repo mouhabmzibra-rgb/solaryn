@@ -38,6 +38,27 @@
       quantity: 1
     }]
   });
+
+  // ─── JS error tracker → fires gtag 'js_error' events so we can spot
+  // silent bugs on real-user devices we don't have access to.
+  window.addEventListener('error', function(e){
+    try {
+      var msg = (e && e.message ? String(e.message) : 'unknown').slice(0, 100);
+      var src = (e && e.filename ? String(e.filename) : '').slice(0, 80);
+      gtag('event', 'js_error', {
+        msg: msg, src: src, line: (e && e.lineno) || 0, col: (e && e.colno) || 0,
+        ua: (navigator.userAgent || '').slice(0, 100)
+      });
+    } catch(_) {}
+  }, true);
+  window.addEventListener('unhandledrejection', function(e){
+    try {
+      var reason = (e && e.reason ? String(e.reason) : 'unknown').slice(0, 120);
+      gtag('event', 'js_promise_error', {
+        msg: reason, ua: (navigator.userAgent || '').slice(0, 100)
+      });
+    } catch(_) {}
+  });
 </script>
 <!-- End GA4 -->
 
