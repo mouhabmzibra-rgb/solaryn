@@ -39,23 +39,45 @@
     }]
   });
 
-  // ─── JS error tracker → fires gtag 'js_error' events so we can spot
-  // silent bugs on real-user devices we don't have access to.
+  // ─── JS error tracker → encodes the error message into the event_name
+  // itself (e.g. js_error_typeerror_cannot_read), since GA4 standard
+  // reports don't expose custom event params without admin-registered
+  // dimensions. This lets us query GA4 by event_name alone and see
+  // exactly which errors fire on which devices.
+  function _safeErrTag(s) {
+    return String(s || 'unknown').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 30) || 'unknown';
+  }
   window.addEventListener('error', function(e){
     try {
-      var msg = (e && e.message ? String(e.message) : 'unknown').slice(0, 100);
-      var src = (e && e.filename ? String(e.filename) : '').slice(0, 80);
+      var msg = (e && e.message ? String(e.message) : 'unknown');
+      var src = (e && e.filename ? String(e.filename) : '');
+      var line = (e && e.lineno) || 0;
+      var col  = (e && e.colno) || 0;
+      // Encode msg into event_name (40-char limit GA4)
+      var evtName = ('js_error_' + _safeErrTag(msg)).slice(0, 40);
+      gtag('event', evtName, {
+        line: line, col: col,
+        err_src: src.slice(0, 80)
+      });
+      // Also fire the generic counter
       gtag('event', 'js_error', {
-        msg: msg, src: src, line: (e && e.lineno) || 0, col: (e && e.colno) || 0,
+        err_msg: msg.slice(0, 100), err_src: src.slice(0, 80),
+        line: line, col: col,
         ua: (navigator.userAgent || '').slice(0, 100)
       });
     } catch(_) {}
   }, true);
   window.addEventListener('unhandledrejection', function(e){
     try {
-      var reason = (e && e.reason ? String(e.reason) : 'unknown').slice(0, 120);
+      var reason = (e && e.reason ? String(e.reason) : 'unknown');
+      var evtName = ('js_reject_' + _safeErrTag(reason)).slice(0, 40);
+      gtag('event', evtName, {});
       gtag('event', 'js_promise_error', {
-        msg: reason, ua: (navigator.userAgent || '').slice(0, 100)
+        err_msg: reason.slice(0, 100),
+        ua: (navigator.userAgent || '').slice(0, 100)
       });
     } catch(_) {}
   });
