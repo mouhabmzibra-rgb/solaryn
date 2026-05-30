@@ -39,6 +39,40 @@
     }]
   });
 
+  // ─── Browser environment detection — fires browser_env_<type> event
+  // so we can query GA4 by event_name and see exactly which browsers
+  // have low conversion (FB in-app, IG in-app, TikTok in-app, etc.)
+  // and which features fail (sendBeacon, visualViewport, etc.)
+  (function(){
+    try {
+      var ua = (navigator.userAgent || '').toLowerCase();
+      var env = 'other';
+      if (/fban\/fbios|fb_iab|fban\/fb4a|fbav\//.test(ua)) env = 'fb_iab';
+      else if (/instagram/.test(ua)) env = 'ig_iab';
+      else if (/musical_ly|tiktok|bytedancewebview/.test(ua)) env = 'tiktok_iab';
+      else if (/snapchat/.test(ua)) env = 'snap_iab';
+      else if (/pinterest/.test(ua)) env = 'pinterest_iab';
+      else if (/whatsapp|wv\)/.test(ua) && /android/.test(ua)) env = 'android_webview';
+      else if (/safari/.test(ua) && /iphone|ipad|ipod/.test(ua) && !/crios|fxios/.test(ua)) env = 'safari_ios';
+      else if (/chrome/.test(ua) && /android/.test(ua)) env = 'chrome_android';
+      else if (/chrome/.test(ua) && !/edg|opr/.test(ua)) env = 'chrome_desktop';
+      else if (/safari/.test(ua) && !/chrome/.test(ua)) env = 'safari_desktop';
+      else if (/firefox|fxios/.test(ua)) env = 'firefox';
+      else if (/edg/.test(ua)) env = 'edge';
+      gtag('event', 'browser_env_' + env, {});
+      // Also detect support for critical APIs and fire env-specific events
+      // so we know which browsers lack key features.
+      var missing = [];
+      if (!window.visualViewport) missing.push('visualviewport');
+      if (!(window.crypto && crypto.randomUUID)) missing.push('cryptouuid');
+      if (!navigator.sendBeacon) missing.push('sendbeacon');
+      if (typeof Promise === 'undefined') missing.push('promise');
+      if (missing.length) {
+        gtag('event', ('browser_missing_' + missing.join('_')).slice(0, 40), {});
+      }
+    } catch (_) {}
+  })();
+
   // ─── JS error tracker → encodes the error message into the event_name
   // itself (e.g. js_error_typeerror_cannot_read), since GA4 standard
   // reports don't expose custom event params without admin-registered
