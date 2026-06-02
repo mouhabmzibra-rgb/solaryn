@@ -147,6 +147,27 @@ fbq('track', 'ViewContent', {
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1424942896066929&ev=PageView&noscript=1"
 /></noscript>
+
+<!-- TikTok Pixel Code Start -->
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
+var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
+;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+
+  ttq.load('D8FLN0JC77UDKLRNE1C0');
+  ttq.page();
+  ttq.track('ViewContent', {
+    content_id: 'solaryn-spf50-150',
+    content_name: 'Solaryn SPF 50',
+    content_category: 'Skincare',
+    content_type: 'product',
+    value: 150,
+    currency: 'MAD'
+  });
+}(window, document, 'ttq');
+</script>
+<!-- TikTok Pixel Code End -->
 <!-- End Meta Pixel Code -->
 
 <style>
@@ -1256,6 +1277,14 @@ img{max-width:100%;display:block;height:auto}
           window.gtag('event', 'purchase', {
             transaction_id: event_id, value: 150, currency: 'MAD',
             items: [{ item_id:'solaryn-spf50-150', item_name:'Solaryn SPF 50', item_category:'Skincare', price:150, quantity:1 }]
+          });
+        }
+        if(window.ttq){
+          window.ttq.track('CompletePayment', {
+            contents: [{ content_id: 'solaryn-spf50-150', content_name: 'Solaryn SPF 50', content_category: 'Skincare', content_type: 'product', price: 150, quantity: 1 }],
+            value: 150,
+            currency: 'MAD',
+            event_id: event_id
           });
         }
         window.location.assign('/ar/merci');
