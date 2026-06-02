@@ -977,6 +977,12 @@ img{max-width:100%;display:block;height:auto}
         value:150, currency:'MAD', num_items:1
       });
     }
+    if (window.ttq) {
+      window.ttq.track('InitiateCheckout', {
+        contents: [{ content_id:'solaryn-spf50-150', content_name:'Solaryn SPF 50', content_category:'Skincare', content_type:'product', price:150, quantity:1 }],
+        value:150, currency:'MAD'
+      });
+    }
     if (window.gtag) {
       window.gtag('event', 'form_start', { value:150, currency:'MAD' });
     }
@@ -994,6 +1000,12 @@ img{max-width:100%;display:block;height:auto}
       window.fbq('track', 'AddToCart', {
         content_name:'Solaryn SPF 50', content_ids:['solaryn-spf50-150'],
         value:150, currency:'MAD', num_items:1
+      });
+    }
+    if (window.ttq) {
+      window.ttq.track('AddToCart', {
+        contents: [{ content_id:'solaryn-spf50-150', content_name:'Solaryn SPF 50', content_category:'Skincare', content_type:'product', price:150, quantity:1 }],
+        value:150, currency:'MAD'
       });
     }
   }
